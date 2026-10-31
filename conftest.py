@@ -5,7 +5,21 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+import os
+
 import pytest
+from hypothesis import HealthCheck, settings as hypothesis_settings
+
+# Hypothesis profiles. CI runs a bounded, deadline-free profile so property
+# tests explore fresh examples without flaking on slow shared runners; `dev`
+# explores harder locally; `repro` pins the seed for a failure replay.
+hypothesis_settings.register_profile(
+    "ci", max_examples=50, deadline=None,
+    suppress_health_check=(HealthCheck.too_slow, HealthCheck.data_too_large),
+)
+hypothesis_settings.register_profile("dev", max_examples=200, deadline=None)
+hypothesis_settings.register_profile("repro", derandomize=True, deadline=None)
+hypothesis_settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "ci"))
 
 
 def _prepend_workspace_src_paths() -> None:
