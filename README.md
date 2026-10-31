@@ -193,3 +193,5 @@ Memory for agents lives in the `memory` brick (`memory_store` / `memory_retrieve
 ---
 
 *The Python counterpart to the Software Factory ecosystem — a repo built for agents to build.*
+
+<!-- ci smoke: verifies the PR-only lanes -->
