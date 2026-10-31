@@ -128,7 +128,7 @@ jobs:
           done < config/ci-known-failures.txt
           # xdist: the serial suite takes ~19 min on a 2-core runner; -n 4
           # brings it to ~5 (measured locally: 7757 passed in 2m49s).
-          uv run --with pytest-xdist pytest $(ls -d components/*/test bases/*/test) -q -n 4 \
+          uv run --with pytest-xdist pytest $(ls -d components/*/test bases/*/test) -q -n 4 --dist loadfile \
             --ignore-glob='components/machine_learning/*' \
             --ignore-glob='components/dataset/*' \
             "${args[@]}"
@@ -180,14 +180,18 @@ jobs:
           uv sync --frozen --group langgraph-legacy
           uv pip install --python .venv/bin/python --no-deps \
             -r config/core-test-requirements.txt
-      - name: Run strict control-plane suites
-        run: uv run pytest -q $(for p in $CORE_SUITES; do [ -e "$p" ] && echo "$p"; done)
+      - name: Run every brick suite (same lane as core-tests)
+        run: |
+          args=()
+          while IFS= read -r nodeid; do
+            case "$nodeid" in ""|\#*) continue ;; esac
+            args+=(--deselect "$nodeid")
+          done < config/ci-known-failures.txt
+          uv run --with pytest-xdist pytest $(ls -d components/*/test bases/*/test) -q -n 4 --dist loadfile \
+            --ignore-glob='components/machine_learning/*' \
+            --ignore-glob='components/dataset/*' \
+            "${args[@]}"
 
-  # ML static lane: pyright ratchet + hypothesis property tests over
-  # components/machine_learning. Core deps only (`uv sync --frozen`, no ml
-  # group) — the selected property/contract suites import no torch/mlx/mlflow,
-  # so this runs on ubuntu. If a heavy-import module ever sneaks into the
-  # selector, collection fails loudly: fail-closed by design.
   frontend-tests:
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
