@@ -5,7 +5,7 @@
 # CI-only (Linux): symlinked-bundle error regex differs from macOS — needs a platform-aware assertion
 components/migration/test/factory/migration/test_bundle_stage.py::test_rejects_a_symlinked_bundle
 
-# CatalogTool harness drift (one root cause: .run/.return_type/.parameters removed from the tool wrapper). Issue: #46
+# CatalogTool harness drift (one root cause: .run/.return_type/.parameters removed from the tool wrapper). Issue: #45
 components/http_client/test/factory/http_client/test_mcp_contract.py::test_raw_transport_preserves_strict_invalid_arguments[http_delete-arguments4]
 components/http_client/test/factory/http_client/test_mcp_contract.py::test_raw_transport_preserves_strict_invalid_arguments[http_describe_config_schema-arguments7]
 components/http_client/test/factory/http_client/test_mcp_contract.py::test_raw_transport_preserves_strict_invalid_arguments[http_get-arguments0]
