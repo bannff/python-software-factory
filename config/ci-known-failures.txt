@@ -16,6 +16,7 @@ components/logger/test/factory/logger/test_mcp_contract.py::test_raw_invalid_pay
 components/logger/test/factory/logger/test_mcp_contract.py::test_raw_invalid_payloads_fail_at_the_mcp_boundary[logger.search-arguments3]
 components/logger/test/factory/logger/test_mcp_contract.py::test_raw_invalid_payloads_fail_at_the_mcp_boundary[logger.tail-arguments0]
 components/logger/test/factory/logger/test_mcp_contract.py::test_raw_invalid_payloads_fail_at_the_mcp_boundary[logger.tail-arguments1]
+components/migration/test/factory/migration/test_bundle_stage.py::test_rejects_a_symlinked_bundle
 components/oracle/test/factory/oracle/test_mcp_contract.py::test_invalid_verifier_state_is_successful_but_never_written
 components/oracle/test/factory/oracle/test_mcp_contract.py::test_raising_verifier_is_successful_and_persists_neutral_state_over_mcp
 components/oracle/test/factory/oracle/test_mcp_contract.py::test_raw_transport_preserves_envelope_and_schema_alias
