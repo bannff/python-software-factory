@@ -1,0 +1,146 @@
+[
+  {
+    "gt_id": "webgoat-idor-view-001",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "webgoat",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "GET",
+      "path": "/IDOR/profile/{userId}",
+      "app": "webgoat"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "GET /IDOR/profile/{userId} returns another user's profile without ownership check.",
+      "description": "The IDORViewOtherProfile endpoint accepts a userId path parameter and returns the profile without verifying the authenticated user owns that profile. Any authenticated user can view other users' profiles by changing the userId.",
+      "severity": "high",
+      "confidence": "confirmed"
+    },
+    "code_evidence": {
+      "locations": [
+        {
+          "file": "src/main/java/org/owasp/webgoat/lessons/idor/IDORViewOtherProfile.java",
+          "function": "completed",
+          "line_start": 44,
+          "line_end": 65,
+          "cwe": "CWE-639",
+          "description": "Accepts userId from path, creates UserProfile(userId) without checking if authenticated user owns the profile. Comment says 'secure code would ensure there was a horizontal access control check'."
+        }
+      ]
+    },
+    "runtime_evidence": {
+      "surface": {"endpoint": "/IDOR/profile/{userId}", "method": "GET"},
+      "probe": {"method": "GET", "url": "http://localhost:5050/WebGoat/IDOR/profile/2342388"},
+      "expected_vulnerable_response": {"status": 200},
+      "expected_secure_response": {"status": 403}
+    },
+    "exploit_evidence": {
+      "description": "Authenticated as tom, access another user's profile by changing userId in URL.",
+      "reproduction_steps": [
+        "Authenticate as tom via /IDOR/login",
+        "GET /IDOR/profile/2342388 (another user's ID)",
+        "Observe: profile data returned without authorization check"
+      ],
+      "cross_tenant_access": true
+    },
+    "fix_evidence": {
+      "description": "Add horizontal access control check: verify userId matches authenticated user before returning profile."
+    }
+  },
+  {
+    "gt_id": "webgoat-idor-edit-002",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "webgoat",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "PUT",
+      "path": "/IDOR/profile/{userId}",
+      "app": "webgoat"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "PUT /IDOR/profile/{userId} allows editing another user's profile without authorization.",
+      "description": "The IDOREditOtherProfile endpoint accepts a userId and UserProfile body, modifies the target profile without verifying the authenticated user has permission. Comments explicitly state 'accepting the user submitted ID and assuming it will be the same as the logged in userId and not checking for proper authorization'.",
+      "severity": "critical",
+      "confidence": "confirmed"
+    },
+    "code_evidence": {
+      "locations": [
+        {
+          "file": "src/main/java/org/owasp/webgoat/lessons/idor/IDOREditOtherProfile.java",
+          "function": "completed",
+          "line_start": 42,
+          "line_end": 95,
+          "cwe": "CWE-639",
+          "description": "Accepts userId from path and UserProfile from body. Sets color and role on target profile without ownership check. Inline comment: 'accepting the user submitted ID and assuming it will be the same as the logged in userId and not checking for proper authorization'."
+        }
+      ]
+    },
+    "runtime_evidence": {
+      "surface": {"endpoint": "/IDOR/profile/{userId}", "method": "PUT"},
+      "probe": {
+        "method": "PUT",
+        "url": "http://localhost:5050/WebGoat/IDOR/profile/2342388",
+        "headers": {"Content-Type": "application/json"},
+        "body": {"userId": "2342388", "color": "red", "role": 1}
+      },
+      "expected_vulnerable_response": {"status": 200},
+      "expected_secure_response": {"status": 403}
+    },
+    "exploit_evidence": {
+      "description": "Authenticated as tom, modify another user's profile including role escalation.",
+      "reproduction_steps": [
+        "Authenticate as tom via /IDOR/login",
+        "PUT /IDOR/profile/2342388 with body {userId: 2342388, color: red, role: 1}",
+        "Observe: target user's profile modified, role changed"
+      ],
+      "cross_tenant_access": true
+    },
+    "fix_evidence": {
+      "description": "Add authorization check: verify authenticated userId matches the path userId before allowing profile modification."
+    }
+  },
+  {
+    "gt_id": "webgoat-idor-viewown-003",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "webgoat",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "GET",
+      "path": "/IDOR/profile/alt-path",
+      "app": "webgoat"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "Alternative profile URL path exposes direct object reference pattern.",
+      "description": "IDORViewOwnProfileAltUrl teaches users to discover the direct object reference URL pattern by finding the alternative path that includes the userId, enabling subsequent IDOR attacks.",
+      "severity": "medium",
+      "confidence": "confirmed"
+    },
+    "code_evidence": {
+      "locations": [
+        {
+          "file": "src/main/java/org/owasp/webgoat/lessons/idor/IDORViewOwnProfileAltUrl.java",
+          "function": "completed",
+          "line_start": 1,
+          "line_end": 60,
+          "cwe": "CWE-639",
+          "description": "Teaches discovery of direct object reference URL pattern with userId in path."
+        }
+      ]
+    },
+    "runtime_evidence": {
+      "surface": {"endpoint": "/IDOR/profile/{userId}", "method": "GET"}
+    },
+    "exploit_evidence": {
+      "description": "Discover the URL pattern that includes userId for direct object reference.",
+      "reproduction_steps": ["Navigate to own profile", "Discover URL contains userId", "Modify userId to access others"]
+    },
+    "fix_evidence": {
+      "description": "Use session-based profile lookup instead of URL-based userId."
+    }
+  }
+]

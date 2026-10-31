@@ -1,0 +1,83 @@
+name: graph
+type: component
+namespace: factory.graph
+description: Portable knowledge graph operations across NetworkX, persistent NetworkX, and Neo4j
+mcp_enabled: true
+features:
+- entity_management
+- relationship_management
+- path_finding
+- run_scoped_typed_reads
+- recent_tool_invocations
+- taxonomy_edges_polymorphic_reads
+- can_failure_taxonomy_autoregistration
+- canonical_dbc_signal_identity
+- provenance_projection
+adapters:
+- networkx
+- neo4j
+- aws
+adapter_infra:
+  neo4j:
+    services:
+    - neo4j
+  aws:
+    services: []
+mcp_resources:
+- graph://schemas/node
+- graph://schemas/edge
+- graph://schemas/taxonomy
+- graph://schemas/security-taxonomy
+- graph://schemas/taxonomy/{domain}
+- graph://docs/overview
+- graph://docs/adapters
+- graph://stats
+- graph://backends
+- graph://factory
+mcp_prompts:
+- create_graph
+- query_graph
+- import_data
+- debug_graph
+mcp_tools:
+  # Deterministic (read-only)
+  - graph_get_capabilities
+  - graph_health_check
+  - graph_describe_config_schema
+  - graph_get_entity
+  - graph_get_neighbors
+  - graph_neighborhood
+  - graph_find_path
+  - graph_find_entities
+  - graph_get_stats
+  - graph_get_run_topology
+  - graph_get_findings_for_run
+  - graph_count_entities_by_run
+  - graph_get_workflow_summary
+  - graph_get_recent_findings
+  - graph_get_target_app
+  - graph_get_tool_invocations_for_run
+  - graph_list_recent_tool_invocations
+  - graph_list_recent_runs
+  - graph_get_dashboard_summary
+  - graph_get_entity_context
+  - graph_get_views
+  # Operational (stateful)
+  - graph_add_entity
+  - graph_update_entity
+  - graph_delete_entity
+  - graph_add_relationship
+  - graph_delete_relationship
+  - graph_set_finding_state
+  - graph_write_relationship
+  - graph_tombstone_relationship
+  - graph_rebuild
+  - graph_project_event
+  - graph_reconcile_projection
+  # Authoring (none currently)
+pip_packages:
+- boto3>=1.35.0
+- mcp[cli]==2.1.1
+- neo4j>=6.1.0
+- networkx>=3.6.1
+- pydantic>=2.0.0

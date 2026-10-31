@@ -1,0 +1,13 @@
+# Exact CI-only overlay. Install with --no-deps so each revision keeps its own lock.
+authlib==1.6.12
+ddgs==9.16.0
+httpx-sse==0.4.3
+langchain-classic==1.0.8
+langchain-community==0.4.2
+langchain-experimental==0.4.2
+langchain-text-splitters==1.1.2
+lxml==6.1.1
+opentelemetry-instrumentation==0.62b0
+primp==2.0.0
+opentelemetry-semantic-conventions==0.62b0
+wrapt==1.17.3

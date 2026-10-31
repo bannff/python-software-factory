@@ -1,0 +1,11 @@
+id: auto-telemetry-reward-on-metrics-record
+event_type: "metrics.record"
+handler: "mcp:telemetry_reward_dispatch"
+description: >
+  Turn a run's tool_error_rate into a negative (PENALIZED) reward via the
+  learning telemetry source → reward.computed, so process failures become a
+  cautionary learning. Isolated from the gt-findings task reward (rides
+  metrics.record, not graph.completed). bd:python-factory-hv5rv.
+enabled: true
+priority: 2
+filters: {}

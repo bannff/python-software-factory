@@ -1,0 +1,37 @@
+/**
+ * Status-bar inspector scaling — NOT a CopilotKit theme override.
+ *
+ * CopilotKit v2 ships its own Tailwind 4 design system at
+ * `@copilotkitnext/react/styles.css` and we let that render unmodified
+ * (bd:python-factory-c9gk dropped the v1-era theme.css + theme-messages.css
+ * overrides that were fighting it).
+ *
+ * What stays here: the <cpk-web-inspector> Lit web component is reparented
+ * by `copilot-status-item.tsx` into the 24px status bar. The component
+ * renders as a 48px diamond with its own Shadow DOM — these rules scale
+ * it down to fit the bar slot. No CopilotKit class names, no theme tokens.
+ */
+
+/*
+ * The Lit <cpk-web-inspector> writes `transform: none` inline, which
+ * beats any external rule without !important. Apply the scale on the
+ * parent host instead — parent transforms apply to the whole subtree
+ * and don't race the child's inline style (bd:python-factory-r8o7).
+ */
+.copilot-status-host {
+  overflow: visible;
+  height: 24px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.45);
+  transform-origin: center center;
+  margin: -12px -8px;
+}
+
+.copilot-status-host cpk-web-inspector {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}

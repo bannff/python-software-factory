@@ -1,0 +1,95 @@
+name: evals
+type: component
+namespace: factory.evals
+# Ownership: frozen policies, immutable evidence-bound reports, typed deficiencies, acceptance/promotion; canonical doctrine: ../../.kiro/steering/python-factory.md
+# Agents cannot supply executable validators or change criteria after results.
+description: Agent benchmarking and evaluation with frozen policies and evidence-bound reports
+mcp_enabled: true
+features:
+- benchmark_suites
+- eval_runs
+- immutable_review_acceptance
+- metrics_collection
+- result_comparison
+- ui_exploration
+- chrome_devtools_integration
+- eval_sop_workflow
+- mcp_resources
+- mcp_prompts
+- graph_persistence
+- strands_experiments
+- experiment_generation
+- declarative_agent_config
+- actor_simulation
+- experiment_serialization
+- tool_chaos
+adapters:
+- custom
+- strands
+- ui_explorer
+mcp_resources:
+- evals://schemas/eval-config
+- evals://schemas/eval-result
+- evals://docs/overview
+- evals://docs/adapters
+- evals://docs/{doc_name}
+- evals://runs
+- evals://metrics
+- evals://evaluators
+- evals://sop/sessions
+- evals://factory
+- evals://ui/scenarios
+- evals://ui/findings
+mcp_prompts:
+- create_eval
+- run_eval
+- analyze_results
+- compare_runs
+mcp_tools:
+- evals_create_suite
+- evals_add_case
+- evals_delete_suite
+- evals_seed_defaults
+- evals_list_suites
+- evals_get_suite
+- evals_get_run
+- evals_list_runs
+- evals_record_run
+- evals_review_and_record
+- evals_verify_record_pointer
+- evals_evaluate
+- evals_evaluate_multi
+- evals_evaluate_can_model
+- evals_evaluate_can_model_evidence
+- evals_list_evaluators
+- evals_run_experiment
+- evals_list_run_results
+- evals_get_run_result
+- evals_generate_experiment
+- evals_run_simulation
+- evals_save_experiment
+- evals_load_experiment
+- evals_list_saved_experiments
+- evals_run_tool_chaos
+- evals_sop_plan
+- evals_sop_generate_data
+- evals_sop_run
+- evals_sop_report
+- evals_sop_status
+- evals_sop_list
+- evals_create_ui_scenario
+- evals_add_scenario_action
+- evals_add_scenario_assertion
+- evals_run_ui_exploration
+- evals_list_ui_scenarios
+- evals_list_ui_findings
+pip_packages:
+- mcp[cli]==2.1.1
+- numpy>=1.24.0
+- opentelemetry-api>=1.20.0
+- scikit-learn>=1.3.0
+- strands-agents-evals>=0.1.0
+- openevals>=0.2.0
+- agentevals>=0.0.9
+- langchain>=1.0.0
+- langchain-aws>=1.0.0

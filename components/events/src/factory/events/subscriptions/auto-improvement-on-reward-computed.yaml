@@ -1,0 +1,10 @@
+id: auto-improvement-on-reward-computed
+event_type: "reward.computed"
+handler: "mcp:workflow_improvement_dispatch"
+description: >
+  Compute workflow improvement vs rolling baseline after reward computation
+  (bd python-factory-kq6u). Closure-observability — answers whether this
+  same workflow is trending up against its own N-run baseline.
+enabled: true
+priority: 7
+filters: {}

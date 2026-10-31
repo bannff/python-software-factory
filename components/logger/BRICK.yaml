@@ -1,0 +1,17 @@
+name: logger
+type: component
+namespace: factory.logger
+description: Tail logs and monitor system health
+mcp_enabled: true
+features:
+- logging
+- monitoring
+- health_checks
+adapters:
+- file
+- structlog
+- aws
+pip_packages:
+- boto3>=1.35.0
+- mcp[cli]==2.1.1
+- structlog>=25.1.0

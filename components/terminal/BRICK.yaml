@@ -1,0 +1,29 @@
+name: terminal
+type: component
+namespace: factory.terminal
+description: Owner-operated interactive PTY sessions with typed MCP lifecycle tools and API WebSocket transport.
+mcp_enabled: true
+dependencies:
+- mcp_utils
+features:
+- native_mcp_v2_typed_pydantic_contracts
+- interactive_pty
+- owner_scoped_sessions
+- shell_discovery
+- terminal_resize
+- orphan_reaping
+adapters:
+- posix_pty
+mcp_resources: []
+mcp_prompts: []
+mcp_tools:
+- terminal_list
+- terminal_list_shells
+- terminal_open_session
+- terminal_write
+- terminal_read
+- terminal_resize
+- terminal_close
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic==2.13.0

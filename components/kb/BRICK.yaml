@@ -1,0 +1,64 @@
+name: kb
+type: component
+namespace: factory.kb
+description: Vector-powered document storage and semantic search (ChromaDB, Neo4j
+  HNSW)
+mcp_enabled: true
+features:
+- knowledge_base
+- vector_search
+- document_management
+- semantic_search
+- backfill_embeddings
+- rag_support
+- graph_rag
+- bedrock_graphrag
+- mcp_resources
+- mcp_prompts
+- collections
+mcp_tools:
+- get_capabilities
+- health_check
+- describe_config_schema
+- get_collection_registry
+- get_collection_stats
+- ingest
+- search
+- get_document
+- delete_document
+- list_documents
+- backfill_embeddings
+- search_remote
+- authoring.get_status
+- authoring.validate_collections
+- authoring.upsert_collection
+- authoring.delete_collection
+- kb_get_views
+adapters:
+- chroma
+- chroma_server
+- bm25
+- neo4j
+- bedrock
+adapter_infra:
+  chroma:
+    services:
+    - chromadb
+  chroma_server:
+    services:
+    - chromadb
+  neo4j:
+    services:
+    - neo4j
+  bedrock:
+    services: []
+brick_deps: []
+pip_packages:
+- boto3>=1.35.0
+- chromadb>=1.4.1
+- mcp[cli]==2.1.1
+- neo4j-graphrag>=1.0.0
+- neo4j>=6.1.0
+- pydantic>=2.0.0
+- pyyaml>=6.0.0
+- rank-bm25>=0.2.2

@@ -1,0 +1,20 @@
+name: connections
+type: component
+namespace: factory.connections
+description: Owner-registered external MCP servers (stdio or Streamable HTTP) mounted as gateway powers
+mcp_enabled: true
+features:
+- mcp_servers_json_import
+- stdio_and_streamable_http_sources
+- env_name_secret_references
+- gateway_pseudo_brick_mount
+- reload_without_restart
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- sqlite
+mcp_resources: []
+mcp_prompts: []
+pip_packages:
+- httpx>=0.28.0
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

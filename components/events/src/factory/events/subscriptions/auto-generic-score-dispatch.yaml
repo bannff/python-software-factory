@@ -1,0 +1,12 @@
+id: auto-generic-score-dispatch
+event_type: "*.completed"
+handler: "mcp:generic_score_dispatch"
+description: >
+  Policy-driven domain-agnostic scoring (bd:python-factory-v7imt.2).
+  Routes any *.completed event through scoring_policy.yaml; unmatched
+  events are skipped (no-op). Dedicated handlers (chat_reward_dispatch,
+  chat_feedback_dispatch) have higher priority and run first; policy
+  entries for those types are disabled by default to avoid double-scoring.
+enabled: true
+priority: 0
+filters: {}

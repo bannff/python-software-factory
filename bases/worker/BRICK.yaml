@@ -1,0 +1,44 @@
+name: worker
+type: base
+namespace: factory.worker
+description: Background task execution with pluggable backends (Celery, Dagster, Fargate SQS)
+mcp_enabled: true
+dependencies:
+- mcp_utils
+features:
+- background_tasks
+- task_execution
+- worker_management
+- health_monitoring
+- mcp_resources
+- mcp_prompts
+- native_mcp_v2_typed_pydantic_contracts
+- authoring_gate
+- canonical_mcp_tool_surface
+- principal_aware_bridge
+adapters:
+- celery
+- dagster
+- fargate_sqs
+mcp_resources:
+- worker://health
+- worker://backends
+- worker://docs
+mcp_prompts:
+- configure_worker
+- debug_worker
+mcp_tools:
+- worker_get_capabilities
+- worker_health_check
+- worker_describe_config_schema
+- worker_list_tasks
+- worker.send_task
+- worker.execute_tool
+- worker.list_mcp_tools
+- worker.authoring.get_status
+- worker.authoring.switch_backend
+- worker.authoring.set_config
+pip_packages:
+- boto3>=1.35.0
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

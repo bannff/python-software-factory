@@ -1,0 +1,58 @@
+name: permissions
+type: component
+namespace: factory.permissions
+description: Policy-based access control with YAML and Cedar policy support
+mcp_enabled: true
+features:
+- permissions
+- access_control
+- authorization
+- policy_evaluation
+- role_management
+- audit_logging
+- cedar_policies
+- mcp_resources
+- mcp_prompts
+- native_mcp_v2_typed_pydantic_contracts
+- authoring_gate
+- canonical_mcp_tool_surface
+adapters:
+- yaml
+- cedar
+- aws
+mcp_resources:
+- permissions://schemas/policy
+- permissions://schemas/settings
+- permissions://schemas/resource
+- permissions://docs
+- permissions://docs/{doc_name}
+- permissions://templates
+- permissions://templates/{template_name}
+- permissions://policies
+- permissions://roles
+- permissions://factory
+mcp_prompts:
+- create_policy
+- debug_denial
+- setup_rbac
+- audit_review
+mcp_tools:
+- permissions.get_capabilities
+- permissions.health_check
+- permissions.describe_config_schema
+- permissions.get_role_registry
+- permissions.get_policy_registry
+- permissions.evaluate
+- permissions.batch_evaluate
+- permissions.explain
+- permissions.authoring.get_status
+- permissions.authoring.validate_policies
+- permissions.authoring.upsert_policy
+- permissions.authoring.delete_policy
+pip_packages:
+- boto3>=1.35.0
+- cedarpy>=0.4.0
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0
+- pyyaml>=6.0.0
+- typer>=0.12.0

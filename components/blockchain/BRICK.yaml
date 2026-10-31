@@ -1,0 +1,20 @@
+name: blockchain
+type: component
+namespace: factory.blockchain
+description: Agent economy ledger with wallets, transfers, bounties, and a strict typed MCP boundary
+mcp_enabled: true
+features:
+- agent_economy
+- wallets
+- transfers
+- bounties
+- hash_chain
+- merkle_trees
+- mcp_resources
+- mcp_prompts
+- native_mcp_v2_typed_pydantic_contracts
+- authoring_gate
+- mcp_views
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

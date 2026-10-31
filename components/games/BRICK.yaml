@@ -1,0 +1,61 @@
+name: games
+type: component
+namespace: factory.games
+description: Turn-based game engine with strict Pydantic v2 MCP contracts and RL-ready environment interface
+mcp_enabled: true
+features:
+  - game_sessions
+  - turn_based_play
+  - connect_four
+  - rl_environment
+  - game_history
+  - legal_move_validation
+  - mcp_resources
+  - mcp_prompts
+  - experiment_reporting
+  - domain_class_rl_loop
+  - native_mcp_v2_typed_pydantic_contracts
+  - workflow_rl_match_on
+adapters:
+  - memory
+mcp_resources:
+  - games://schemas/config
+  - games://schemas/game
+  - games://docs
+  - games://docs/{doc_name}
+  - games://health
+  - games://backends
+  - games://factory
+mcp_prompts:
+  - play_game
+  - train_agent
+  - debug_game
+# Canonical native MCP v2 surface: 20 typed tools. All accept strict same-brick
+# Pydantic v2 inputs and return ToolResult[OutputDTO] envelopes.
+mcp_tools:
+  # Deterministic (11)
+  - get_capabilities
+  - health_check
+  - describe_config_schema
+  - games_get_state
+  - games_legal_moves
+  - games_evaluate
+  - games_list
+  - games_get_dashboard_summary
+  - games_get_game_activity
+  - games_get_game_graph_context
+  - games_get_views
+  # Operational (9)
+  - games_create
+  - games_move
+  - games_delete
+  - games_reset
+  - games_ctf_move
+  - games_security_move
+  - games_process_finished
+  # `match_on` is accepted only by this workflow-RL tool.
+  - games_process_workflow_rl
+  - games_write_experiment_report
+pip_packages:
+  - mcp[cli]==2.1.1
+  - pydantic>=2.0.0

@@ -1,0 +1,41 @@
+name: config
+type: component
+namespace: factory.config
+description: Centralized configuration with pluggable backends (env, file, SSM)
+mcp_enabled: true
+features:
+- key_value_config
+- feature_flags
+- environment_support
+- secrets_reference
+- mcp_resources
+- mcp_prompts
+- aws_identity
+adapters:
+- env
+- file
+- ssm
+- pydantic
+- aws_identity
+mcp_resources:
+- config://schemas/config
+- config://schemas/feature-flag
+- config://schemas/config-value
+- config://docs
+- config://docs/{doc_name}
+- config://values
+- config://sources
+- config://health
+- config://factory
+- config://aws/identity
+mcp_prompts:
+- configure_source
+- add_feature_flag
+- debug_config
+- migrate_config
+pip_packages:
+- boto3>=1.35.0
+- mcp[cli]==2.1.1
+- pydantic-settings>=2.12.0
+- pydantic>=2.0.0
+- pyyaml>=6.0.0

@@ -1,0 +1,39 @@
+name: browser
+type: component
+namespace: factory.browser
+description: Browser automation with pluggable protocol adapters (CDP, Playwright,
+  Selenium). Its 18 public native MCP v2 tools retain their names and flat kwargs,
+  validate ingress with strict same-brick Pydantic v2 DTOs, and return ToolResult
+  v1 envelopes.
+mcp_enabled: true
+features:
+- native_mcp_v2_typed_pydantic_contracts
+- browser_automation
+- page_navigation
+- element_interaction
+- screenshot_capture
+- network_interception
+- javascript_execution
+- cdp_protocol
+adapters:
+- cdp
+- mock
+mcp_resources:
+- browser://schemas/config
+- browser://schemas/session
+- browser://docs
+- browser://docs/{doc_name}
+- browser://sessions
+- browser://backends
+- browser://health
+- browser://factory
+mcp_prompts:
+- automate_page
+- extract_content
+- debug_session
+pip_packages:
+- mcp[cli]==2.1.1
+- httpx>=0.27.0
+- pydantic>=2.0.0
+- pyyaml>=6.0.0
+- websockets>=12.0

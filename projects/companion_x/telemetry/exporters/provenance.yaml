@@ -1,0 +1,22 @@
+id: provenance
+kind: provenance
+context:
+  tenant_id: companion-x
+  producer_id: companion-x-runtime
+  principal_id: companion-x-control-plane
+  visibility: internal
+  source_namespace: companion-x.strands
+mappings:
+  - [tool-invocation-lineage, "1"]
+activation:
+  registry_version: "1"
+  activated_at: "2026-01-01T00:00:00Z"
+  mappings:
+    - mapping_id: tool-invocation-lineage
+      version: "1"
+      accepted_signals: [span]
+      target_brick: graph
+      target_capability: graph_write_relationship
+      target_version: "1"
+      max_fan_out: 1
+  edges: []

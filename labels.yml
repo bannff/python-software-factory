@@ -1,0 +1,96 @@
+# Label Taxonomy for python-factory
+# 
+# This file defines the canonical label set for the repository.
+# Labels are synced to GitHub using scripts/sync_labels.py
+#
+# Format:
+#   name: Label name (required)
+#   color: Hex color without # (required)
+#   description: Label description (optional)
+#
+# See docs/labels.md for usage guidelines.
+
+# Status Labels - Track lifecycle state
+- name: status:todo
+  color: fbca04
+  description: Not started
+
+- name: status:in-progress
+  color: fbca04
+  description: Work in progress
+
+- name: status:blocked
+  color: d73a4a
+  description: Blocked by dependency
+
+- name: status:review
+  color: 0e8a16
+  description: Ready for review
+
+- name: status:done
+  color: 0e8a16
+  description: Completed
+
+# Type Labels - Categorize nature of work
+- name: type:bug
+  color: d73a4a
+  description: Bug fix
+
+- name: type:feature
+  color: 0075ca
+  description: New feature
+
+- name: type:doc
+  color: 0075ca
+  description: Documentation
+
+- name: type:scaffold
+  color: 0075ca
+  description: Scaffolding / setup
+
+- name: type:refactor
+  color: 5319e7
+  description: Refactoring
+
+- name: type:test
+  color: 5319e7
+  description: Testing
+
+# Brick Labels - Tag work by Polylith brick
+# (Add more as bricks are created)
+- name: brick:auth
+  color: e4e669
+  description: Authentication component
+
+- name: brick:kb
+  color: e4e669
+  description: Knowledge Base component
+
+- name: brick:agent
+  color: e4e669
+  description: Agent orchestration component
+
+- name: brick:workflow
+  color: e4e669
+  description: Workflow component
+
+- name: brick:foreman
+  color: e4e669
+  description: Foreman (Polylith tooling) component
+
+- name: brick:events
+  color: e4e669
+  description: Events component
+
+# Agent Labels - Identify owning agent
+- name: agent:copilot
+  color: ededed
+  description: Work owned by Copilot agent
+
+- name: agent:foreman
+  color: ededed
+  description: Work owned by Foreman agent
+
+- name: agent:guardian
+  color: ededed
+  description: Work owned by Process Guardian agent

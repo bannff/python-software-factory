@@ -1,0 +1,8 @@
+id: auto-memory-on-reward-computed
+event_type: "reward.computed"
+handler: "mcp:memory_learning_dispatch"
+description: >
+  Store distilled learnings in memory after reward computation completes.
+enabled: true
+priority: 8
+filters: {}

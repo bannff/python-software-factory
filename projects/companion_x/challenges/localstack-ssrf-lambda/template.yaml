@@ -1,0 +1,54 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Intentionally vulnerable Lambda with SSRF. The function fetches
+  any URL the caller provides, including internal AWS endpoints.
+
+Resources:
+  SecretParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /app/db-password
+      Type: String
+      Value: 'SuperSecretPassword123!'
+
+  SsrfLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ssrf-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: ssm-read-access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ssm:GetParameter'
+                  - 'ssm:GetParameters'
+                Resource: '*'
+
+  SsrfFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ssrf-vulnerable-function
+      Runtime: python3.12
+      Handler: handler.handler
+      Role: !GetAtt SsrfLambdaRole.Arn
+      Code:
+        ZipFile: |
+          import json, urllib.request
+          def handler(event, context):
+              url = event.get("url", "")
+              if not url:
+                  return {"statusCode": 400, "body": "Missing url"}
+              try:
+                  with urllib.request.urlopen(url, timeout=5) as r:
+                      return {"statusCode": 200, "body": r.read().decode()[:4000]}
+              except Exception as e:
+                  return {"statusCode": 500, "body": str(e)}

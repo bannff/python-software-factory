@@ -1,0 +1,12 @@
+id: auto-metrics-on-workflow-complete
+event_type: "graph.completed"
+handler: "mcp:events_publish"
+description: >
+  Record workflow metrics after any graph completes.
+  Publishes a metrics.record event with execution_time,
+  node_count, and status for the metrics brick to consume.
+filters:
+  event_type: "metrics.record"
+  source: "events.auto-metrics"
+enabled: true
+priority: 5

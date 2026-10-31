@@ -1,0 +1,5 @@
+{
+  "_comment": "Shared by components/ui (Python _CHORD) and frontends/next-dashboard lib/shortcuts.ts (CHORD). Both grammars must agree on every vector.",
+  "accept": ["k", "mod+k", "mod+shift+p", "mod+shift+alt+p", "mod+`", "alt+t", "mod+space", "shift+enter", "escape", "f12", "mod+f1"],
+  "reject": ["Cmd+K", "mod+", "mod+ctrl+k", "K", "mod+K", "mod+shift+", "shift+mod+k", "mod+kk", "mod+f13", "ctrl+k", ""]
+}

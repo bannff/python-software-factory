@@ -1,0 +1,110 @@
+# Opt-in security sandbox infrastructure.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.sandbox.yml up -d
+services:
+  neo4j:
+    image: neo4j:5-enterprise
+    environment:
+      NEO4J_AUTH: neo4j/password
+      NEO4J_PLUGINS: '["graph-data-science"]'
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      NEO4J_initial_server_mode__constraint: "NONE"
+    ports:
+      - "127.0.0.1:17474:7474"
+      - "127.0.0.1:17687:7687"
+    volumes:
+      - neo4j_data:/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:16379:6379"
+
+  localstack:
+    image: localstack/localstack:latest
+    environment:
+      SERVICES: iam,lambda,s3,dynamodb,sqs,sns,apigateway,cloudformation,sts,ssm
+      ENFORCE_IAM: "1"
+      LOCALSTACK_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: "1"
+      LS_ACKNOWLEDGE_ACCOUNT_REQUIREMENT: "1"
+    ports:
+      - "127.0.0.1:4566:4566"
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  awscli:
+    image: amazon/aws-cli:latest
+    entrypoint: ["sh", "-c", "yum install -y jq curl git > /dev/null 2>&1; sleep infinity"]
+    environment:
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    volumes:
+      - ./challenges/localstack-iam-privesc:/challenges/iam-privesc:ro
+      - ./challenges/localstack-ssrf-lambda:/challenges/ssrf-lambda:ro
+      - ./challenges/localstack-idor-warehouse:/challenges/idor-warehouse:ro
+    depends_on:
+      localstack:
+        condition: service_healthy
+
+  companion_x-api:
+    environment:
+      SANDBOX_ADAPTER: localstack
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - neo4j
+      - redis
+
+  vuln-idor-warehouse:
+    build:
+      context: ./challenges/idor_warehouse
+    profiles: ["warehouse"]
+    ports:
+      - "127.0.0.1:5050:5000"
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:5000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  vuln-vampi:
+    image: erev0s/vampi:latest
+    profiles: ["vampi"]
+    ports:
+      - "127.0.0.1:5050:5000"
+
+  vuln-crapi:
+    image: ghcr.io/owasp/crapi/crapi-all:latest
+    profiles: ["crapi"]
+    ports:
+      - "127.0.0.1:5050:8888"
+
+  vuln-juice-shop:
+    image: bkimminich/juice-shop:latest
+    profiles: ["juiceshop"]
+    ports:
+      - "127.0.0.1:5050:3000"
+
+  vuln-dvwa:
+    image: vulnerables/web-dvwa:latest
+    profiles: ["dvwa"]
+    ports:
+      - "127.0.0.1:5050:80"
+
+  vuln-webgoat:
+    image: webgoat/webgoat:latest
+    profiles: ["webgoat"]
+    ports:
+      - "127.0.0.1:5050:8080"
+
+volumes:
+  neo4j_data:
+  localstack_data:

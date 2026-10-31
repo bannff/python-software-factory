@@ -1,0 +1,3 @@
+# Experiment run data — local only, not committed
+*.json
+!.gitignore

@@ -1,0 +1,67 @@
+{
+  "targets": {
+    "idor_warehouse": {
+      "profile": "warehouse",
+      "port": 5050,
+      "base_url": "http://vuln-idor-warehouse:5000",
+      "gt_file": "challenges/idor_warehouse/gt_entries.json",
+      "init_endpoint": "/health",
+      "source": "local",
+      "tech_stack": ["python", "flask"],
+      "vuln_classes": ["IDOR"]
+    },
+    "vampi": {
+      "profile": "vampi",
+      "port": 5050,
+      "base_url": "http://vuln-vampi:5000",
+      "gt_file": "challenges/vampi/gt_entries.json",
+      "init_endpoint": "/createdb",
+      "source": "external",
+      "repo": "https://github.com/erev0s/VAmPI",
+      "tech_stack": ["python", "flask"],
+      "vuln_classes": ["IDOR", "SQLi", "Mass_Assignment"]
+    },
+    "crapi": {
+      "profile": "crapi",
+      "port": 5050,
+      "base_url": "http://vuln-crapi:8888",
+      "gt_file": "challenges/crapi/gt_entries.json",
+      "source": "external",
+      "repo": "https://github.com/OWASP/crAPI",
+      "tech_stack": ["java", "python", "go"],
+      "vuln_classes": ["IDOR", "SSRF", "SQLi"]
+    },
+    "juice_shop": {
+      "profile": "juiceshop",
+      "port": 5050,
+      "base_url": "http://vuln-juice-shop:3000",
+      "gt_file": "challenges/juice_shop/gt_entries.json",
+      "source": "external",
+      "repo": "https://github.com/juice-shop/juice-shop",
+      "tech_stack": ["javascript", "express", "angular"],
+      "vuln_classes": ["XSS", "SQLi", "IDOR", "CSRF"]
+    },
+    "dvwa": {
+      "profile": "dvwa",
+      "port": 5050,
+      "base_url": "http://vuln-dvwa:80",
+      "gt_file": "challenges/dvwa/gt_entries.json",
+      "init_endpoint": "/login.php",
+      "source": "external",
+      "repo": "https://github.com/digininja/DVWA",
+      "tech_stack": ["php"],
+      "vuln_classes": ["SQLi", "XSS", "CSRF", "Path_Traversal", "Command_Injection"]
+    },
+    "webgoat": {
+      "profile": "webgoat",
+      "port": 5050,
+      "base_url": "http://vuln-webgoat:8080",
+      "gt_file": "challenges/webgoat/gt_entries.json",
+      "init_endpoint": "/WebGoat/login",
+      "source": "external",
+      "repo": "https://github.com/WebGoat/WebGoat",
+      "tech_stack": ["java", "spring_boot"],
+      "vuln_classes": ["IDOR", "SQLi", "XSS", "SSRF", "CSRF", "Path_Traversal"]
+    }
+  }
+}

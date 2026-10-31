@@ -1,0 +1,45 @@
+name: foreman
+type: component
+namespace: factory.foreman
+description: Polylith scaffolding, structure management, and governance with strict Pydantic v2 ToolResult MCP contracts
+mcp_enabled: true
+dependencies:
+- mcp_utils
+features:
+- polylith
+- scaffolding
+- workspace_introspection
+- governance
+- compliance_checks
+- bricks_index
+- native_mcp_v2_typed_pydantic_contracts
+mcp_resources:
+- foreman://docs
+- foreman://docs/{doc_name}
+- foreman://schema/brick-yaml
+- foreman://bricks
+- foreman://bricks/components
+- foreman://bricks/bases
+mcp_prompts:
+- create_component
+- fix_compliance
+- onboard_agent
+mcp_tools:
+- get_capabilities
+- health_check
+- describe_config_schema
+- foreman_info
+- foreman_check
+- foreman_guardian_check
+- foreman_get_repo_guardrails
+- foreman_create_component
+- foreman_create_base
+- foreman_build_bricks_index
+- foreman_write_bricks_index
+- foreman_resolve_dependencies
+- foreman_create_project
+- foreman_sync_brick_deps
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0
+- pyyaml>=6.0.0

@@ -1,0 +1,91 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      dependencies:
+        patterns: ["*"]
+        exclude-patterns:
+          - "strands-agents"
+          - "strands-agents-evals"
+    ignore:
+      # Frozen identities mirrored exactly by projects/companion_x/pyproject.toml
+      # (mcp:21, langchain family:22-26, mlflow:39, mlx:40, mlx-lm:41,
+      # chronos:42, peft:44, torch:46, transformers:47, otel-instrumentation:52).
+      # Root + companion_x share ONE uv.lock; a root bump companion_x does not
+      # take breaks resolution (PR #111 class). Unfreeze = deliberate PR moving
+      # both manifests + regenerating uv.lock; delete the line in that PR.
+      - dependency-name: "mcp"
+      - dependency-name: "langchain"
+      - dependency-name: "langchain-aws"
+      - dependency-name: "langchain-openai"
+      - dependency-name: "langgraph"
+      - dependency-name: "langgraph-checkpoint-sqlite"
+      - dependency-name: "mlflow"
+      - dependency-name: "mlx"
+      - dependency-name: "mlx-lm"
+      - dependency-name: "chronos-forecasting"
+      - dependency-name: "peft"
+      - dependency-name: "torch"
+      - dependency-name: "transformers"
+      - dependency-name: "opentelemetry-instrumentation"
+      - dependency-name: "opentelemetry-semantic-conventions"
+      # Transitive of opentelemetry-instrumentation — moves only with it.
+      - dependency-name: "wrapt"
+      # CAN provenance contract (pyproject.toml:69-74): exact pins keep
+      # generated MF4/parser provenance reproducible; regen is a reviewed
+      # manual change, not a group rider. asammdf/cantools are the pair.
+      - dependency-name: "cantools"
+      - dependency-name: "asammdf"
+      # Mirror exact pins at projects/companion_x/pyproject.toml (croniter:18,
+      # lightgbm:38 + tool.uv.sources URL pin at root:183-184, ncps:43) —
+      # bumpable today at the root manifest; the next upstream release would
+      # re-create the #111-class breaker. Deliberate unfreeze deletes the line.
+      - dependency-name: "croniter"
+      - dependency-name: "lightgbm"
+      - dependency-name: "ncps"
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "npm"
+    directory: "/frontends/next-dashboard"
+    schedule:
+      interval: "weekly"
+    groups:
+      dependencies:
+        patterns: ["*"]
+    ignore:
+      # Issue #32: v7 removes UIResourceRenderer (#35: every route 500s) and
+      # widens the outer sandbox to allow-forms (v7 index.mjs:5600). Blanket
+      # ignore, deliberately stronger than #32's '>=6' ask: this repo
+      # auto-merges any green PR with no review gate, so even a solo 5.17.3
+      # must arrive via a deliberate PR that deletes this line.
+      - dependency-name: "@mcp-ui/client"
+      # AG-UI 1.0 unit: @copilotkit/react-core 1.77 requires @ag-ui/client 1.x
+      # (package-lock.json:1526-1528 pins the peer exactly). Move the pair as
+      # ONE deliberate PR that re-verifies the five dispatcher canaries and the
+      # vitest.config.ts CJS alias; delete these lines in that PR.
+      - dependency-name: "@ag-ui/client"
+      - dependency-name: "@copilotkit/react-core"
+      - dependency-name: "@copilotkit/runtime"
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "npm"
+    directory: "/frontends/shared-renderer"
+    schedule:
+      interval: "weekly"
+    groups:
+      dependencies:
+        patterns: ["*"]
+    commit-message:
+      prefix: "chore(deps)"

@@ -1,0 +1,47 @@
+name: ui
+type: component
+namespace: factory.ui
+description: Polymorphic UI rendering with pluggable adapters for HTMX, React/shadcn,
+  A2UI protocol, Flet/Flutter, and hybrid strategies
+mcp_enabled: true
+features:
+- ui_components
+- polymorphic_adapters
+- a2ui_default_protocol
+- htmx_daisyui
+- react_shadcn
+- a2ui_protocol
+- flet_flutter
+- hybrid_routing
+- theme_system
+- push_channels
+- view_management
+- reasoning_message_events
+- canvas_authorization
+adapters:
+- htmx
+- react
+- json
+- inline-html
+- a2ui
+- flet
+- ag-ui
+- hybrid
+mcp_tools:
+- ui_render_a2ui
+- ui_render_brick_view
+- ui_paint_canvas
+- ui_paint_uiresource
+- ui_get_a2ui_component_catalog
+- ui_validate_a2ui
+- ui_a2ui_to_view
+- ui_view_to_a2ui
+- ui_resolve_canvas
+pip_packages:
+- mcp[cli]==2.1.1
+- flet-charts>=0.1.0
+- flet>=0.85.3
+- jinja2>=3.1.0
+- networkx>=3.6.1
+- pydantic>=2.0.0
+- pyyaml>=6.0.0

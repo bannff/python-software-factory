@@ -1,0 +1,11 @@
+id: auto-eval-on-workflow-complete
+event_type: "graph.completed"
+handler: "mcp:evals_evaluate_multi"
+description: >
+  Auto-evaluate agent output after any graph workflow completes.
+  Runs faithfulness and helpfulness LLMAJ evaluators on the
+  tool invocation trace from the workflow run.
+filters:
+  evaluator_names: '["faithfulness", "helpfulness"]'
+enabled: true
+priority: 10

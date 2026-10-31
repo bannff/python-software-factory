@@ -1,0 +1,86 @@
+name: dataset
+type: component
+namespace: factory.dataset
+# Ownership: validate/materialize immutable blueprints via allowlisted refs; only bounded idempotent internal retries; canonical doctrine: ../../.kiro/steering/python-factory.md
+description: Durable asynchronous generation and immutable dataset materialization
+mcp_enabled: true
+features:
+- durable_job_state
+- immutable_artifacts
+- immutable_definition_artifacts
+- typed_artifact_routing
+- canonical_scenario_packs
+- immutable_dataset_blueprints
+- human_gated_blueprint_materialization
+- scenario_episode_lineage
+- asynchronous_materialization
+- mcp_resources
+- mcp_prompts
+- approved_dbc_catalog
+- canonical_dbc_semantics
+- evidence_backed_can_failure_patterns
+- event_derived_can_labels
+- mcp_graph_projection
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- definition_artifact_store
+- blueprint_store
+- quality_policy_config
+- human_approval_config
+- local_durable_worker
+- scenario_pack_store
+- scenario_generate
+- dbc_catalog
+- dbc_decoder
+- failure_pattern_store
+- mcp_graph_projection
+- can_ingest
+- can_profile
+- can_synthesize
+- can_window
+- can_augment
+- context_ingest
+- context_augment
+- context_correlate
+- can_taxonomize
+- scania_pattern_extractor
+mcp_resources:
+- dataset://schemas/blueprint
+- dataset://schemas/generation-request
+- dataset://schemas/job
+- dataset://schemas/artifact
+- dataset://schemas/scenario-pack
+- dataset://schemas/can-intelligence
+- dataset://dbc/catalog
+- dataset://can/failure-patterns
+- dataset://docs/can-intelligence-scope
+mcp_prompts:
+- prepare_dataset_generation
+mcp_tools:
+- dataset_publish_definition_artifact
+- dataset_resolve_definition_artifact
+- dataset_validate_blueprint
+- dataset_materialize_blueprint
+- dataset_submit_generation
+- dataset_publish_scenario_pack
+- dataset_get_scenario_pack
+- dataset_get_job
+- dataset_get_artifact
+- dataset_resolve_artifact
+- dataset_resolve_trajectory_zone
+- dataset_materialize_can_training_bundle
+- dataset_cancel_job
+- can_pipeline_overview
+- dataset_query_dbc_catalog
+- dataset_resolve_dbc_candidate
+- dataset_list_failure_patterns
+- dataset_inspect_failure_pattern
+- dataset_project_can_graph
+pip_packages:
+- asammdf>=8.0.0
+- cantools>=42.0.0
+- mcp[cli]==2.1.1
+- numpy>=1.24.0
+- pandas>=2.0.0
+- pydantic>=2.0.0
+- sdv>=1.37.0

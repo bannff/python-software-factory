@@ -1,0 +1,57 @@
+id: security-review
+name: Security Review Pipeline
+description: >
+  Ensemble security review: gatherer collects context, analyzer identifies
+  vulnerabilities, challenger stress-tests findings (reduces FPs), grader
+  scores the output via evals rubric. Maps to the RL agent economy pipeline.
+
+execution_timeout: 1800.0
+max_node_executions: 20
+
+nodes:
+  - id: gatherer
+    type: agent
+    system_prompt: >
+      You are a security context gatherer. Given a codebase or description,
+      collect all relevant context: entry points, data flows, authentication
+      mechanisms, external dependencies, and trust boundaries. Output a
+      structured context document.
+    model: us.amazon.nova-lite-v1:0
+
+  - id: analyzer
+    type: agent
+    system_prompt: >
+      You are a security vulnerability analyzer. Given the context document,
+      identify potential vulnerabilities with evidence: source-to-sink data
+      flows, missing sanitization, broken auth, IDOR patterns. For each
+      finding include: type, location, evidence, severity, exploitability.
+    model: us.amazon.nova-pro-v1:0
+
+  - id: challenger
+    type: agent
+    system_prompt: >
+      You are an adversarial security reviewer. Given the findings list,
+      challenge each one: Is this actually exploitable? What sanitization
+      exists? Is this a false positive? Provide a verdict (confirmed/FP/
+      needs-more-info) with reasoning for each finding.
+    model: us.amazon.nova-pro-v1:0
+
+  - id: grader
+    type: agent
+    system_prompt: >
+      You are a security findings grader. Given the challenged findings,
+      produce a final scored report: confirmed findings with severity,
+      evidence quality score (0-1), and remediation recommendations.
+      Discard false positives. Output structured JSON.
+    model: us.amazon.nova-lite-v1:0
+
+edges:
+  - source: gatherer
+    target: analyzer
+  - source: analyzer
+    target: challenger
+  - source: challenger
+    target: grader
+
+entry_points:
+  - gatherer

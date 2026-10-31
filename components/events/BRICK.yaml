@@ -1,0 +1,38 @@
+name: events
+type: component
+namespace: factory.events
+description: Event streaming and message bus with a strict Pydantic v2 ToolResult MCP boundary
+mcp_enabled: true
+dependencies:
+- mcp_utils
+features:
+- event_streaming
+- message_bus
+- pub_sub
+- event_history
+- event_replay
+- subscription_patterns
+- redis_integration
+- sqlite_storage
+- learning_event_workflow_id_alias
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- memory
+- sqlite
+- redis
+- blinker
+- aws
+adapter_infra:
+  redis:
+    services:
+    - redis
+  aws:
+    services: []
+pip_packages:
+- blinker>=1.9.0
+- boto3>=1.35.0
+- mcp[cli]==2.1.1
+- neo4j>=6.1.0
+- pydantic>=2.0.0
+- pyyaml>=6.0.0
+- redis>=7.1.0

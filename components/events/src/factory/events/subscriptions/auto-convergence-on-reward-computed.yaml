@@ -1,0 +1,8 @@
+id: auto-convergence-on-reward-computed
+event_type: "reward.computed"
+handler: "mcp:convergence_dispatch"
+description: >
+  Record reward-derived metrics and emit convergence status after reward computation.
+enabled: true
+priority: 6
+filters: {}

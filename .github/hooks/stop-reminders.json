@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "uv run python scripts/hooks/stop_reminders.py",
+        "timeout": 15
+      }
+    ]
+  }
+}

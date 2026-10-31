@@ -1,0 +1,18 @@
+container_name: edge-n2-sdk
+cpus: 1.0
+entrypoint:
+- run
+image: sha256:040c91591c28154252bf921759cbbf5255a555f739e0d2484c837bc975c12eed
+memory_mb: 512
+name: edge-n2-sdk
+peer_network:
+  alias: edge-n2-sdk
+  internal: true
+  network_id: edge-n2-sdk-lab
+  port: 17331
+platform: linux/arm64
+replace_existing: false
+secret_refs:
+- ditto-offline-license
+setup_commands: []
+shell: /bin/sh

@@ -1,0 +1,111 @@
+services:
+  # Meta Database
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: factory
+      POSTGRES_PASSWORD: factory
+      POSTGRES_DB: factory
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Graph Database
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      NEO4J_AUTH: neo4j/password
+      NEO4J_PLUGINS: '["graph-data-science"]'
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1G
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+
+  # Cache & Message Broker
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # Identity & Access Management
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  # Knowledge Base (Vector DB)
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/data
+
+  # Object Storage (SeaweedFS)
+  seaweedfs:
+    image: chrislusf/seaweedfs
+    command: server -s3
+    ports:
+      - "9333:9333"
+      - "8333:8333"
+      - "8081:8081"
+    volumes:
+      - seaweed_data:/data
+
+  # Telemetry (Arize Phoenix)
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports:
+      - "6006:6006"
+
+  # Workflow (Dagster)
+  dagster:
+    image: dagster/dagster-celery-k8s:latest # placeholder for simpler local setup
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+    ports:
+      - "3000:3000"
+
+  # ==========================================================================
+  # Companion-X Application Services
+  # ==========================================================================
+
+  companion_x-api:
+    build:
+      context: .
+      dockerfile: projects/companion_x/Dockerfile
+    command: ["uvicorn", "factory.mcp_server.core:create_app", "--host", "0.0.0.0", "--port", "8000", "--factory"]
+    env_file: projects/companion_x/.env
+    ports:
+      - "8100:8000"
+    depends_on:
+      - postgres
+      - redis
+      - neo4j
+      - keycloak
+      - chromadb
+
+  companion_x-worker:
+    build:
+      context: .
+      dockerfile: projects/companion_x/Dockerfile
+    command: ["python", "-m", "factory.worker.main"]
+    env_file: projects/companion_x/.env
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+  neo4j_data:
+  chroma_data:
+  seaweed_data:

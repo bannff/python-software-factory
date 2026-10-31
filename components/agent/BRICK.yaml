@@ -1,0 +1,38 @@
+name: agent
+type: component
+namespace: factory.agent
+# Agent owns bounded intelligent execution; Workflow exclusively owns durable attempts.
+description: LangChain and LangGraph runtime for registered personas and scoped MCP capabilities
+mcp_enabled: true
+features:
+- agent_orchestration
+- bounded_langgraph_execution
+- graph_workflows
+- job_management
+- langchain_integration
+- langgraph_integration
+- polymorphic_design
+- persistent_chat_agent
+- companion_x_chat
+- mcp_resources
+- mcp_prompts
+- native_mcp_v2_scoped_capabilities
+- normalized_runtime_events
+- companion_x_registry_persona
+pip_packages:
+- boto3>=1.35.0
+- botocore>=1.34,<2
+- click>=8.0.0
+- fastapi>=0.128.0
+- langchain==1.3.17
+- langchain-aws==1.7.4
+- langchain-openai==1.6.2
+- langchain-community>=0.4,<0.5
+- langchain-experimental>=0.4,<0.5
+- langgraph==1.2.11
+- langgraph-checkpoint-sqlite==3.1.1
+- ddgs>=6.0.0
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0
+- pyyaml>=6.0.0
+- uvicorn>=0.40.0

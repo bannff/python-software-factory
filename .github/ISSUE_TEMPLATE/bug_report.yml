@@ -1,0 +1,58 @@
+name: 🐛 Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug] "
+labels: ["type/bug", "status/triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this bug!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is broken or not working as expected?
+      placeholder: Describe the bug...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      placeholder: |
+        1. Go to...
+        2. Run...
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Any other relevant information (logs, screenshots, etc.)
+    validations:
+      required: false
+
+  - type: dropdown
+    id: brick
+    attributes:
+      label: Which brick is affected?
+      options:
+        - Component
+        - Base
+        - Project
+        - Workspace/Infrastructure
+    validations:
+      required: true

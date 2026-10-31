@@ -1,0 +1,23 @@
+schema_version: 1
+id: mcp-gateway-local
+name: Local MCP gateway policy
+version: "1.0"
+rules:
+  - id: deny-authoring-without-operator
+    effect: deny
+    actions: ["mcp:*"]
+    resource_types: ["mcp-tool"]
+    conditions:
+      - key: context.category
+        op: eq
+        value: authoring
+      - key: context.is_operator
+        op: eq
+        value: false
+  - id: allow-authenticated-tools
+    effect: allow
+    actions: ["mcp:discover", "mcp:execute"]
+    resource_types: ["mcp-tool"]
+    conditions:
+      - key: envelope.principal_id
+        op: exists

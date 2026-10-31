@@ -1,0 +1,20 @@
+name: oracle
+type: component
+namespace: factory.oracle
+description: Domain-agnostic verification oracle — registry-overlay VerifierPort dispatch with a generic fallback
+mcp_enabled: true
+features:
+- finding_verification
+- verifier_registry_overlay
+- generic_fallback
+- domain_agnostic_dispatch
+adapters:
+- memory
+mcp_resources:
+- oracle://schemas/verify-result
+- oracle://docs/oracle
+mcp_prompts:
+- verify_finding
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

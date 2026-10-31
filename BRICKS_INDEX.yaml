@@ -1,0 +1,2095 @@
+schema_version: 1
+workspace: python-factory
+bricks:
+  components:
+  - name: agent
+    type: component
+    namespace: factory.agent
+    description: LangChain and LangGraph runtime for registered personas and scoped MCP capabilities
+    mcp_enabled: true
+    features:
+    - agent_orchestration
+    - bounded_langgraph_execution
+    - graph_workflows
+    - job_management
+    - langchain_integration
+    - langgraph_integration
+    - polymorphic_design
+    - persistent_chat_agent
+    - companion_x_chat
+    - mcp_resources
+    - mcp_prompts
+    - native_mcp_v2_scoped_capabilities
+    - normalized_runtime_events
+    - companion_x_registry_persona
+    pip_packages:
+    - boto3>=1.35.0
+    - botocore>=1.34,<2
+    - click>=8.0.0
+    - fastapi>=0.128.0
+    - langchain==1.3.17
+    - langchain-aws==1.7.4
+    - langchain-openai==1.6.2
+    - langchain-community>=0.4,<0.5
+    - langchain-experimental>=0.4,<0.5
+    - langgraph==1.2.11
+    - langgraph-checkpoint-sqlite==3.1.1
+    - ddgs>=6.0.0
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+    - uvicorn>=0.40.0
+  - name: arcade_config
+    type: component
+    namespace: factory.arcade_config
+    description: System/emulator/core configuration model for OpenArcade
+    mcp_enabled: false
+    features:
+    - system_config
+    - core_mapping
+    pip_packages:
+    - pydantic>=2.0.0
+  - name: artifacts
+    type: component
+    namespace: factory.artifacts
+    description: Tenant-owned versioned artifact library with stable slugs and immutable history
+    mcp_enabled: true
+    features:
+    - stable_owner_scoped_slugs
+    - idempotent_save
+    - immutable_version_snapshots
+    - revision_fenced_lifecycle
+    - additive_version_revert
+    - opaque_tombstones
+    - content_free_lifecycle_events
+    - bounded_owner_scoped_folders
+    - one_level_comment_threads
+    - human_gated_authoring
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - sqlite
+    mcp_resources: []
+    mcp_prompts: []
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: auth
+    type: component
+    namespace: factory.auth
+    description: Authentication and authorization via Keycloak with token verification, exchange, and
+      native MCP v2 typed Pydantic contracts
+    mcp_enabled: true
+    features:
+    - authentication
+    - authorization
+    - token_management
+    - keycloak_integration
+    - token_exchange
+    - multitenancy
+    - tokenless_credential_egress
+    - oauth_authorization_code_enrollment
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - memory
+    - keycloak
+    - authlib_keycloak
+    - aws
+    adapter_infra:
+      keycloak:
+        services:
+        - keycloak
+      authlib_keycloak:
+        services:
+        - keycloak
+      aws:
+        services: []
+    pip_packages:
+    - authlib>=1.3.0
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - httpx>=0.27.0
+    - pydantic>=2.0.0
+    - pyjwt[crypto]>=2.8.0
+    - pyyaml>=6.0.0
+    - typer>=0.12.0
+  - name: blockchain
+    type: component
+    namespace: factory.blockchain
+    description: Agent economy ledger with wallets, transfers, bounties, and a strict typed MCP boundary
+    mcp_enabled: true
+    features:
+    - agent_economy
+    - wallets
+    - transfers
+    - bounties
+    - hash_chain
+    - merkle_trees
+    - mcp_resources
+    - mcp_prompts
+    - native_mcp_v2_typed_pydantic_contracts
+    - authoring_gate
+    - mcp_views
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: browser
+    type: component
+    namespace: factory.browser
+    description: Browser automation with pluggable protocol adapters (CDP, Playwright, Selenium). Its
+      18 public native MCP v2 tools retain their names and flat kwargs, validate ingress with strict same-brick
+      Pydantic v2 DTOs, and return ToolResult v1 envelopes.
+    mcp_enabled: true
+    features:
+    - native_mcp_v2_typed_pydantic_contracts
+    - browser_automation
+    - page_navigation
+    - element_interaction
+    - screenshot_capture
+    - network_interception
+    - javascript_execution
+    - cdp_protocol
+    adapters:
+    - cdp
+    - mock
+    mcp_resources:
+    - browser://schemas/config
+    - browser://schemas/session
+    - browser://docs
+    - browser://docs/{doc_name}
+    - browser://sessions
+    - browser://backends
+    - browser://health
+    - browser://factory
+    mcp_prompts:
+    - automate_page
+    - extract_content
+    - debug_session
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - httpx>=0.27.0
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+    - websockets>=12.0
+  - name: cache
+    type: component
+    namespace: factory.cache
+    description: Ephemeral caching with pluggable backends (memory, Redis)
+    mcp_enabled: true
+    features:
+    - key_value_cache
+    - ttl_support
+    - pattern_matching
+    - statistics
+    adapters:
+    - memory
+    - redis
+    - aws
+    adapter_infra:
+      redis:
+        services:
+        - redis
+      aws:
+        services: []
+    mcp_resources:
+    - cache://schemas/config
+    - cache://schemas/entry
+    - cache://schemas/stats
+    - cache://docs
+    - cache://docs/{doc_name}
+    - cache://stats
+    - cache://backends
+    - cache://health
+    - cache://factory
+    mcp_prompts:
+    - configure_cache
+    - debug_cache
+    - optimize_cache
+    pip_packages:
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - redis>=7.1.0
+  - name: config
+    type: component
+    namespace: factory.config
+    description: Centralized configuration with pluggable backends (env, file, SSM)
+    mcp_enabled: true
+    features:
+    - key_value_config
+    - feature_flags
+    - environment_support
+    - secrets_reference
+    - mcp_resources
+    - mcp_prompts
+    - aws_identity
+    adapters:
+    - env
+    - file
+    - ssm
+    - pydantic
+    - aws_identity
+    mcp_resources:
+    - config://schemas/config
+    - config://schemas/feature-flag
+    - config://schemas/config-value
+    - config://docs
+    - config://docs/{doc_name}
+    - config://values
+    - config://sources
+    - config://health
+    - config://factory
+    - config://aws/identity
+    mcp_prompts:
+    - configure_source
+    - add_feature_flag
+    - debug_config
+    - migrate_config
+    pip_packages:
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - pydantic-settings>=2.12.0
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+  - name: connections
+    type: component
+    namespace: factory.connections
+    description: Owner-registered external MCP servers (stdio or Streamable HTTP) mounted as gateway powers
+    mcp_enabled: true
+    features:
+    - mcp_servers_json_import
+    - stdio_and_streamable_http_sources
+    - env_name_secret_references
+    - gateway_pseudo_brick_mount
+    - reload_without_restart
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - sqlite
+    mcp_resources: []
+    mcp_prompts: []
+    pip_packages:
+    - httpx>=0.28.0
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: curator
+    type: component
+    namespace: factory.curator
+    description: AI-assistant control plane -- ROM ingest + compatibility scanning (management-plane only)
+    mcp_enabled: false
+    features:
+    - rom_ingest
+    - compatibility_scan
+    - playability_stub
+    pip_packages:
+    - pydantic>=2.0.0
+  - name: dataset
+    type: component
+    namespace: factory.dataset
+    description: Durable asynchronous generation and immutable dataset materialization
+    mcp_enabled: true
+    features:
+    - durable_job_state
+    - immutable_artifacts
+    - immutable_definition_artifacts
+    - typed_artifact_routing
+    - canonical_scenario_packs
+    - immutable_dataset_blueprints
+    - human_gated_blueprint_materialization
+    - scenario_episode_lineage
+    - asynchronous_materialization
+    - mcp_resources
+    - mcp_prompts
+    - approved_dbc_catalog
+    - canonical_dbc_semantics
+    - evidence_backed_can_failure_patterns
+    - event_derived_can_labels
+    - mcp_graph_projection
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - definition_artifact_store
+    - blueprint_store
+    - quality_policy_config
+    - human_approval_config
+    - local_durable_worker
+    - scenario_pack_store
+    - scenario_generate
+    - dbc_catalog
+    - dbc_decoder
+    - failure_pattern_store
+    - mcp_graph_projection
+    - can_ingest
+    - can_profile
+    - can_synthesize
+    - can_window
+    - can_augment
+    - context_ingest
+    - context_augment
+    - context_correlate
+    - can_taxonomize
+    - scania_pattern_extractor
+    mcp_resources:
+    - dataset://schemas/blueprint
+    - dataset://schemas/generation-request
+    - dataset://schemas/job
+    - dataset://schemas/artifact
+    - dataset://schemas/scenario-pack
+    - dataset://schemas/can-intelligence
+    - dataset://dbc/catalog
+    - dataset://can/failure-patterns
+    - dataset://docs/can-intelligence-scope
+    mcp_prompts:
+    - prepare_dataset_generation
+    mcp_tools:
+    - dataset_publish_definition_artifact
+    - dataset_resolve_definition_artifact
+    - dataset_validate_blueprint
+    - dataset_materialize_blueprint
+    - dataset_submit_generation
+    - dataset_publish_scenario_pack
+    - dataset_get_scenario_pack
+    - dataset_get_job
+    - dataset_get_artifact
+    - dataset_resolve_artifact
+    - dataset_resolve_trajectory_zone
+    - dataset_materialize_can_training_bundle
+    - dataset_cancel_job
+    - can_pipeline_overview
+    - dataset_query_dbc_catalog
+    - dataset_resolve_dbc_candidate
+    - dataset_list_failure_patterns
+    - dataset_inspect_failure_pattern
+    - dataset_project_can_graph
+    pip_packages:
+    - asammdf>=8.0.0
+    - cantools>=42.0.0
+    - mcp[cli]==2.1.1
+    - numpy>=1.24.0
+    - pandas>=2.0.0
+    - pydantic>=2.0.0
+    - sdv>=1.37.0
+  - name: devtools
+    type: component
+    namespace: factory.devtools
+    description: Project-scoped host-local file, command, and git operations
+    mcp_enabled: true
+    features:
+    - project_path_confinement
+    - bounded_file_operations
+    - argv_command_execution
+    - gated_git_operations
+    adapters:
+    - local
+    mcp_resources: []
+    mcp_prompts: []
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    mcp_tools:
+    - devtools_read_file
+    - devtools_list_dir
+    - devtools_search
+    - devtools_git_status
+    - devtools_git_diff
+    - devtools_git_log
+    - devtools_write_file
+    - devtools_edit_file
+    - devtools_run_command
+    - devtools_cancel_command
+    - devtools_git_stage
+    - devtools_git_commit
+    - devtools_git_push
+  - name: domain
+    type: component
+    namespace: factory.domain
+    description: Domain presentation manifests and workspace engagements (render-side, domain-agnostic)
+    mcp_enabled: true
+    features:
+    - presentation_manifests
+    - workspace_engagements
+    - unified_manifest_registry
+    - generic_fallback
+    - polymorphic_design
+    - mcp_resources
+    - mcp_prompts
+    adapters:
+    - memory
+    mcp_resources:
+    - domain://manifests/*
+    mcp_prompts:
+    - open_domain_engagement
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: evals
+    type: component
+    namespace: factory.evals
+    description: Agent benchmarking and evaluation with frozen policies and evidence-bound reports
+    mcp_enabled: true
+    features:
+    - benchmark_suites
+    - eval_runs
+    - immutable_review_acceptance
+    - metrics_collection
+    - result_comparison
+    - ui_exploration
+    - chrome_devtools_integration
+    - eval_sop_workflow
+    - mcp_resources
+    - mcp_prompts
+    - graph_persistence
+    - strands_experiments
+    - experiment_generation
+    - declarative_agent_config
+    - actor_simulation
+    - experiment_serialization
+    - tool_chaos
+    adapters:
+    - custom
+    - strands
+    - ui_explorer
+    mcp_resources:
+    - evals://schemas/eval-config
+    - evals://schemas/eval-result
+    - evals://docs/overview
+    - evals://docs/adapters
+    - evals://docs/{doc_name}
+    - evals://runs
+    - evals://metrics
+    - evals://evaluators
+    - evals://sop/sessions
+    - evals://factory
+    - evals://ui/scenarios
+    - evals://ui/findings
+    mcp_prompts:
+    - create_eval
+    - run_eval
+    - analyze_results
+    - compare_runs
+    mcp_tools:
+    - evals_create_suite
+    - evals_add_case
+    - evals_delete_suite
+    - evals_seed_defaults
+    - evals_list_suites
+    - evals_get_suite
+    - evals_get_run
+    - evals_list_runs
+    - evals_record_run
+    - evals_review_and_record
+    - evals_verify_record_pointer
+    - evals_evaluate
+    - evals_evaluate_multi
+    - evals_evaluate_can_model
+    - evals_evaluate_can_model_evidence
+    - evals_list_evaluators
+    - evals_run_experiment
+    - evals_list_run_results
+    - evals_get_run_result
+    - evals_generate_experiment
+    - evals_run_simulation
+    - evals_save_experiment
+    - evals_load_experiment
+    - evals_list_saved_experiments
+    - evals_run_tool_chaos
+    - evals_sop_plan
+    - evals_sop_generate_data
+    - evals_sop_run
+    - evals_sop_report
+    - evals_sop_status
+    - evals_sop_list
+    - evals_create_ui_scenario
+    - evals_add_scenario_action
+    - evals_add_scenario_assertion
+    - evals_run_ui_exploration
+    - evals_list_ui_scenarios
+    - evals_list_ui_findings
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - numpy>=1.24.0
+    - opentelemetry-api>=1.20.0
+    - scikit-learn>=1.3.0
+    - strands-agents-evals>=0.1.0
+    - openevals>=0.2.0
+    - agentevals>=0.0.9
+    - langchain>=1.0.0
+    - langchain-aws>=1.0.0
+  - name: events
+    type: component
+    namespace: factory.events
+    description: Event streaming and message bus with a strict Pydantic v2 ToolResult MCP boundary
+    mcp_enabled: true
+    dependencies:
+    - mcp_utils
+    features:
+    - event_streaming
+    - message_bus
+    - pub_sub
+    - event_history
+    - event_replay
+    - subscription_patterns
+    - redis_integration
+    - sqlite_storage
+    - learning_event_workflow_id_alias
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - memory
+    - sqlite
+    - redis
+    - blinker
+    - aws
+    adapter_infra:
+      redis:
+        services:
+        - redis
+      aws:
+        services: []
+    pip_packages:
+    - blinker>=1.9.0
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - neo4j>=6.1.0
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+    - redis>=7.1.0
+  - name: foreman
+    type: component
+    namespace: factory.foreman
+    description: Polylith scaffolding, structure management, and governance with strict Pydantic v2 ToolResult
+      MCP contracts
+    mcp_enabled: true
+    dependencies:
+    - mcp_utils
+    features:
+    - polylith
+    - scaffolding
+    - workspace_introspection
+    - governance
+    - compliance_checks
+    - bricks_index
+    - native_mcp_v2_typed_pydantic_contracts
+    mcp_resources:
+    - foreman://docs
+    - foreman://docs/{doc_name}
+    - foreman://schema/brick-yaml
+    - foreman://bricks
+    - foreman://bricks/components
+    - foreman://bricks/bases
+    mcp_prompts:
+    - create_component
+    - fix_compliance
+    - onboard_agent
+    mcp_tools:
+    - get_capabilities
+    - health_check
+    - describe_config_schema
+    - foreman_info
+    - foreman_check
+    - foreman_guardian_check
+    - foreman_get_repo_guardrails
+    - foreman_create_component
+    - foreman_create_base
+    - foreman_build_bricks_index
+    - foreman_write_bricks_index
+    - foreman_resolve_dependencies
+    - foreman_create_project
+    - foreman_sync_brick_deps
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+  - name: games
+    type: component
+    namespace: factory.games
+    description: Turn-based game engine with strict Pydantic v2 MCP contracts and RL-ready environment
+      interface
+    mcp_enabled: true
+    features:
+    - game_sessions
+    - turn_based_play
+    - connect_four
+    - rl_environment
+    - game_history
+    - legal_move_validation
+    - mcp_resources
+    - mcp_prompts
+    - experiment_reporting
+    - domain_class_rl_loop
+    - native_mcp_v2_typed_pydantic_contracts
+    - workflow_rl_match_on
+    adapters:
+    - memory
+    mcp_resources:
+    - games://schemas/config
+    - games://schemas/game
+    - games://docs
+    - games://docs/{doc_name}
+    - games://health
+    - games://backends
+    - games://factory
+    mcp_prompts:
+    - play_game
+    - train_agent
+    - debug_game
+    mcp_tools:
+    - get_capabilities
+    - health_check
+    - describe_config_schema
+    - games_get_state
+    - games_legal_moves
+    - games_evaluate
+    - games_list
+    - games_get_dashboard_summary
+    - games_get_game_activity
+    - games_get_game_graph_context
+    - games_get_views
+    - games_create
+    - games_move
+    - games_delete
+    - games_reset
+    - games_ctf_move
+    - games_security_move
+    - games_process_finished
+    - games_process_workflow_rl
+    - games_write_experiment_report
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: graph
+    type: component
+    namespace: factory.graph
+    description: Portable knowledge graph operations across NetworkX, persistent NetworkX, and Neo4j
+    mcp_enabled: true
+    features:
+    - entity_management
+    - relationship_management
+    - path_finding
+    - run_scoped_typed_reads
+    - recent_tool_invocations
+    - taxonomy_edges_polymorphic_reads
+    - can_failure_taxonomy_autoregistration
+    - canonical_dbc_signal_identity
+    - provenance_projection
+    adapters:
+    - networkx
+    - neo4j
+    - aws
+    adapter_infra:
+      neo4j:
+        services:
+        - neo4j
+      aws:
+        services: []
+    mcp_resources:
+    - graph://schemas/node
+    - graph://schemas/edge
+    - graph://schemas/taxonomy
+    - graph://schemas/security-taxonomy
+    - graph://schemas/taxonomy/{domain}
+    - graph://docs/overview
+    - graph://docs/adapters
+    - graph://stats
+    - graph://backends
+    - graph://factory
+    mcp_prompts:
+    - create_graph
+    - query_graph
+    - import_data
+    - debug_graph
+    mcp_tools:
+    - graph_get_capabilities
+    - graph_health_check
+    - graph_describe_config_schema
+    - graph_get_entity
+    - graph_get_neighbors
+    - graph_neighborhood
+    - graph_find_path
+    - graph_find_entities
+    - graph_get_stats
+    - graph_get_run_topology
+    - graph_get_findings_for_run
+    - graph_count_entities_by_run
+    - graph_get_workflow_summary
+    - graph_get_recent_findings
+    - graph_get_target_app
+    - graph_get_tool_invocations_for_run
+    - graph_list_recent_tool_invocations
+    - graph_list_recent_runs
+    - graph_get_dashboard_summary
+    - graph_get_entity_context
+    - graph_get_views
+    - graph_add_entity
+    - graph_update_entity
+    - graph_delete_entity
+    - graph_add_relationship
+    - graph_delete_relationship
+    - graph_set_finding_state
+    - graph_write_relationship
+    - graph_tombstone_relationship
+    - graph_rebuild
+    - graph_project_event
+    - graph_reconcile_projection
+    pip_packages:
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - neo4j>=6.1.0
+    - networkx>=3.6.1
+    - pydantic>=2.0.0
+  - name: http_client
+    type: component
+    namespace: factory.http
+    description: HTTP client abstraction with retry, auth, rate limiting
+    mcp_enabled: true
+    features:
+    - http_requests
+    - retry_logic
+    - rate_limiting
+    - auth_headers
+    - timeout_handling
+    - mcp_resources
+    - mcp_prompts
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - httpx
+    - aiohttp
+    - tenacity_httpx
+    mcp_tools:
+    - http_get_capabilities
+    - http_health_check
+    - http_describe_config_schema
+    - http_list_backends
+    - http_get
+    - http_post
+    - http_request
+    - http_put
+    - http_delete
+    mcp_resources:
+    - http://schemas/request
+    - http://schemas/response
+    - http://docs/overview
+    - http://docs/adapters
+    - http://docs/{doc_name}
+    - http://backends
+    - http://stats
+    - http://factory
+    mcp_prompts:
+    - make_request
+    - configure_client
+    - debug_request
+    - batch_requests
+    pip_packages:
+    - aiohttp>=3.9.0
+    - mcp[cli]==2.1.1
+    - httpx>=0.27.0
+    - pydantic>=2.0.0
+    - tenacity>=8.2.0
+  - name: integrations
+    type: component
+    namespace: factory.integrations
+    description: External service connectors with pluggable backends (REST, GraphQL, Webhook, AWS)
+    mcp_enabled: true
+    features:
+    - rest_connector
+    - graphql_connector
+    - webhook_receiver
+    - aws_connector
+    - connection_pooling
+    - retry_logic
+    - rate_limiting
+    - boto3_integration
+    - tokenless_provider_email_egress
+    adapters:
+    - rest
+    - graphql
+    - webhook
+    - aws
+    mcp_resources:
+    - integrations://schemas/config
+    - integrations://schemas/connector
+    - integrations://docs
+    - integrations://docs/{doc_name}
+    - integrations://health
+    - integrations://connectors
+    mcp_prompts:
+    - configure_connector
+    - debug_connection
+    - create_integration
+    pip_packages:
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - gql[httpx]>=3.5.0
+    - pydantic>=2.0.0
+  - name: kb
+    type: component
+    namespace: factory.kb
+    description: Vector-powered document storage and semantic search (ChromaDB, Neo4j HNSW)
+    mcp_enabled: true
+    features:
+    - knowledge_base
+    - vector_search
+    - document_management
+    - semantic_search
+    - backfill_embeddings
+    - rag_support
+    - graph_rag
+    - bedrock_graphrag
+    - mcp_resources
+    - mcp_prompts
+    - collections
+    mcp_tools:
+    - get_capabilities
+    - health_check
+    - describe_config_schema
+    - get_collection_registry
+    - get_collection_stats
+    - ingest
+    - search
+    - get_document
+    - delete_document
+    - list_documents
+    - backfill_embeddings
+    - search_remote
+    - authoring.get_status
+    - authoring.validate_collections
+    - authoring.upsert_collection
+    - authoring.delete_collection
+    - kb_get_views
+    adapters:
+    - chroma
+    - chroma_server
+    - bm25
+    - neo4j
+    - bedrock
+    adapter_infra:
+      chroma:
+        services:
+        - chromadb
+      chroma_server:
+        services:
+        - chromadb
+      neo4j:
+        services:
+        - neo4j
+      bedrock:
+        services: []
+    brick_deps: []
+    pip_packages:
+    - boto3>=1.35.0
+    - chromadb>=1.4.1
+    - mcp[cli]==2.1.1
+    - neo4j-graphrag>=1.0.0
+    - neo4j>=6.1.0
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+    - rank-bm25>=0.2.2
+  - name: launch
+    type: component
+    namespace: factory.launch
+    description: "Arcade launch orchestrator \u2014 NCI transport protocol + handoff state machine"
+    mcp_enabled: false
+    features:
+    - nci_transport
+    - launch_orchestration
+    - readiness_probing
+    adapters:
+    - udp
+    - mock
+    pip_packages: []
+  - name: learning
+    type: component
+    namespace: factory.learning
+    description: "Domain-agnostic reward-signal seam \u2014 polymorphic RewardSourcePort dispatch with\
+      \ a registry overlay; unpins recursive learning from security findings"
+    mcp_enabled: true
+    dependencies:
+    - mcp_utils
+    features:
+    - reward_source_registry_overlay
+    - domain_agnostic_reward
+    - gt_findings_reward_source
+    - generic_fallback
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - games
+    - evals
+    mcp_tools:
+    - learning_list_reward_sources
+    - learning_compute_reward
+    mcp_resources:
+    - learning://schemas/reward-signal
+    - learning://docs/learning
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: lessons
+    type: component
+    namespace: factory.lessons
+    description: Owner-scoped typed lesson identity, curation, and recall authority
+    mcp_enabled: true
+    features:
+    - typed_lesson_identity
+    - owner_persona_scope
+    - revision_fenced_lifecycle
+    - accepted_memory_projection
+    adapters:
+    - sqlite
+    mcp_resources: []
+    mcp_prompts: []
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: library
+    type: component
+    namespace: factory.library
+    description: Game/ROM catalog model and scanning interface
+    mcp_enabled: false
+    features:
+    - game_catalog
+    - library_scanning
+    pip_packages:
+    - pydantic>=2.0.0
+  - name: llm_gateway
+    type: component
+    namespace: factory.llm_gateway
+    description: Direct LLM calls with pluggable providers for completions and embeddings
+    mcp_enabled: true
+    features:
+    - text_completion
+    - chat_completion
+    - embeddings
+    - mcp_resources
+    - mcp_prompts
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - bedrock
+    - openai
+    - anthropic
+    - ollama
+    mcp_tools:
+    - get_capabilities
+    - health_check
+    - describe_config_schema
+    - llm_list_backends
+    - llm_complete
+    - llm_chat
+    - llm_embed
+    mcp_resources:
+    - llm://schemas/config
+    - llm://schemas/message
+    - llm://schemas/response
+    - llm://docs
+    - llm://docs/{doc_name}
+    - llm://backends
+    - llm://health
+    - llm://factory
+    mcp_prompts:
+    - configure_backend
+    - debug_llm
+    - optimize_prompts
+    pip_packages:
+    - anthropic>=0.34.0
+    - boto3>=1.35.0
+    - botocore>=1.34,<2
+    - mcp[cli]==2.1.1
+    - openai>=1.40.0
+    - pydantic>=2.0.0
+  - name: logger
+    type: component
+    namespace: factory.logger
+    description: Tail logs and monitor system health
+    mcp_enabled: true
+    features:
+    - logging
+    - monitoring
+    - health_checks
+    adapters:
+    - file
+    - structlog
+    - aws
+    pip_packages:
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - structlog>=25.1.0
+  - name: machine_learning
+    type: component
+    namespace: factory.machine_learning
+    description: ML experiment tracking, fine-tuning job management, and model registry
+    mcp_enabled: true
+    dependencies:
+    - dataset
+    features:
+    - experiment_tracking
+    - run_management
+    - metrics_logging
+    - parameter_logging
+    - model_registry
+    - tensorboard_visualization
+    - mlflow_integration
+    - finetuning
+    - lora
+    - qlora
+    - model_export
+    - training_objectives
+    - checkpoint_lifecycle
+    - local_storage
+    - can_warm_inference
+    - model_passports
+    - attempt_idempotent_can_lifecycle
+    - polymorphic_native_can_lifecycle
+    - crash_reconciled_native_can_effects
+    - timegan_generation
+    - timegan_conditional_generation
+    - training_run_dashboard
+    - ml_observatory
+    adapters:
+    - memory
+    - mlflow
+    - tensorboard
+    - memory_finetuning
+    - mlx_finetuning
+    - peft_finetuning
+    - aws
+    - sklearn_timeseries
+    - torch_timeseries
+    - mlx_timeseries
+    - patchtst_timeseries
+    - chronos_timeseries
+    - lnn_timeseries
+    - timegan
+    - timegan_conditional
+    - can_inference
+    - local_model_passport_store
+    - training_run_store
+    mcp_resources:
+    - tracking://experiments
+    - tracking://experiments/{experiment_id}
+    - tracking://health
+    - tracking://jobs
+    - tracking://docs
+    mcp_prompts:
+    - run_experiment
+    - create_finetuning_job
+    - debug_finetuning_job
+    pip_packages:
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - joblib>=1.3.0
+    - lightgbm==4.7.0
+    - mlflow==3.16.0
+    - mlx==0.31.1; platform_system == "Darwin" and platform_machine == "arm64"
+    - mlx-lm==0.31.2; platform_system == "Darwin" and platform_machine == "arm64"
+    - numpy>=1.24.0
+    - pandas>=2.0.0
+    - scikit-learn>=1.3.0
+    - tensorboard>=2.17.0
+    - torch==2.13.0
+    - peft==0.19.1
+    - chronos-forecasting==2.3.1
+    - ncps==1.0.1
+    - transformers==5.5.4
+  - name: mcp_utils
+    type: component
+    namespace: factory.mcp_utils
+    description: Shared MCP utilities and decorators for categorizing tools across bricks
+    mcp_enabled: false
+    features:
+    - decorators
+    - tool_categorization
+    - poll_noise_filter
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - httpx2>=2.5.0
+    - pydantic>=2.0.0
+    - starlette>=0.40.0
+  - name: memory
+    type: component
+    namespace: factory.memory
+    description: Agent memory abstraction with pluggable backends (in-memory, Mem0, AgentCore, Zep, Cognee,
+      Neo4j)
+    mcp_enabled: true
+    features:
+    - semantic_memory
+    - short_term_memory
+    - long_term_memory
+    - memory_consolidation
+    - relevance_scoring
+    - graph_memory
+    - temporal_edges
+    - memory_evolution
+    - typed_mcp_boundary
+    adapters:
+    - memory
+    - mem0
+    - agentcore
+    - zep
+    - cognee
+    - neo4j
+    - amem
+    adapter_infra:
+      neo4j:
+        services:
+        - neo4j
+      mem0:
+        services: []
+      agentcore:
+        services: []
+      zep:
+        services: []
+      cognee:
+        services: []
+    mcp_resources:
+    - memory://schemas/config
+    - memory://schemas/memory
+    - memory://docs
+    - memory://docs/{doc_name}
+    - memory://health
+    - memory://backends
+    mcp_prompts:
+    - configure_memory
+    - debug_memory
+    - optimize_retrieval
+    pip_packages:
+    - chromadb>=1.4.1
+    - cognee>=0.1.0
+    - mcp[cli]==2.1.1
+    - neo4j>=6.1.0
+    - pydantic>=2.0.0
+    - rapidfuzz>=3.0.0
+    - zep-cloud>=2.0.0
+  - name: metrics
+    type: component
+    namespace: factory.metrics
+    description: Portfolio-level metrics, risk scoring, drift detection, and time-series tracking
+    mcp_enabled: true
+    features:
+    - metric_definitions
+    - time_series_recording
+    - aggregation_snapshots
+    - drift_detection
+    - trend_analysis
+    - portfolio_coverage
+    - risk_scoring
+    - mcp_resources
+    - mcp_prompts
+    - taxonomy
+    - regression_gating
+    - bayesian_estimation
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - memory
+    mcp_resources:
+    - metrics://schemas/metric-definition
+    - metrics://schemas/data-point
+    - metrics://schemas/snapshot
+    - metrics://docs/overview
+    - metrics://docs/metric-types
+    - metrics://registry
+    - metrics://snapshots
+    - metrics://factory
+    mcp_prompts:
+    - define_metric
+    - analyze_trend
+    - configure_dashboard
+    mcp_tools:
+    - metrics_get_capabilities
+    - metrics_health_check
+    - metrics_describe_config_schema
+    - metrics_get_registry
+    - metrics_get_definition
+    - metrics_get_snapshot
+    - metrics_get_trend
+    - metrics_get_all_snapshots
+    - metrics_get_by_taxonomy
+    - metrics_compare_baseline
+    - metrics_list_baselines
+    - metrics_measure
+    - metrics_precision_estimate
+    - metrics_sample_size
+    - metrics_iteration_efficiency
+    - metrics_get_views
+    - metrics_record
+    - metrics_record_batch
+    - metrics_compute_aggregation
+    - metrics_detect_drift
+    - metrics_seed_defaults
+    - metrics_seed_sample_data
+    - metrics_authoring_status
+    - metrics_define_metric
+    - metrics_update_definition
+    - metrics_delete_definition
+    - metrics_set_baseline
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+  - name: migration
+    type: component
+    namespace: factory.migration
+    description: Bounded owner-scoped migration of allowlisted external data through typed target MCP
+    mcp_enabled: true
+    features:
+    - kirocrew_v1_source_preview
+    - allowlisted_nofollow_snapshot
+    - wal_inclusive_sqlite_backup
+    - immutable_import_plans
+    - durable_owner_scoped_receipts
+    - workflow_owned_apply_execution
+    - workflow_enrollment_and_progress
+    - protected_target_import_calls
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - kirocrew_v1
+    - sqlite
+    mcp_resources: []
+    mcp_prompts: []
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: notification
+    type: component
+    namespace: factory.notification
+    description: Notification delivery and alert management with pluggable channel backends
+    mcp_enabled: true
+    features:
+    - notifications
+    - alerts
+    - messaging
+    - email_smtp
+    - sms_twilio
+    - slack_webhooks
+    - templates
+    - inbox
+    - deep_link_resolution
+    adapters:
+    - stdio
+    - apprise
+    - celery
+    - aws
+    pip_packages:
+    - apprise>=1.9.0
+    - boto3>=1.35.0
+    - celery>=5.6.2
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+  - name: oracle
+    type: component
+    namespace: factory.oracle
+    description: "Domain-agnostic verification oracle \u2014 registry-overlay VerifierPort dispatch with\
+      \ a generic fallback"
+    mcp_enabled: true
+    features:
+    - finding_verification
+    - verifier_registry_overlay
+    - generic_fallback
+    - domain_agnostic_dispatch
+    adapters:
+    - memory
+    mcp_resources:
+    - oracle://schemas/verify-result
+    - oracle://docs/oracle
+    mcp_prompts:
+    - verify_finding
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: payments
+    type: component
+    namespace: factory.payments
+    description: Payment processing with pluggable providers and a strict Pydantic v2 ToolResult MCP boundary
+    mcp_enabled: true
+    features:
+    - payment_processing
+    - billing
+    - stripe_integration
+    - provider_registry
+    - payment_history
+    - refunds
+    - webhooks
+    - native_mcp_v2_typed_pydantic_contracts
+    - secret_safe_mcp_boundary
+    adapters:
+    - mock
+    - stripe
+    - aws
+    mcp_resources:
+    - payments://schemas/provider-config
+    - payments://schemas/payment-request
+    - payments://schemas/payment-result
+    - payments://schemas/enums
+    - payments://docs
+    - payments://docs/overview
+    - payments://docs/providers
+    - payments://docs/webhooks
+    - payments://docs/currencies
+    - payments://providers
+    - payments://payments
+    - payments://stats
+    - payments://factory
+    mcp_prompts:
+    - register_provider
+    - debug_payment
+    - configure_stripe
+    mcp_tools:
+    - payments_get_capabilities
+    - payments_health_check
+    - payments_describe_config_schema
+    - payments_get_provider_registry
+    - payments_get_provider_stats
+    - payments_list_payments
+    - payments_get_payment
+    - payments_create_payment
+    - payments_refund_payment
+    - payments_process_webhook
+    - payments_authoring_get_status
+    - payments_authoring_register_provider
+    - payments_authoring_unregister_provider
+    - payments_authoring_update_provider
+    pip_packages:
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+    - stripe>=14.3.0a1
+  - name: permissions
+    type: component
+    namespace: factory.permissions
+    description: Policy-based access control with YAML and Cedar policy support
+    mcp_enabled: true
+    features:
+    - permissions
+    - access_control
+    - authorization
+    - policy_evaluation
+    - role_management
+    - audit_logging
+    - cedar_policies
+    - mcp_resources
+    - mcp_prompts
+    - native_mcp_v2_typed_pydantic_contracts
+    - authoring_gate
+    - canonical_mcp_tool_surface
+    adapters:
+    - yaml
+    - cedar
+    - aws
+    mcp_resources:
+    - permissions://schemas/policy
+    - permissions://schemas/settings
+    - permissions://schemas/resource
+    - permissions://docs
+    - permissions://docs/{doc_name}
+    - permissions://templates
+    - permissions://templates/{template_name}
+    - permissions://policies
+    - permissions://roles
+    - permissions://factory
+    mcp_prompts:
+    - create_policy
+    - debug_denial
+    - setup_rbac
+    - audit_review
+    mcp_tools:
+    - permissions.get_capabilities
+    - permissions.health_check
+    - permissions.describe_config_schema
+    - permissions.get_role_registry
+    - permissions.get_policy_registry
+    - permissions.evaluate
+    - permissions.batch_evaluate
+    - permissions.explain
+    - permissions.authoring.get_status
+    - permissions.authoring.validate_policies
+    - permissions.authoring.upsert_policy
+    - permissions.authoring.delete_policy
+    pip_packages:
+    - boto3>=1.35.0
+    - cedarpy>=0.4.0
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+    - typer>=0.12.0
+  - name: portability
+    type: component
+    namespace: factory.portability
+    description: Owner-scoped export of Companion-X's own memory/config into an inspectable, secret-free
+      bundle for later re-import
+    mcp_enabled: true
+    features:
+    - allowlisted_kind_export
+    - secret_free_bundle
+    - deterministic_record_identity
+    - redaction_defense_in_depth
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters: []
+    mcp_resources: []
+    mcp_prompts: []
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: sandbox
+    type: component
+    namespace: factory.sandbox
+    description: Remote execution environment provisioning with strict Pydantic v2 ToolResult MCP contracts
+    mcp_enabled: true
+    features:
+    - environment_provisioning
+    - command_execution
+    - file_transfer
+    - session_management
+    - ec2_integration
+    - ssm_integration
+    - localstack_aws_emulation
+    - cfn_deployment
+    - manifest_provisioning
+    - compose_deployment
+    - profile_provisioning
+    - native_mcp_v2_typed_pydantic_contracts
+    - authoring_gate
+    - canonical_mcp_tool_surface
+    adapters:
+    - aws_ec2
+    - aws_ssm
+    - cfn_provisioner
+    - compose_provisioner
+    - docker
+    - graph
+    - localstack
+    - mock
+    mcp_resources:
+    - sandbox://schemas/config
+    - sandbox://schemas/environment
+    - sandbox://docs
+    - sandbox://docs/{doc_name}
+    - sandbox://environments
+    - sandbox://backends
+    - sandbox://health
+    - sandbox://factory
+    mcp_prompts:
+    - provision_environment
+    - execute_command
+    - debug_environment
+    mcp_tools:
+    - sandbox.get_capabilities
+    - sandbox.health_check
+    - sandbox.describe_config_schema
+    - sandbox.list_profiles
+    - sandbox.list_environments
+    - sandbox.generate_cfn_from_recon
+    - sandbox.validate_manifest
+    - sandbox_get_dashboard_summary
+    - sandbox_get_environment_activity
+    - sandbox_get_environment_graph_context
+    - sandbox_get_views
+    - sandbox.provision
+    - sandbox.terminate
+    - sandbox.get_status
+    - sandbox.execute
+    - sandbox.upload_file
+    - sandbox.download_file
+    - sandbox.apply_service_mocks
+    - sandbox.list_stacks
+    - sandbox.workspace_dir
+    - sandbox.deploy_cfn
+    - sandbox.describe_stack
+    - sandbox.delete_stack
+    - sandbox.translate_cfn
+    - sandbox.plan_provision
+    - sandbox.apply_provision
+    - sandbox.authoring.get_status
+    - sandbox.authoring.list_templates
+    - sandbox.authoring.upsert_template
+    - sandbox.authoring.delete_template
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+  - name: scheduler
+    type: component
+    namespace: factory.scheduler
+    description: Owner-scoped durable schedules that trigger Agent-managed Workflow attempts
+    mcp_enabled: true
+    features:
+    - interval_schedules
+    - one_shot_schedules
+    - exactly_once_fire_claims
+    - pause_resume
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - sqlite
+    mcp_resources: []
+    mcp_prompts: []
+    pip_packages:
+    - croniter==6.2.4
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: security
+    type: component
+    namespace: factory.security
+    description: Polymorphic security operations with pluggable analysis adapters
+    domain: security
+    mcp_enabled: true
+    features:
+    - threat_modeling
+    - code_analysis
+    - penetration_testing
+    - reconnaissance
+    - vulnerability_scanning
+    - finding_management
+    - cwe_taxonomy
+    - ocsf_taxonomy
+    - gt_ingestion
+    - pentest_scanning
+    - pentest_port_scan
+    - pentest_vuln_scan
+    - pentest_web_fuzz
+    - pentest_sql_inject
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - threat_modeling
+    - code_analysis
+    - pen_testing
+    - recon
+    - mock
+    - graph_persistence
+    - memory_persistence
+    - pentest_sandbox
+    mcp_resources:
+    - security://schemas/config
+    - security://schemas/finding
+    - security://schemas/analysis
+    - security://schemas/gt-entry
+    - security://schemas/pentest-tools
+    - security://docs
+    - security://docs/{doc_name}
+    - security://findings
+    - security://backends
+    - security://health
+    - security://factory
+    mcp_prompts:
+    - analyze_target
+    - threat_model
+    - review_findings
+    - ingest_ground_truth
+    - run_pentest_assessment
+    - analyze_scan_results
+    mcp_tools:
+    - security.get_capabilities
+    - security.health_check
+    - security.describe_config_schema
+    - security.list_analyses
+    - security.get_analysis
+    - security.supported_types
+    - security.scan_endpoints
+    - security.classify_confidence
+    - security.trace_taint
+    - security_pentest_list_jobs
+    - security_get_views
+    - security.analyze
+    - security.threat_model
+    - security.code_review
+    - security.recon
+    - security.list_persisted_findings
+    - security.list_persisted_analyses
+    - security_classify_finding
+    - security_conform_finding
+    - security_ingest_gt_entry
+    - security_list_findings_for_run
+    - security_pentest_scan
+    - security_pentest_status
+    - security_pentest_results
+    - security_pentest_cancel
+    - security.authoring.get_status
+    - security.authoring.list_rules
+    - security.authoring.upsert_rule
+    - security.authoring.delete_rule
+    - security_seed_cwe_taxonomy
+    - security_seed_ocsf_taxonomy
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+  - name: session
+    type: component
+    namespace: factory.session
+    description: Tenant-owned persistent chat sessions and exactly-once live-steering mailbox
+    mcp_enabled: true
+    features:
+    - session_registry
+    - tenant_owned_sessions
+    - steer_delivery_state
+    - completion_delivery
+    - revision_fenced_cas
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - sqlite
+    mcp_resources:
+    - session://schemas/session
+    - session://schemas/steer
+    - session://docs/overview
+    mcp_prompts:
+    - manage_session
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+  - name: state
+    type: component
+    namespace: factory.state
+    description: "Runtime session state \u2014 what's launched, focus, last-played"
+    mcp_enabled: false
+    features:
+    - session_state
+    - state_transitions
+    pip_packages:
+    - pydantic>=2.0.0
+  - name: storage
+    type: component
+    namespace: factory.storage
+    description: Unified storage abstraction with pluggable backends (blob, document, SQL, graph)
+    mcp_enabled: true
+    features:
+    - blob_storage
+    - document_storage
+    - sql_storage
+    - graph_storage
+    - encrypted_credential_slots
+    - mcp_resources
+    - mcp_prompts
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+      blob:
+      - local_fs
+      - s3
+      document:
+      - sqlite
+      - tinydb
+      - mongodb
+      - aws_document
+      sql:
+      - sqlite
+      - postgres
+      - aws_sql
+      graph:
+      - networkx
+      - neo4j
+    adapter_infra:
+      s3:
+        services:
+        - seaweedfs
+      mongodb:
+        services:
+        - mongodb
+      postgres:
+        services:
+        - postgres
+      neo4j:
+        services:
+        - neo4j
+      aws_document:
+        services: []
+      aws_sql:
+        services: []
+    pip_packages:
+    - boto3>=1.35.0
+    - cryptography>=44.0.0
+    - mcp[cli]==2.1.1
+    - neo4j>=6.1.0
+    - networkx>=3.6.1
+    - psycopg2-binary>=2.9.9
+    - pymongo>=4.8.0
+    - tinydb>=4.8.2
+  - name: telemetry
+    type: component
+    namespace: factory.telemetry
+    description: Observability and distributed tracing via OpenTelemetry (OTLP)
+    mcp_enabled: true
+    features:
+    - observability
+    - distributed_tracing
+    - metrics
+    - otlp_export
+    - console_export
+    - storage_persistence
+    - llm_token_tracking
+    - typed_mcp_boundary
+    - provenance_ingest
+    - provenance_reference_reads
+    - provenance_materialization
+    - mcp_resources
+    - mcp_prompts
+    adapters:
+    - memory
+    - aws
+    adapter_infra:
+      aws:
+        services: []
+    mcp_resources:
+    - telemetry://schemas/settings
+    - telemetry://schemas/exporter
+    - telemetry://schemas/metric
+    - telemetry://docs
+    - telemetry://docs/overview
+    - telemetry://docs/otel
+    - telemetry://docs/metrics
+    - telemetry://docs/tracing
+    - telemetry://docs/when-to-use
+    - telemetry://metrics
+    - telemetry://exporters
+    - telemetry://summary
+    - telemetry://factory
+    mcp_prompts:
+    - configure_otel
+    - debug_telemetry
+    - create_metric
+    mcp_tools:
+    - get_capabilities
+    - health_check
+    - get_metric_registry
+    - get_exporter_registry
+    - get_metrics_summary
+    - describe_config_schema
+    - inject_context
+    - extract_context
+    - telemetry_get_views
+    - flush_telemetry
+    - record_log
+    - record_llm_interaction
+    - record_agent_execution
+    - record_tool_invocation
+    - start_span
+    - end_span
+    - telemetry_ingest_batch
+    - telemetry_read_reference
+    - telemetry_materialize
+    - authoring_status
+    - list_configs
+    - read_config
+    - write_config
+    - write_metric_file
+    - delete_config
+    pip_packages:
+    - boto3>=1.35.0
+    - click>=8.0.0
+    - mcp[cli]==2.1.1
+    - opentelemetry-api>=1.20.0
+    - opentelemetry-instrumentation==0.62b0
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+  - name: terminal
+    type: component
+    namespace: factory.terminal
+    description: Owner-operated interactive PTY sessions with typed MCP lifecycle tools and API WebSocket
+      transport.
+    mcp_enabled: true
+    dependencies:
+    - mcp_utils
+    features:
+    - native_mcp_v2_typed_pydantic_contracts
+    - interactive_pty
+    - owner_scoped_sessions
+    - shell_discovery
+    - terminal_resize
+    - orphan_reaping
+    adapters:
+    - posix_pty
+    mcp_resources: []
+    mcp_prompts: []
+    mcp_tools:
+    - terminal_list
+    - terminal_list_shells
+    - terminal_open_session
+    - terminal_write
+    - terminal_read
+    - terminal_resize
+    - terminal_close
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic==2.13.0
+  - name: test
+    type: component
+    namespace: factory.test
+    description: Trusted-local test execution with strict typed MCP contracts and path containment
+    mcp_enabled: true
+    dependencies:
+    - mcp_utils
+    features:
+    - testing
+    - regression_testing
+    - test_orchestration
+    - junit_debt_comparison
+    - trusted_local_execution
+    - mcp_path_containment
+    - native_mcp_v2_typed_pydantic_contracts
+    adapters:
+    - pytest
+    - memory
+    mcp_tools:
+    - test_get_capabilities
+    - test_health_check
+    - test_describe_config_schema
+    - test_discover
+    - test_compare_junit
+    - test_run_all
+    - test_run_component
+    - test_run_path
+    - test_list_files
+    - test_authoring_get_status
+    - test_authoring_set_adapter
+    - test_authoring_set_timeout
+    - test_authoring_set_pattern
+    - test_authoring_set_verbose
+    mcp_resources:
+    - test://schemas/config
+    - test://schemas/result
+    - test://docs
+    - test://docs/{doc_name}
+    - test://info
+    - test://adapters
+    - test://factory
+    mcp_prompts:
+    - run_tests
+    - debug_failure
+    - add_tests
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pydantic==2.13.0
+  - name: ui
+    type: component
+    namespace: factory.ui
+    description: Polymorphic UI rendering with pluggable adapters for HTMX, React/shadcn, A2UI protocol,
+      Flet/Flutter, and hybrid strategies
+    mcp_enabled: true
+    features:
+    - ui_components
+    - polymorphic_adapters
+    - a2ui_default_protocol
+    - htmx_daisyui
+    - react_shadcn
+    - a2ui_protocol
+    - flet_flutter
+    - hybrid_routing
+    - theme_system
+    - push_channels
+    - view_management
+    - reasoning_message_events
+    - canvas_authorization
+    adapters:
+    - htmx
+    - react
+    - json
+    - inline-html
+    - a2ui
+    - flet
+    - ag-ui
+    - hybrid
+    mcp_tools:
+    - ui_render_a2ui
+    - ui_render_brick_view
+    - ui_paint_canvas
+    - ui_paint_uiresource
+    - ui_get_a2ui_component_catalog
+    - ui_validate_a2ui
+    - ui_a2ui_to_view
+    - ui_view_to_a2ui
+    - ui_resolve_canvas
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - flet-charts>=0.1.0
+    - flet>=0.85.3
+    - jinja2>=3.1.0
+    - networkx>=3.6.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+  - name: workflow
+    type: component
+    namespace: factory.workflow
+    description: Durable workflow lifecycles with native MCP v2 typed Pydantic contracts
+    mcp_enabled: true
+    features:
+    - workflow_orchestration
+    - native_mcp_v2_typed_pydantic_contracts
+    - process_management
+    - lifecycle_control
+    - task_execution
+    - durable_named_mcp_execution_sqlite
+    - celery_integration
+    - dagster_integration
+    adapters:
+    - sqlite
+    - aws
+    adapter_infra:
+      aws:
+        services: []
+    pip_packages:
+    - boto3>=1.35.0
+    - celery>=5.6.2
+    - dagster>=1.7.0
+    - httpx==0.28.1
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0
+    - pyyaml>=6.0.0
+    - typer>=0.12.0
+    - uvicorn==0.44.0
+  bases:
+  - name: api
+    type: base
+    namespace: factory.api
+    description: HTTP API entry point with REST and GraphQL adapters
+    mcp_enabled: true
+    features:
+    - rest_api
+    - graphql_api
+    - openapi_schema
+    - route_introspection
+    adapters:
+    - rest
+    - graphql
+    pip_packages:
+    - fastapi>=0.128.0
+    - mcp[cli]==2.1.1
+    - opentelemetry-api>=1.20.0
+    - pydantic>=2.0.0
+    - starlette>=0.40.0
+    - uvicorn>=0.40.0
+  - name: blueprint
+    type: base
+    namespace: factory.blueprint
+    description: System configuration, service discovery, CDK generation & CI/CD pipelines
+    mcp_enabled: true
+    features:
+    - service_discovery
+    - system_configuration
+    - orchestration
+    - deployment_generation
+    - project_introspection
+    - cdk_generation
+    - pipeline_generation
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - pyyaml>=6.0.0
+    - tomli>=2.0.0; python_version<'3.11'
+  - name: mcp_server
+    type: base
+    namespace: factory.mcp_server
+    description: Unified native MCP v2 aggregator with one scoped server surface
+    mcp_enabled: true
+    mcp_gateway_host: true
+    features:
+    - brick_aggregation
+    - dynamic_discovery
+    - progressive_discovery
+    - lazy_loading
+    - unified_health_check
+    - unified_capabilities
+    - hot_reload
+    - mcp_resources
+    - mcp_prompts
+    - brick_resource_aggregation
+    - brick_prompt_aggregation
+    - native_mcp_v2_typed_pydantic_contracts
+    - native_mcp_v2_transport_egress
+    contract_tools:
+    - get_capabilities
+    - health_check
+    meta_tools:
+    - get_capabilities
+    - health_check
+    - list_bricks
+    - get_brick_tools
+    - get_brick_resources
+    - get_brick_prompts
+    - get_tool_catalog
+    - call_brick_tool
+    - read_brick_resource
+    - render_brick_prompt
+    resources:
+    - mcp://docs
+    - mcp://docs/{name}
+    - mcp://bricks
+    - mcp://bricks/{brick_name}
+    - mcp://health
+    - mcp://capabilities
+    prompts:
+    - discover_capabilities
+    - find_tool
+    - brick_health_check
+    - troubleshoot_brick
+    configuration:
+      env_vars:
+        MCP_SERVER_NAME: 'Server name (default: factory-app)'
+        MCP_INCLUDE_BRICKS: Comma-separated bricks to include
+        MCP_EXCLUDE_BRICKS: Comma-separated bricks to exclude
+        MCP_DISCOVERY_MODE: 'Discovery mode: progressive (default) or flat'
+    pip_packages:
+    - mcp[cli]==2.1.1
+    - opentelemetry-api>=1.20.0
+    - pyyaml>=6.0.0
+    - starlette>=0.40.0
+    - tomli>=2.0.0; python_version<'3.11'
+  - name: openarcade
+    type: base
+    namespace: factory.openarcade
+    description: "Agent-native retro arcade game wall \u2014 Flet frontend over control-plane bricks (launch,\
+      \ library, arcade_config, state, curator, ui)"
+    mcp_enabled: false
+    declared-bricks:
+    - launch
+    - library
+    - arcade_config
+    - state
+    - curator
+    - ui
+    features:
+    - game_wall_ui
+    - nci_launch_orchestration
+    - rom_library_scanning
+    - compatibility_probing
+    - flet_desktop_window
+    - typer_cli
+    pip_packages:
+    - flet>=0.85.3
+    - pydantic>=2.0.0
+    - structlog>=25.1.0
+    - typer>=0.12.0
+    - pyyaml>=6.0
+  - name: worker
+    type: base
+    namespace: factory.worker
+    description: Background task execution with pluggable backends (Celery, Dagster, Fargate SQS)
+    mcp_enabled: true
+    dependencies:
+    - mcp_utils
+    features:
+    - background_tasks
+    - task_execution
+    - worker_management
+    - health_monitoring
+    - mcp_resources
+    - mcp_prompts
+    - native_mcp_v2_typed_pydantic_contracts
+    - authoring_gate
+    - canonical_mcp_tool_surface
+    - principal_aware_bridge
+    adapters:
+    - celery
+    - dagster
+    - fargate_sqs
+    mcp_resources:
+    - worker://health
+    - worker://backends
+    - worker://docs
+    mcp_prompts:
+    - configure_worker
+    - debug_worker
+    mcp_tools:
+    - worker_get_capabilities
+    - worker_health_check
+    - worker_describe_config_schema
+    - worker_list_tasks
+    - worker.send_task
+    - worker.execute_tool
+    - worker.list_mcp_tools
+    - worker.authoring.get_status
+    - worker.authoring.switch_backend
+    - worker.authoring.set_config
+    pip_packages:
+    - boto3>=1.35.0
+    - mcp[cli]==2.1.1
+    - pydantic>=2.0.0

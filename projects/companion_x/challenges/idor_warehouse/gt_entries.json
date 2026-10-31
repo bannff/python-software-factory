@@ -1,0 +1,156 @@
+[
+  {
+    "gt_id": "idor-warehouse-get-001",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "idor_warehouse",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "GET",
+      "path": "/warehouses/{code}",
+      "app": "idor_warehouse"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "GET /warehouses/<code> returns warehouse data without ownership check.",
+      "description": "GET /warehouses/<code> returns warehouse data to any caller regardless of whether the requesting vendor owns the resource.",
+      "severity": "high",
+      "confidence": "confirmed"
+    },
+    "code_evidence": {
+      "locations": [
+        {
+          "file": "app.py",
+          "function": "get_warehouse",
+          "line_start": 25,
+          "line_end": 35,
+          "cwe": "CWE-639",
+          "description": "Returns warehouse data without checking if vendor_id == wh['owner']"
+        }
+      ]
+    },
+    "runtime_evidence": {
+      "surface": {"endpoint": "/warehouses/{code}", "method": "GET"},
+      "probe": {
+        "method": "GET",
+        "url": "http://localhost:5050/warehouses/ABCDE",
+        "headers": {"X-Vendor-ID": "vendor-a"}
+      },
+      "expected_vulnerable_response": {"status": 200, "body_contains": {"owner": "vendor-b"}},
+      "expected_secure_response": {"status": 403}
+    },
+    "exploit_evidence": {
+      "description": "vendor-a reads vendor-b's warehouse data.",
+      "reproduction_steps": [
+        "curl -H 'X-Vendor-ID: vendor-a' http://localhost:5050/warehouses/ABCDE"
+      ],
+      "cross_tenant_access": true
+    },
+    "fix_evidence": {
+      "description": "Add ownership check: if wh['owner'] != vendor_id: return 403"
+    }
+  },
+  {
+    "gt_id": "idor-warehouse-delete-002",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "idor_warehouse",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "DELETE",
+      "path": "/warehouses/{code}",
+      "app": "idor_warehouse"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "DELETE /warehouses/<code> deletes any warehouse without ownership check.",
+      "description": "Any vendor can delete any other vendor's warehouse. No ownership verification.",
+      "severity": "critical",
+      "confidence": "confirmed"
+    },
+    "code_evidence": {
+      "locations": [
+        {
+          "file": "app.py",
+          "function": "delete_warehouse",
+          "line_start": 35,
+          "line_end": 46,
+          "cwe": "CWE-639",
+          "description": "Deletes warehouse without checking if vendor_id == wh['owner']"
+        }
+      ]
+    },
+    "runtime_evidence": {
+      "surface": {"endpoint": "/warehouses/{code}", "method": "DELETE"},
+      "probe": {
+        "method": "DELETE",
+        "url": "http://localhost:5050/warehouses/ABCDE",
+        "headers": {"X-Vendor-ID": "vendor-a"}
+      },
+      "expected_vulnerable_response": {"status": 200},
+      "expected_secure_response": {"status": 403}
+    },
+    "exploit_evidence": {
+      "description": "vendor-a deletes vendor-b's warehouse.",
+      "reproduction_steps": [
+        "curl -X DELETE -H 'X-Vendor-ID: vendor-a' http://localhost:5050/warehouses/ABCDE"
+      ],
+      "cross_tenant_access": true
+    },
+    "fix_evidence": {
+      "description": "Add ownership check before delete."
+    }
+  },
+  {
+    "gt_id": "idor-warehouse-put-003",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "idor_warehouse",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "PUT",
+      "path": "/warehouses/{code}",
+      "app": "idor_warehouse"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "PUT /warehouses/<code> updates any warehouse without ownership check, including owner field hijacking.",
+      "description": "Any vendor can overwrite any field on any warehouse, including taking ownership.",
+      "severity": "critical",
+      "confidence": "confirmed"
+    },
+    "code_evidence": {
+      "locations": [
+        {
+          "file": "app.py",
+          "function": "update_warehouse",
+          "line_start": 46,
+          "line_end": 56,
+          "cwe": "CWE-639",
+          "description": "Updates warehouse dict without checking ownership, allows owner field hijacking"
+        }
+      ]
+    },
+    "runtime_evidence": {
+      "surface": {"endpoint": "/warehouses/{code}", "method": "PUT"},
+      "probe": {
+        "method": "PUT",
+        "url": "http://localhost:5050/warehouses/ABCDE",
+        "headers": {"X-Vendor-ID": "vendor-a", "Content-Type": "application/json"},
+        "body": {"name": "Hijacked", "owner": "vendor-a"}
+      },
+      "expected_vulnerable_response": {"status": 200},
+      "expected_secure_response": {"status": 403}
+    },
+    "exploit_evidence": {
+      "description": "vendor-a hijacks vendor-b's warehouse ownership.",
+      "reproduction_steps": [
+        "curl -X PUT -H 'X-Vendor-ID: vendor-a' -H 'Content-Type: application/json' -d '{\"owner\":\"vendor-a\"}' http://localhost:5050/warehouses/ABCDE"
+      ],
+      "cross_tenant_access": true
+    },
+    "fix_evidence": {
+      "description": "Add ownership check, strip owner field from update payload."
+    }
+  }
+]

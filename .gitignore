@@ -1,0 +1,345 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.hypothesis/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+# `lib/` matches a directory named `lib` at any depth, so frontend source trees
+# that legitimately live under `lib/` (or `src/lib/`) are re-included by name.
+# `frontends/shared-renderer/lib/` is deliberately absent: it is `tsc -b` output
+# (`npm run build`), rebuilt by `npm ci`'s prepare hook and by the Docker build,
+# never committed.
+lib/
+!frontends/next-dashboard/lib/
+!frontends/*/src/lib/
+!projects/*/webapp/lib/
+!projects/*/lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# uv
+.uv/
+
+# Polylith
+bricks/
+.poly/
+
+# Local scratch
+repl_state/
+.object_store/
+.storage/
+
+# Tool caches
+.pytest_cache/
+.ruff_cache/
+.agents/.repo-graph/
+*.tsbuildinfo
+
+# Legacy reference copies (for project recreation)
+legacy/
+
+# Infrastructure / Secrets
+.env
+.env.*
+!.env.example
+!.env.local.example
+logs/
+*.log
+postgres_data/
+neo4j_data/
+chroma_data/
+chroma_memory/
+seaweed_data/
+
+# IDEs
+.kiro/settings/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Editor tooling caches
+.clj-kondo/
+.lsp/
+
+# VS Code extensions
+*.vsix
+
+# OS
+.DS_Store
+.sesskey
+Thumbs.db
+
+# Runtime data
+config/data/
+# Every project's config dir is local deployment state — except the tracked
+# template that makes a fresh clone buildable (issue #34). The parent dir is
+# matched by `/*` rather than ignored whole, because an ignored directory can
+# never re-include a child file.
+projects/*/config/*
+!projects/*/config/settings.yaml.example
+**/runs/
+**/kb_store.json
+*.sqlite
+*.db
+.dataset_store/
+.dataset_jobs/
+!Thumbs.db
+
+# CDK output
+cdk.out/
+
+# Bedrock AgentCore CLI artifacts (local paths, account-specific)
+.bedrock_agentcore.yaml
+.bedrock_agentcore/
+
+# Personal projects (not shared with team)
+projects/circuitron/
+
+# Security issues (Shepherd findings — tracked externally)
+.agents/.issues/
+
+# .beads/ Rules (consolidated)
+.beads/dolt/
+.beads/dolt-access.lock
+.beads/bd.sock
+.beads/bd.sock.startlock
+.beads/sync-state.json
+.beads/last-touched
+.beads/.exclusive-lock
+.beads/daemon.*
+.beads/interactions.jsonl
+.beads/push-state.json
+.beads/*.lock
+.beads.gate.lock
+.beads/dolt-server-config.yaml
+.beads/.beads-credential-key
+.beads/.local_version
+.beads/redirect
+.beads/.sync.lock
+.beads/export-state/
+.beads/ephemeral.sqlite3*
+.beads/dolt-server.*
+.beads/*.corrupt.backup/
+.beads/backup/
+
+# Next Dashboard Rules (consolidated)
+frontends/next-dashboard/node_modules/
+frontends/next-dashboard/.pnp
+frontends/next-dashboard/.pnp.*
+frontends/next-dashboard/.yarn/*
+!frontends/next-dashboard/.yarn/patches
+!frontends/next-dashboard/.yarn/plugins
+!frontends/next-dashboard/.yarn/releases
+!frontends/next-dashboard/.yarn/versions
+frontends/next-dashboard/.next/
+frontends/next-dashboard/out/
+frontends/next-dashboard/build
+frontends/next-dashboard/*.pem
+frontends/next-dashboard/*.log*
+frontends/next-dashboard/.vercel
+frontends/next-dashboard/*.tsbuildinfo
+frontends/next-dashboard/next-env.d.ts
+
+# Companion-X runtime data
+projects/companion_x/data/
+projects/companion_x/.code-cache/
+
+node_modules/
+
+# Dolt database files (added by bd init)
+.dolt/
+
+# Migration docs
+migration-docs/
+
+# ML model weights — never commit large binaries to git
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+*.ggml
+adapters/*.safetensors
+
+# Experiment data (raw results, journals, caches)
+**/experiments/
+
+# Curated, versioned Companion-X edge-model research and reproducibility code.
+# Generated data and model artifacts remain ignored; admit explicit source files.
+!projects/companion_x/experiments/
+projects/companion_x/experiments/*
+!projects/companion_x/experiments/edge_models/
+projects/companion_x/experiments/edge_models/*
+!projects/companion_x/experiments/edge_models/README.md
+!projects/companion_x/experiments/edge_models/HANDOFF.md
+!projects/companion_x/experiments/edge_models/*/
+projects/companion_x/experiments/edge_models/*/*
+!projects/companion_x/experiments/edge_models/*/protocol.md
+!projects/companion_x/experiments/edge_models/*/results.md
+!projects/companion_x/experiments/edge_models/*/run-index.json
+!projects/companion_x/experiments/edge_models/*/run.py
+!projects/companion_x/experiments/edge_models/edge-routing-sdk-001/pydantic-wheelhouse.lock
+!projects/companion_x/experiments/edge_models/edge-routing-sdk-001/pydantic-wheelhouse/
+!projects/companion_x/experiments/edge_models/edge-routing-sdk-001/pydantic-wheelhouse/*.whl
+!projects/companion_x/experiments/edge_models/edge-visual-quality-mesh-001/model.py
+!projects/companion_x/experiments/edge_models/edge-visual-quality-mesh-001/train.py
+!projects/companion_x/experiments/edge_models/edge-visual-quality-mesh-001/model-fold0.json
+!projects/companion_x/experiments/edge_models/edge-visual-quality-mesh-001/manifest.py
+!projects/companion_x/experiments/edge_models/edge-visual-quality-mesh-001/prepare.py
+!projects/companion_x/experiments/edge_models/edge-visual-quality-mesh-001/peer.py
+!projects/companion_x/experiments/edge_models/edge-visual-quality-mesh-001/records.py
+!projects/companion_x/experiments/edge_models/edge-visual-quality-mesh-001/review.py
+!projects/companion_x/experiments/edge_models/edge-audio-device-demo-001/prepare.py
+!projects/companion_x/experiments/edge_models/edge-audio-device-demo-001/payload_layout.py
+!projects/companion_x/experiments/edge_models/edge-audio-device-demo-001/runtime.py
+!projects/companion_x/experiments/edge_models/edge-audio-device-demo-001/render.py
+!projects/companion_x/experiments/edge_models/edge-audio-device-demo-001/run_edge_lab.sh
+!projects/companion_x/experiments/edge_models/native_runner/*.py
+!projects/companion_x/experiments/edge_models/native_runner/fd001_bundle.md
+!projects/companion_x/experiments/edge_models/edge-routing-sdk-001/attestation.py
+!projects/companion_x/experiments/edge_models/edge-routing-sdk-001/attestation_schema.py
+!projects/companion_x/experiments/edge_models/edge-routing-sdk-001/collection_schema.py
+!projects/companion_x/experiments/edge_models/edge-routing-sdk-001/collect_sealed.py
+!projects/companion_x/experiments/edge_models/edge-ditto-device-flow-001/contracts.py
+!projects/companion_x/experiments/edge_models/edge-ditto-device-flow-001/peer.py
+!projects/companion_x/experiments/edge_models/edge-ditto-device-flow-001/scenario-n2.json
+!projects/companion_x/experiments/edge_models/edge-ditto-device-flow-001/sealed_image.py
+!projects/companion_x/experiments/edge_models/edge-ditto-device-flow-001/sealed_entrypoint.py
+!projects/companion_x/experiments/edge_models/edge-ditto-device-flow-001/sealed_pins.json
+!projects/companion_x/experiments/edge_models/edge-ditto-device-flow-001/sealed_image.md
+!projects/companion_x/experiments/edge_models/edge-ditto-device-flow-001/collect_sealed.py
+!projects/companion_x/experiments/edge_models/edge-mesh-scenario-v2/README.md
+!projects/companion_x/experiments/edge_models/edge-mesh-scenario-v2/scenario-edge-mesh-v2.json
+!projects/companion_x/experiments/edge_models/edge-mesh-scenario-v2/sealed_pins-v2.json
+!projects/companion_x/experiments/edge_models/edge-mesh-scenario-v2/rebuild_sealed_image.sh
+!projects/companion_x/experiments/edge_models/edge-mesh-scenario-v2/test_scenario_v2.py
+!projects/companion_x/experiments/edge_models/model-catalog.yaml
+!projects/companion_x/experiments/edge_models/experiment-registry.yaml
+!projects/companion_x/experiments/edge_models/README-catalog.md
+!projects/companion_x/experiments/edge_models/test_model_catalog.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/orchestration-options.md
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/TAXONOMY.md
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/design.md
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/edge-cases.md
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/validation.md
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/orchestration-options.md
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/mesh_sim.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/mesh_state.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/heterogeneous.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/conftest.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/test_taxonomy_sync.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/test_v1_v2_determinism_claims.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/test_v5_v10_partition_outbox.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/test_v6_v7_v9_commands_schema_creation.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/test_verify_slm_triggers.py
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/test_wired_gates.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/
+projects/companion_x/experiments/edge_models/edge-mesh-demo/*
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/workflow_state_runtime.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/peer_workflow_ext.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/audio_runtime.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/audio_peer.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/audio_model.json
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/audio_cohort.json
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/vision_peer.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/vision-model.json
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/vision-images/
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/vision-images/*.jpg
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/audio_driver.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/run_takeover_demo.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/conftest.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/test_workflow_state_runtime.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/test_vision_peer.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/test_vision_ext_integration.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/test_observe_loop_takeover.py
+!projects/companion_x/experiments/edge_models/edge-mesh-demo/test_audio_peer.py
+!projects/companion_x/experiments/edge_models/edge-audio-device-001/model.json
+!projects/companion_x/experiments/edge_models/edge-vision-device-001/model.json
+!projects/companion_x/experiments/edge_models/edge-mesh-scenario-v2/build-evidence/build-evidence.json
+!projects/companion_x/sandbox-profiles/edge-n2-sdk.yaml
+!projects/companion_x/experiments/edge_models/edge-fault-matrix-001/run_fault_matrix.py
+!projects/companion_x/experiments/edge_models/edge-fault-matrix-001/driver_ops.py
+!projects/companion_x/experiments/edge_models/edge-mesh-slm-hook-001/slm_hook.py
+!projects/companion_x/experiments/edge_models/edge-mesh-slm-hook-001/blueprint-slm-router-v1.json
+!projects/companion_x/experiments/edge_models/edge-mesh-slm-hook-001/pins.json
+!projects/companion_x/experiments/edge_models/edge-mesh-slm-hook-001/slm_intent_model.json
+!projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/test_taxonomy_sync.py
+
+# ChromaDB local persistence (container-free memory adapter)
+chroma_memory/
+
+# External test target apps cloned for dynamic analysis
+WebGoat/
+mcp-servers/context7/
+
+# Local QA / debug scratchpad — screenshots, scripts, bd description drafts
+.qa-tmp/
+.bd-bug-desc.txt
+
+# Playwright install side-effect (node_modules-style) and run artifacts
+.agents/.pw-install/
+frontends/*/test-results/
+playwright-report/
+
+# Local probes / scratch (any session)
+.tmp_*.py
+**/.scratch/
+**/.tmp/
+frontends/next-dashboard/test_agent_delta.mjs
+
+# Personal team-onboarding notes (not for this repo / not shared with team)
+.kiro/loaf/
+.kiro/steering/personal/
+
+# Generated report artifacts
+/projects/report_pattern_intel/reports/
+
+# Generated agent review output and accidental mock-path artifacts
+/semantic-review/
+/MagicMock/
+
+# Generated profile pins a host-local sealed Docker image ID.
+/projects/companion_x/sandbox-profiles/edge-n2-sdk.yaml
+/projects/companion_x/sandbox-profiles/edge-mesh-v2.yaml
+
+# Opencode plugin runtime — regeneratable vector index + ambient receipts
+.opencode/index/
+.opencode/codebase-index.json
+.ocx/
+
+# Companion-X local telemetry runtime (never version runtime evidence)
+projects/companion_x/telemetry/provenance.sqlite3
+projects/companion_x/.telemetry-live-verify/
+
+# Companion-X KiroCrew port: agent worktrees, vite cache, stray root screenshots from loop evidence
+.worktrees/
+.vite/
+.playwright-mcp/
+/*.png
+# OMP session/loop state (local-only)
+.omp/
+
+# Checked-in vector DB artifact removed 2026-10-24 (issue #156)
+chroma_db/

@@ -1,0 +1,27 @@
+name: openarcade
+type: base
+namespace: factory.openarcade
+description: Agent-native retro arcade game wall — Flet frontend over control-plane bricks (launch, library, arcade_config, state, curator, ui)
+mcp_enabled: false
+# Project-local convention: the bricks the base composes. Enforced by
+# bases/openarcade/test/test_undeclared_imports.py. Not a Polylith-standard field.
+declared-bricks:
+- launch
+- library
+- arcade_config
+- state
+- curator
+- ui
+features:
+- game_wall_ui
+- nci_launch_orchestration
+- rom_library_scanning
+- compatibility_probing
+- flet_desktop_window
+- typer_cli
+pip_packages:
+- flet>=0.85.3
+- pydantic>=2.0.0
+- structlog>=25.1.0
+- typer>=0.12.0
+- pyyaml>=6.0

@@ -1,0 +1,9 @@
+id: auto-freshness-on-swarm-complete
+event_type: "swarm.completed"
+handler: "mcp:freshness_dispatch"
+description: >
+  bd:python-factory-v7imt.4 — Eval-freshness trigger on swarm completion.
+  Same handler as graph.completed; routes to shared staleness check.
+filters: {}
+enabled: true
+priority: 20

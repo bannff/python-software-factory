@@ -1,0 +1,37 @@
+name: integrations
+type: component
+namespace: factory.integrations
+description: External service connectors with pluggable backends (REST, GraphQL, Webhook,
+  AWS)
+mcp_enabled: true
+features:
+- rest_connector
+- graphql_connector
+- webhook_receiver
+- aws_connector
+- connection_pooling
+- retry_logic
+- rate_limiting
+- boto3_integration
+- tokenless_provider_email_egress
+adapters:
+- rest
+- graphql
+- webhook
+- aws
+mcp_resources:
+- integrations://schemas/config
+- integrations://schemas/connector
+- integrations://docs
+- integrations://docs/{doc_name}
+- integrations://health
+- integrations://connectors
+mcp_prompts:
+- configure_connector
+- debug_connection
+- create_integration
+pip_packages:
+- boto3>=1.35.0
+- mcp[cli]==2.1.1
+- gql[httpx]>=3.5.0
+- pydantic>=2.0.0

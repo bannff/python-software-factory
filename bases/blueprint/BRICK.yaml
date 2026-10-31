@@ -1,0 +1,17 @@
+name: blueprint
+type: base
+namespace: factory.blueprint
+description: System configuration, service discovery, CDK generation & CI/CD pipelines
+mcp_enabled: true
+features:
+- service_discovery
+- system_configuration
+- orchestration
+- deployment_generation
+- project_introspection
+- cdk_generation
+- pipeline_generation
+pip_packages:
+- mcp[cli]==2.1.1
+- pyyaml>=6.0.0
+- tomli>=2.0.0; python_version<'3.11'

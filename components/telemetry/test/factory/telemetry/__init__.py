@@ -1,0 +1,1 @@
+"""Telemetry brick tests."""

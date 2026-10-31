@@ -1,0 +1,37 @@
+name: cache
+type: component
+namespace: factory.cache
+description: Ephemeral caching with pluggable backends (memory, Redis)
+mcp_enabled: true
+features:
+- key_value_cache
+- ttl_support
+- pattern_matching
+- statistics
+adapters:
+- memory
+- redis
+- aws
+adapter_infra:
+  redis:
+    services: [redis]
+  aws:
+    services: []
+mcp_resources:
+- cache://schemas/config
+- cache://schemas/entry
+- cache://schemas/stats
+- cache://docs
+- cache://docs/{doc_name}
+- cache://stats
+- cache://backends
+- cache://health
+- cache://factory
+mcp_prompts:
+- configure_cache
+- debug_cache
+- optimize_cache
+pip_packages:
+- boto3>=1.35.0
+- mcp[cli]==2.1.1
+- redis>=7.1.0

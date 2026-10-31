@@ -1,0 +1,24 @@
+name: artifacts
+type: component
+namespace: factory.artifacts
+description: Tenant-owned versioned artifact library with stable slugs and immutable history
+mcp_enabled: true
+features:
+- stable_owner_scoped_slugs
+- idempotent_save
+- immutable_version_snapshots
+- revision_fenced_lifecycle
+- additive_version_revert
+- opaque_tombstones
+- content_free_lifecycle_events
+- bounded_owner_scoped_folders
+- one_level_comment_threads
+- human_gated_authoring
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- sqlite
+mcp_resources: []
+mcp_prompts: []
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

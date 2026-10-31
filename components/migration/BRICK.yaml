@@ -1,0 +1,23 @@
+name: migration
+type: component
+namespace: factory.migration
+description: Bounded owner-scoped migration of allowlisted external data through typed target MCP
+mcp_enabled: true
+features:
+- kirocrew_v1_source_preview
+- allowlisted_nofollow_snapshot
+- wal_inclusive_sqlite_backup
+- immutable_import_plans
+- durable_owner_scoped_receipts
+- workflow_owned_apply_execution
+- workflow_enrollment_and_progress
+- protected_target_import_calls
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- kirocrew_v1
+- sqlite
+mcp_resources: []
+mcp_prompts: []
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

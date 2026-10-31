@@ -1,0 +1,19 @@
+name: scheduler
+type: component
+namespace: factory.scheduler
+description: Owner-scoped durable schedules that trigger Agent-managed Workflow attempts
+mcp_enabled: true
+features:
+- interval_schedules
+- one_shot_schedules
+- exactly_once_fire_claims
+- pause_resume
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- sqlite
+mcp_resources: []
+mcp_prompts: []
+pip_packages:
+- croniter==6.2.4
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

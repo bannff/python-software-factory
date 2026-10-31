@@ -1,0 +1,58 @@
+name: payments
+type: component
+namespace: factory.payments
+description: Payment processing with pluggable providers and a strict Pydantic v2 ToolResult MCP boundary
+mcp_enabled: true
+features:
+- payment_processing
+- billing
+- stripe_integration
+- provider_registry
+- payment_history
+- refunds
+- webhooks
+- native_mcp_v2_typed_pydantic_contracts
+- secret_safe_mcp_boundary
+adapters:
+- mock
+- stripe
+- aws
+mcp_resources:
+- payments://schemas/provider-config
+- payments://schemas/payment-request
+- payments://schemas/payment-result
+- payments://schemas/enums
+- payments://docs
+- payments://docs/overview
+- payments://docs/providers
+- payments://docs/webhooks
+- payments://docs/currencies
+- payments://providers
+- payments://payments
+- payments://stats
+- payments://factory
+mcp_prompts:
+- register_provider
+- debug_payment
+- configure_stripe
+mcp_tools:
+- payments_get_capabilities
+- payments_health_check
+- payments_describe_config_schema
+- payments_get_provider_registry
+- payments_get_provider_stats
+- payments_list_payments
+- payments_get_payment
+- payments_create_payment
+- payments_refund_payment
+- payments_process_webhook
+- payments_authoring_get_status
+- payments_authoring_register_provider
+- payments_authoring_unregister_provider
+- payments_authoring_update_provider
+pip_packages:
+- boto3>=1.35.0
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0
+- pyyaml>=6.0.0
+- stripe>=14.3.0a1

@@ -1,0 +1,39 @@
+# Scoring Policy — declarative opt-in scoring for genuinely uncovered event types.
+# bd:python-factory-v7imt.2
+#
+# RULE: Only add entries for event types that have NO dedicated handler.
+# Dedicated handlers own their types and must not be duplicated here:
+#   - graph.completed  -> rewards_dispatch (auto-rewards-workflow.yaml)
+#   - swarm.completed  -> rewards_dispatch (auto-rewards-swarm.yaml)
+#   - chat.turn.completed -> chat_reward_dispatch (auto-reward-chat-turn.yaml)
+#   - chat.feedback    -> chat_feedback_dispatch
+#
+# Adding a type here that already has a dedicated handler causes DOUBLE-REWARD
+# (this handler's _emit_reward_event uses key_suffix="policy:{pattern}", a
+# different idempotency_key than the dedicated handler's, so dedupe won't fire).
+#
+# Each entry routes a matching event_type (fnmatch pattern) through
+# learning_compute_reward → reward.computed → memory/blockchain/improvement
+# fan-out. Unmatched events are SKIPPED (no noise auto-scoring).
+#
+# Fields:
+#   pattern     - fnmatch-style event_type pattern (e.g. "code_review.completed")
+#   source_tag  - domain_class for the stored learning; determines the
+#                 recall tag (f"{source_tag}-learnings") so the originating
+#                 agent's LearningRecallPlugin picks it up next run.
+#   enabled     - opt-out individual entries without removing them.
+
+policies:
+  # Opt-in a custom domain activity type — this is the pattern for new types:
+  - pattern: "code_review.completed"
+    source_tag: "code-review"
+    enabled: true
+
+  # Example: another uncovered type (disabled until an agent emits it)
+  # - pattern: "deploy.completed"
+  #   source_tag: "deploy"
+  #   enabled: true
+
+  - pattern: "dev_loop.cycle.completed"
+    source_tag: "dev-loop"
+    enabled: true

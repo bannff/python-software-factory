@@ -1,0 +1,48 @@
+name: test
+type: component
+namespace: factory.test
+description: Trusted-local test execution with strict typed MCP contracts and path containment
+mcp_enabled: true
+dependencies:
+- mcp_utils
+features:
+- testing
+- regression_testing
+- test_orchestration
+- junit_debt_comparison
+- trusted_local_execution
+- mcp_path_containment
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- pytest
+- memory
+mcp_tools:
+- test_get_capabilities
+- test_health_check
+- test_describe_config_schema
+- test_discover
+- test_compare_junit
+- test_run_all
+- test_run_component
+- test_run_path
+- test_list_files
+- test_authoring_get_status
+- test_authoring_set_adapter
+- test_authoring_set_timeout
+- test_authoring_set_pattern
+- test_authoring_set_verbose
+mcp_resources:
+- test://schemas/config
+- test://schemas/result
+- test://docs
+- test://docs/{doc_name}
+- test://info
+- test://adapters
+- test://factory
+mcp_prompts:
+- run_tests
+- debug_failure
+- add_tests
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic==2.13.0

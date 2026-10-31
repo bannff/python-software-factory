@@ -1,0 +1,97 @@
+# Standard labels for GitHub control plane
+# These labels follow the repo's two-plane model:
+# - Control plane (GitHub): issues/PRs/labels
+# - Execution plane (MCP): Foreman + Process Guardian
+
+# Status labels (lifecycle)
+- name: "status/triage"
+  color: "ededed"
+  description: "Needs initial review and categorization"
+
+- name: "status/ready"
+  color: "0e8a16"
+  description: "Ready to be worked on"
+
+- name: "status/in-progress"
+  color: "fbca04"
+  description: "Currently being worked on"
+
+- name: "status/blocked"
+  color: "d93f0b"
+  description: "Blocked by external dependency or decision"
+
+- name: "status/review"
+  color: "5319e7"
+  description: "In code review"
+
+- name: "status/done"
+  color: "0e8a16"
+  description: "Completed and merged"
+
+# Agent labels (who/what is working on it)
+- name: "agent/human"
+  color: "c5def5"
+  description: "Human-driven work"
+
+- name: "agent/copilot"
+  color: "0366d6"
+  description: "GitHub Copilot agent work"
+
+- name: "agent/autonomous"
+  color: "1d76db"
+  description: "Autonomous agent work"
+
+# Type labels (what kind of work)
+- name: "type/feature"
+  color: "a2eeef"
+  description: "New feature or enhancement"
+
+- name: "type/bug"
+  color: "d73a4a"
+  description: "Bug fix"
+
+- name: "type/chore"
+  color: "fef2c0"
+  description: "Maintenance, refactoring, or tooling"
+
+- name: "type/docs"
+  color: "0075ca"
+  description: "Documentation changes"
+
+- name: "type/security"
+  color: "ee0701"
+  description: "Security vulnerability or fix"
+
+# Brick labels (which part of the Polylith architecture)
+- name: "brick/component"
+  color: "bfdadc"
+  description: "Related to a Polylith component"
+
+- name: "brick/base"
+  color: "c2e0c6"
+  description: "Related to a Polylith base"
+
+- name: "brick/project"
+  color: "f9d0c4"
+  description: "Related to a Polylith project"
+
+- name: "brick/workspace"
+  color: "d4c5f9"
+  description: "Workspace-level changes (structure, tooling, CI)"
+
+# Priority labels
+- name: "priority/critical"
+  color: "b60205"
+  description: "Critical priority"
+
+- name: "priority/high"
+  color: "d93f0b"
+  description: "High priority"
+
+- name: "priority/medium"
+  color: "fbca04"
+  description: "Medium priority"
+
+- name: "priority/low"
+  color: "0e8a16"
+  description: "Low priority"

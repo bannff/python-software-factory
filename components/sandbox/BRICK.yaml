@@ -1,0 +1,83 @@
+name: sandbox
+type: component
+namespace: factory.sandbox
+description: Remote execution environment provisioning with strict Pydantic v2 ToolResult MCP contracts
+mcp_enabled: true
+features:
+- environment_provisioning
+- command_execution
+- file_transfer
+- session_management
+- ec2_integration
+- ssm_integration
+- localstack_aws_emulation
+- cfn_deployment
+- manifest_provisioning
+- compose_deployment
+- profile_provisioning
+- native_mcp_v2_typed_pydantic_contracts
+- authoring_gate
+- canonical_mcp_tool_surface
+adapters:
+- aws_ec2
+- aws_ssm
+- cfn_provisioner
+- compose_provisioner
+- docker
+- graph
+- localstack
+- mock
+mcp_resources:
+- sandbox://schemas/config
+- sandbox://schemas/environment
+- sandbox://docs
+- sandbox://docs/{doc_name}
+- sandbox://environments
+- sandbox://backends
+- sandbox://health
+- sandbox://factory
+mcp_prompts:
+- provision_environment
+- execute_command
+- debug_environment
+# Canonical native MCP v2 surface: 30 strict Pydantic v2 ToolResult tools.
+# `sandbox.list_stacks` accepts only `env_id`; authoring tools are discoverable
+# and behavior-gated by authoring mode.
+mcp_tools:
+# Deterministic (11)
+- sandbox.get_capabilities
+- sandbox.health_check
+- sandbox.describe_config_schema
+- sandbox.list_profiles
+- sandbox.list_environments
+- sandbox.generate_cfn_from_recon
+- sandbox.validate_manifest
+- sandbox_get_dashboard_summary
+- sandbox_get_environment_activity
+- sandbox_get_environment_graph_context
+- sandbox_get_views
+# Operational (15)
+- sandbox.provision
+- sandbox.terminate
+- sandbox.get_status
+- sandbox.execute
+- sandbox.upload_file
+- sandbox.download_file
+- sandbox.apply_service_mocks
+- sandbox.list_stacks
+- sandbox.workspace_dir
+- sandbox.deploy_cfn
+- sandbox.describe_stack
+- sandbox.delete_stack
+- sandbox.translate_cfn
+- sandbox.plan_provision
+- sandbox.apply_provision
+# Authoring (4; discoverable, behavior-gated)
+- sandbox.authoring.get_status
+- sandbox.authoring.list_templates
+- sandbox.authoring.upsert_template
+- sandbox.authoring.delete_template
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0
+- pyyaml>=6.0.0

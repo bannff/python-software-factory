@@ -1,0 +1,7 @@
+id: graph-relationship-projection
+event_type: graph.projection.requested
+handler: mcp:graph_project_event
+description: Project trusted content-free source references into Graph
+enabled: true
+priority: 50
+filters: {}

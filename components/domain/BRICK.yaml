@@ -1,0 +1,22 @@
+name: domain
+type: component
+namespace: factory.domain
+description: Domain presentation manifests and workspace engagements (render-side, domain-agnostic)
+mcp_enabled: true
+features:
+- presentation_manifests
+- workspace_engagements
+- unified_manifest_registry
+- generic_fallback
+- polymorphic_design
+- mcp_resources
+- mcp_prompts
+adapters:
+- memory
+mcp_resources:
+- domain://manifests/*
+mcp_prompts:
+- open_domain_engagement
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

@@ -1,0 +1,43 @@
+# Optional containers for companion_x
+# Usage: docker compose -f docker-compose.yml -f docker-compose.optional.yml up
+#
+# Enable the corresponding adapter in .env before starting:
+#   chromadb  -> FACTORY_KB_ADAPTER=chromadb, KB_BACKEND=chromadb
+#   dagster   -> FACTORY_WORKER_BACKEND=dagster
+#   keycloak  -> FACTORY_AUTH_ADAPTER=keycloak
+#   postgres  -> FACTORY_STORAGE_ADAPTER=postgres
+services:
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "18100:8000"
+    volumes:
+      - chroma_data:/chroma/data
+  dagster:
+    image: dagster/dagster-celery-k8s:latest
+    platform: linux/amd64
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+    ports:
+      - "13000:3000"
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "18080:8080"
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: factory
+      POSTGRES_PASSWORD: factory
+      POSTGRES_DB: factory
+    ports:
+      - "15432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+volumes:
+  chroma_data:
+  postgres_data:

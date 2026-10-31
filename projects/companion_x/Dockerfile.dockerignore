@@ -1,0 +1,17 @@
+.git
+.venv
+.agents
+.storage
+backups
+chroma_data
+chroma_memory
+logs
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+**/node_modules
+**/.next
+**/.env
+**/*.pyc
+dist

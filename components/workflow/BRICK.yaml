@@ -1,0 +1,31 @@
+name: workflow
+type: component
+namespace: factory.workflow
+# Ownership: durable cross-brick attempts, global budgets/retries/stopping/recovery/terminal reasons—not intelligent synthesis; canonical doctrine: ../../.kiro/steering/python-factory.md
+description: Durable workflow lifecycles with native MCP v2 typed Pydantic contracts
+mcp_enabled: true
+features:
+- workflow_orchestration
+- native_mcp_v2_typed_pydantic_contracts
+- process_management
+- lifecycle_control
+- task_execution
+- durable_named_mcp_execution_sqlite
+- celery_integration
+- dagster_integration
+adapters:
+- sqlite
+- aws
+adapter_infra:
+  aws:
+    services: []
+pip_packages:
+- boto3>=1.35.0
+- celery>=5.6.2
+- dagster>=1.7.0
+- httpx==0.28.1
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0
+- pyyaml>=6.0.0
+- typer>=0.12.0
+- uvicorn==0.44.0

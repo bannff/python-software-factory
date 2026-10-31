@@ -1,0 +1,10 @@
+name: arcade_config
+type: component
+namespace: factory.arcade_config
+description: System/emulator/core configuration model for OpenArcade
+mcp_enabled: false
+features:
+- system_config
+- core_mapping
+pip_packages:
+- pydantic>=2.0.0

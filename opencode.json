@@ -1,0 +1,125 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode-go/mimo-v2.5",
+  "plugin": [
+    "open-codebase-index",
+    "opencode-pty",
+    "opencode-visual-cache@latest",
+    "opencode-plugin-openspec"
+  ],
+  "lsp": true,
+  "agent": {
+    "meta-architect": {
+      "mode": "subagent",
+      "model": "opencode-go/qwen3.7-plus",
+      "description": "Senior architect who reviews plans and designs, enforces Polylith structure and repo tenets.",
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow",
+        "task": "allow",
+        "webfetch": "allow",
+        "skill": "allow"
+      }
+    },
+    "strands-expert": {
+      "mode": "subagent",
+      "model": "opencode-go/qwen3.7-plus",
+      "description": "Expert in Strands SDK integration, MCP graph workflows, and agent orchestration.",
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow",
+        "task": "allow",
+        "webfetch": "allow",
+        "skill": "allow"
+      }
+    },
+    "implementer": {
+      "mode": "subagent",
+      "model": "opencode-go/minimax-m3",
+      "description": "Senior SDE who builds features, extends bricks, writes adapters, and refactors following Polylith architecture.",
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow",
+        "task": "allow",
+        "webfetch": "allow",
+        "skill": "allow"
+      }
+    },
+    "qa-tester": {
+      "mode": "subagent",
+      "model": "opencode-go/mimo-v2.5",
+      "description": "Senior QA Engineer who finds edge cases, writes property-based tests, and ensures high-fidelity coverage.",
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow",
+        "task": "allow",
+        "webfetch": "allow",
+        "skill": "allow"
+      }
+    },
+    "security-engineer": {
+      "mode": "subagent",
+      "model": "opencode-go/mimo-v2.5",
+      "description": "Senior Security Engineer who performs security audits and identifies vulnerabilities with pragmatic quick wins.",
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow",
+        "task": "allow",
+        "webfetch": "allow",
+        "skill": "allow"
+      }
+    },
+    "ux-designer": {
+      "mode": "subagent",
+      "model": "opencode-go/qwen3.7-plus",
+      "description": "World-class UI/UX designer specialized in elegant, modern, IDE-style interfaces for dashboards.",
+      "permission": {
+        "read": "allow",
+        "edit": "allow",
+        "glob": "allow",
+        "grep": "allow",
+        "list": "allow",
+        "bash": "allow",
+        "task": "allow",
+        "webfetch": "allow",
+        "skill": "allow"
+      }
+    },
+    "researcher": {
+      "mode": "subagent",
+      "model": "opencode-go/mimo-v2.5",
+      "description": "Read-only research agent for background tasks.",
+      "permission": {
+        "read": "allow",
+        "edit": "deny",
+        "glob": "deny",
+        "grep": "deny",
+        "list": "deny",
+        "bash": "deny",
+        "task": "deny",
+        "webfetch": "deny",
+        "skill": "deny"
+      }
+    }
+	}
+}

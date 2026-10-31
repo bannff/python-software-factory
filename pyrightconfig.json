@@ -1,0 +1,11 @@
+{
+  "include": ["components/machine_learning/src"],
+  "extraPaths": [
+    "components/machine_learning/src/factory/machine_learning/runtime",
+    "components/mcp_utils/src",
+    "bases/mcp_server/src"
+  ],
+  "typeCheckingMode": "basic",
+  "venvPath": ".",
+  "venv": ".venv"
+}

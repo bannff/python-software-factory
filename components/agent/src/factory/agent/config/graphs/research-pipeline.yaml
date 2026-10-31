@@ -1,0 +1,54 @@
+id: research-pipeline
+name: Research Pipeline
+description: >
+  Classic research pipeline: researcher gathers information, analyst
+  processes it, fact_checker validates claims, report_writer produces
+  the final deliverable. Parallel fact-checking and analysis.
+
+execution_timeout: 1800.0
+
+nodes:
+  - id: researcher
+    type: agent
+    system_prompt: >
+      You are a research specialist. Given a topic or question, gather
+      comprehensive information: key facts, relevant context, primary
+      sources, and open questions. Output a structured research brief.
+    model: us.amazon.nova-lite-v1:0
+
+  - id: analyst
+    type: agent
+    system_prompt: >
+      You are a data analysis specialist. Given the research brief,
+      identify patterns, draw insights, and highlight the most significant
+      findings. Provide quantitative analysis where possible.
+    model: us.amazon.nova-pro-v1:0
+
+  - id: fact_checker
+    type: agent
+    system_prompt: >
+      You are a fact-checking specialist. Given the research brief,
+      verify key claims, identify unsupported assertions, and flag
+      anything that needs additional evidence. Output a verification report.
+    model: us.amazon.nova-lite-v1:0
+
+  - id: report_writer
+    type: agent
+    system_prompt: >
+      You are a report writing specialist. Given the analysis and
+      fact-check results, produce a clear, well-structured final report
+      with executive summary, key findings, and recommendations.
+    model: us.amazon.nova-pro-v1:0
+
+edges:
+  - source: researcher
+    target: analyst
+  - source: researcher
+    target: fact_checker
+  - source: analyst
+    target: report_writer
+  - source: fact_checker
+    target: report_writer
+
+entry_points:
+  - researcher

@@ -1,0 +1,37 @@
+name: auth
+type: component
+namespace: factory.auth
+description: Authentication and authorization via Keycloak with token verification,
+  exchange, and native MCP v2 typed Pydantic contracts
+mcp_enabled: true
+features:
+- authentication
+- authorization
+- token_management
+- keycloak_integration
+- token_exchange
+- multitenancy
+- tokenless_credential_egress
+- oauth_authorization_code_enrollment
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- memory
+- keycloak
+- authlib_keycloak
+- aws
+adapter_infra:
+  keycloak:
+    services: [keycloak]
+  authlib_keycloak:
+    services: [keycloak]
+  aws:
+    services: []
+pip_packages:
+- authlib>=1.3.0
+- boto3>=1.35.0
+- mcp[cli]==2.1.1
+- httpx>=0.27.0
+- pydantic>=2.0.0
+- pyjwt[crypto]>=2.8.0
+- pyyaml>=6.0.0
+- typer>=0.12.0

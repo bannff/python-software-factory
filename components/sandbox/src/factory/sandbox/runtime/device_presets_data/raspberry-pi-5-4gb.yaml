@@ -1,0 +1,12 @@
+name: raspberry-pi-5-4gb
+vendor: Raspberry Pi
+model: Raspberry Pi 5
+variant: 4 GB
+form_factor: single_board
+os_family: linux
+fidelity: linux_proxy
+source_url: https://www.raspberrypi.com/products/raspberry-pi-5/
+proxy:
+  platform: linux/arm64
+  cpus: 4.0
+  memory_mb: 3072

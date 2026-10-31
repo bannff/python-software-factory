@@ -1,0 +1,23 @@
+name: session
+type: component
+namespace: factory.session
+description: Tenant-owned persistent chat sessions and exactly-once live-steering mailbox
+mcp_enabled: true
+features:
+- session_registry
+- tenant_owned_sessions
+- steer_delivery_state
+- completion_delivery
+- revision_fenced_cas
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- sqlite
+mcp_resources:
+- session://schemas/session
+- session://schemas/steer
+- session://docs/overview
+mcp_prompts:
+- manage_session
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

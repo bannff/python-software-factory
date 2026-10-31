@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  IDOR Warehouse — intentionally vulnerable API Gateway + Lambda.
+  GET/DELETE/PUT /warehouses/{code} with no ownership check.
+
+Resources:
+  WarehouseRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: idor-warehouse-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: basic-lambda
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: '*'
+
+  WarehouseFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: idor-warehouse
+      Runtime: python3.12
+      Handler: handler.handler
+      Role: !GetAtt WarehouseRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          WH = {"RYWYO": {"code": "RYWYO", "owner": "vendor-a", "name": "Main Warehouse"}, "ABCDE": {"code": "ABCDE", "owner": "vendor-b", "name": "East Warehouse"}, "XYZPQ": {"code": "XYZPQ", "owner": "vendor-c", "name": "West Warehouse"}}
+          def handler(event, context):
+              method = event.get("httpMethod", "GET")
+              path = event.get("path", "/")
+              headers = event.get("headers") or {}
+              vid = headers.get("X-Vendor-ID", headers.get("x-vendor-id", "unknown"))
+              if path == "/warehouses" and method == "GET":
+                  return {"statusCode": 200, "body": json.dumps(list(WH.values()))}
+              parts = path.strip("/").split("/")
+              if len(parts) == 2 and parts[0] == "warehouses":
+                  code = parts[1]
+                  wh = WH.get(code)
+                  if not wh:
+                      return {"statusCode": 404, "body": json.dumps({"error": "not found"})}
+                  if method == "GET":
+                      return {"statusCode": 200, "body": json.dumps(wh)}
+                  if method == "DELETE":
+                      del WH[code]
+                      return {"statusCode": 200, "body": json.dumps({"deleted": code, "by": vid})}
+                  if method == "PUT":
+                      data = json.loads(event.get("body") or "{}")
+                      wh.update(data)
+                      return {"statusCode": 200, "body": json.dumps(wh)}
+              return {"statusCode": 404, "body": json.dumps({"error": "not found"})}

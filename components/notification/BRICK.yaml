@@ -1,0 +1,27 @@
+name: notification
+type: component
+namespace: factory.notification
+description: Notification delivery and alert management with pluggable channel backends
+mcp_enabled: true
+features:
+- notifications
+- alerts
+- messaging
+- email_smtp
+- sms_twilio
+- slack_webhooks
+- templates
+- inbox
+- deep_link_resolution
+adapters:
+- stdio
+- apprise
+- celery
+- aws
+pip_packages:
+- apprise>=1.9.0
+- boto3>=1.35.0
+- celery>=5.6.2
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0
+- pyyaml>=6.0.0

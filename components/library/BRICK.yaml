@@ -1,0 +1,10 @@
+name: library
+type: component
+namespace: factory.library
+description: Game/ROM catalog model and scanning interface
+mcp_enabled: false
+features:
+- game_catalog
+- library_scanning
+pip_packages:
+- pydantic>=2.0.0

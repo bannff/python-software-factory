@@ -1,0 +1,26 @@
+[tool.polylith]
+namespace = "factory"
+git_tag_pattern = "stable-*"
+
+[tool.polylith.structure]
+theme = "tdd"
+
+[tool.polylith.tag.patterns]
+stable = "stable-*"
+release = "v[0-9]*"
+
+[tool.polylith.resources]
+brick_docs_enabled = false
+
+[tool.polylith.test]
+enabled = true
+
+[tool.polylith.alias]
+strands = "strands-agents"
+strands_tools = "strands-agents-tools"
+jwt = "pyjwt"
+opentelemetry = "opentelemetry-api"
+hfc = "fabric-sdk-py"
+yaml = "pyyaml"
+fasthtml = "python-fasthtml"
+

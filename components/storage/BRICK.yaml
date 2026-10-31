@@ -1,0 +1,53 @@
+name: storage
+type: component
+namespace: factory.storage
+description: Unified storage abstraction with pluggable backends (blob, document,
+  SQL, graph)
+mcp_enabled: true
+features:
+- blob_storage
+- document_storage
+- sql_storage
+- graph_storage
+- encrypted_credential_slots
+- mcp_resources
+- mcp_prompts
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+  blob:
+  - local_fs
+  - s3
+  document:
+  - sqlite
+  - tinydb
+  - mongodb
+  - aws_document
+  sql:
+  - sqlite
+  - postgres
+  - aws_sql
+  graph:
+  - networkx
+  - neo4j
+adapter_infra:
+  s3:
+    services: [seaweedfs]
+  mongodb:
+    services: [mongodb]
+  postgres:
+    services: [postgres]
+  neo4j:
+    services: [neo4j]
+  aws_document:
+    services: []
+  aws_sql:
+    services: []
+pip_packages:
+- boto3>=1.35.0
+- cryptography>=44.0.0
+- mcp[cli]==2.1.1
+- neo4j>=6.1.0
+- networkx>=3.6.1
+- psycopg2-binary>=2.9.9
+- pymongo>=4.8.0
+- tinydb>=4.8.2

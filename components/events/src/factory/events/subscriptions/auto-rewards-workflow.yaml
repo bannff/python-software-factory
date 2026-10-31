@@ -1,0 +1,10 @@
+id: auto-rewards-on-workflow-complete
+event_type: "graph.completed"
+handler: "mcp:rewards_dispatch"
+description: >
+  RL reward processing after any graph completes.
+  Triggers games_process_workflow_rl for GT scoring and reward planning,
+  then emits canonical learning events for blockchain, memory, and convergence handlers.
+filters: {}
+enabled: true
+priority: 1

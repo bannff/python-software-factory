@@ -1,0 +1,79 @@
+# Companion-X workflow settings — TRACKED TEMPLATE, not live config.
+#
+# `projects/*/config/` is untracked deployment state (gitignored), so this
+# `.example` file is the committed, reviewed contract and the live
+# `settings.yaml` beside it never is. To run locally:
+#
+#     cp projects/companion_x/config/settings.yaml.example \
+#        projects/companion_x/config/settings.yaml
+#
+# The container image ships this template at /app/config/settings.yaml.example
+# and `entrypoint.sh` seeds the live file from it on start when absent (issue
+# #34), so `docker build` no longer depends on an untracked path.
+#
+# A deployment MAY override: service.name, storage.backend with its
+# sqlite.filename (or storage.aws.*), executor.backend, and the
+# execution_engines list. It must NOT drop the engine registrations below:
+# the agent's managed launch hardcodes engine_id "langgraph" and the migration
+# brick hardcodes "migration_import", so an unregistered engine fails at
+# enrollment time with `ValueError: unknown execution engine: <id>`.
+#
+# `durable_tasks.allowlist` is an AUTHORIZATION surface: it names the MCP tools
+# a durable workflow definition is allowed to invoke. It is deliberately EMPTY
+# and fail-closed — no workflow can call a tool it was not explicitly granted.
+# A deployment that needs durable named-MCP tools restores entries under its own
+# review; never populate it speculatively.
+
+service:
+  name: companion-x-workflow
+
+storage:
+  backend: sqlite
+  sqlite:
+    filename: workflow_state.sqlite
+
+executor:
+  backend: local
+
+durable_tasks:
+  allowlist: {}
+
+execution_engines:
+  engines:
+    # Pinned by projects/companion_x/test/test_execution_engine_config.py.
+    - engine_id: langgraph
+      invoke_target:
+        brick_name: agent
+        tool_name: execute_langgraph_attempt
+      cancel_target:
+        brick_name: agent
+        tool_name: cancel_langgraph_attempt
+      outcome:
+        success:
+          pointer: /status
+          equals: completed
+        retryable:
+          pointer: /retryable
+          equals: true
+        error_pointer: /error
+    # Pinned by
+    # components/workflow/test/factory/workflow/test_migration_engine_registration.py.
+    # No cancel_target: the migration brick exposes no cancel tool. The
+    # `continuation` outcome requires the positive max_continuations cap.
+    - engine_id: migration_import
+      invoke_target:
+        brick_name: migration
+        tool_name: migration_apply_execution
+      max_attempts: 3
+      max_continuations: 1000
+      outcome:
+        success:
+          pointer: /status
+          equals: completed
+        continuation:
+          pointer: /status
+          equals: partial
+        retryable:
+          pointer: /retryable
+          equals: true
+        error_pointer: /error

@@ -1,0 +1,55 @@
+name: 🔧 Chore
+description: Maintenance, refactoring, or infrastructure work
+title: "[Chore] "
+labels: ["type/chore", "status/triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for maintenance tasks, refactoring, or infrastructure improvements.
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What needs to be done?
+      placeholder: Describe the maintenance task...
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is in scope and out of scope?
+      placeholder: |
+        In scope:
+        - 
+        
+        Out of scope:
+        - 
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know when this is complete?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: brick
+    attributes:
+      label: Which brick category?
+      options:
+        - Component
+        - Base
+        - Project
+        - Workspace/Infrastructure
+    validations:
+      required: true

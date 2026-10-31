@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/bannff/python-factory/discussions
+    about: For questions, RFCs, and general discussion
+  - name: 📖 GitHub Wiki
+    url: https://github.com/bannff/python-factory/wiki
+    about: For narrative documentation and how-to guides

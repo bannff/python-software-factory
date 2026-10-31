@@ -1,0 +1,330 @@
+[
+  {
+    "gt_id": "juiceshop-passwordHashLeakChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/rest/memories", "app": "juice_shop", "challenge_key": "passwordHashLeakChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Obtain the password hash of the currently logged-in user directly from a REST API endpoint.", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-adminSectionChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-639",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/#/administration", "app": "juice_shop", "challenge_key": "adminSectionChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Access the administration section of the store.", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-resetPasswordBjoernOwaspChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-640",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/reset-password", "app": "juice_shop", "challenge_key": "resetPasswordBjoernOwaspChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Reset Bjoern's OWASP account password via Forgot Password with the original security question answer.", "severity": "high", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-nftUnlockChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "web_challenge", "app": "juice_shop", "challenge_key": "nftUnlockChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Take over the wallet containing the official Soul Bound Token (NFT).", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-web3SandboxChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-639",
+    "service_name": "juice_shop",
+    "artifact": {"type": "web_challenge", "app": "juice_shop", "challenge_key": "web3SandboxChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Find an accidentally deployed code sandbox for writing smart contracts.", "severity": "low", "difficulty": 1}
+  },
+  {
+    "gt_id": "juiceshop-changePasswordBenderChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-620",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/rest/user/change-password", "app": "juice_shop", "challenge_key": "changePasswordBenderChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Change Bender's password without using SQL Injection or Forgot Password.", "severity": "critical", "difficulty": 5}
+  },
+  {
+    "gt_id": "juiceshop-directoryListingChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-548",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/ftp", "app": "juice_shop", "challenge_key": "directoryListingChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Access a confidential document via directory listing.", "severity": "low", "difficulty": 1}
+  },
+  {
+    "gt_id": "juiceshop-easterEggLevelOneChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-548",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/ftp/eastere.gg", "app": "juice_shop", "challenge_key": "easterEggLevelOneChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Find the hidden easter egg.", "severity": "critical", "difficulty": 4}
+  },
+  {
+    "gt_id": "juiceshop-emailLeakChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "web_challenge", "app": "juice_shop", "challenge_key": "emailLeakChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Perform unwanted information disclosure by accessing data cross-domain.", "severity": "critical", "difficulty": 5}
+  },
+  {
+    "gt_id": "juiceshop-feedbackChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-639",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "DELETE", "path": "/api/Feedbacks", "app": "juice_shop", "challenge_key": "feedbackChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Get rid of all 5-star customer feedback.", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-forgedFeedbackChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-639",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/api/Feedbacks", "app": "juice_shop", "challenge_key": "forgedFeedbackChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Post feedback in another user's name.", "severity": "high", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-forgedReviewChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-639",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "PUT", "path": "/rest/products/reviews", "app": "juice_shop", "challenge_key": "forgedReviewChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Post a product review as another user or edit any user's existing review.", "severity": "high", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-forgottenDevBackupChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-548",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/ftp/package.json.bak", "app": "juice_shop", "challenge_key": "forgottenDevBackupChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Access a developer's forgotten backup file.", "severity": "critical", "difficulty": 4}
+  },
+  {
+    "gt_id": "juiceshop-forgottenBackupChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-548",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/ftp/coupons_2013.md.bak", "app": "juice_shop", "challenge_key": "forgottenBackupChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Access a salesman's forgotten backup file.", "severity": "critical", "difficulty": 4}
+  },
+  {
+    "gt_id": "juiceshop-ghostLoginChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-89",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/login", "app": "juice_shop", "challenge_key": "ghostLoginChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Log in with Chris' erased user account via SQL injection.", "severity": "high", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-dataExportChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "web_challenge", "app": "juice_shop", "challenge_key": "dataExportChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Steal someone else's personal data without using Injection.", "severity": "critical", "difficulty": 4}
+  },
+  {
+    "gt_id": "juiceshop-dlpPastebinDataLeakChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "web_challenge", "app": "juice_shop", "challenge_key": "dlpPastebinDataLeakChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Identify an unsafe product that was removed from the shop.", "severity": "critical", "difficulty": 4}
+  },
+  {
+    "gt_id": "juiceshop-loginAmyChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-287",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/login", "app": "juice_shop", "challenge_key": "loginAmyChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Log in with Amy's original user credentials.", "severity": "high", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-oauthUserPasswordChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-287",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/login", "app": "juice_shop", "challenge_key": "oauthUserPasswordChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Log in with Bjoern's Gmail account without SQL Injection.", "severity": "critical", "difficulty": 4}
+  },
+  {
+    "gt_id": "juiceshop-loginRapperChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-287",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/login", "app": "juice_shop", "challenge_key": "loginRapperChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Log in with MC SafeSearch's original user credentials.", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-basketManipulateChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-639",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "PUT", "path": "/api/BasketItems", "app": "juice_shop", "challenge_key": "basketManipulateChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Put an additional product into another user's shopping basket.", "severity": "high", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-weakPasswordChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-287",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/login", "app": "juice_shop", "challenge_key": "weakPasswordChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Log in with the administrator's weak credentials.", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-changeProductChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-639",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "PUT", "path": "/api/Products", "app": "juice_shop", "challenge_key": "changeProductChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Change the href of the O-Saft product description.", "severity": "high", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-resetPasswordBenderChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-640",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/reset-password", "app": "juice_shop", "challenge_key": "resetPasswordBenderChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Reset Bender's password via Forgot Password with the original security question answer.", "severity": "critical", "difficulty": 4}
+  },
+  {
+    "gt_id": "juiceshop-resetPasswordBjoernChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-640",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/reset-password", "app": "juice_shop", "challenge_key": "resetPasswordBjoernChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Reset Bjoern's internal account password via Forgot Password.", "severity": "critical", "difficulty": 5}
+  },
+  {
+    "gt_id": "juiceshop-resetPasswordJimChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-640",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/reset-password", "app": "juice_shop", "challenge_key": "resetPasswordJimChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Reset Jim's password via Forgot Password with the original security question answer.", "severity": "high", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-retrieveBlueprintChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "web_challenge", "app": "juice_shop", "challenge_key": "retrieveBlueprintChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Download the blueprint for one of the shop's products.", "severity": "critical", "difficulty": 5}
+  },
+  {
+    "gt_id": "juiceshop-ssrfChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-918",
+    "service_name": "juice_shop",
+    "artifact": {"type": "web_challenge", "app": "juice_shop", "challenge_key": "ssrfChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Request a hidden resource on server through server.", "severity": "critical", "difficulty": 6}
+  },
+  {
+    "gt_id": "juiceshop-twoFactorAuthUnsafeSecretStorageChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-287",
+    "service_name": "juice_shop",
+    "artifact": {"type": "web_challenge", "app": "juice_shop", "challenge_key": "twoFactorAuthUnsafeSecretStorageChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Solve the 2FA challenge for user wurstbrot.", "severity": "critical", "difficulty": 5}
+  },
+  {
+    "gt_id": "juiceshop-basketAccessChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-639",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/rest/basket", "app": "juice_shop", "challenge_key": "basketAccessChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "View another user's shopping basket.", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-csrfChallenge",
+    "vulnerability_class": "Broken Access Control",
+    "cwe": "CWE-352",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/rest/user/change-password", "app": "juice_shop", "challenge_key": "csrfChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Change a user's name via Cross-Site Request Forgery.", "severity": "high", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-resetPasswordUvoginChallenge",
+    "vulnerability_class": "Broken Authentication",
+    "cwe": "CWE-640",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/reset-password", "app": "juice_shop", "challenge_key": "resetPasswordUvoginChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Reset Uvogin's password via Forgot Password.", "severity": "critical", "difficulty": 4}
+  },
+  {
+    "gt_id": "juiceshop-geoStalkingMetaChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/reset-password", "app": "juice_shop", "challenge_key": "geoStalkingMetaChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Determine John's security question answer from Photo Wall upload and reset his password.", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-geoStalkingVisualChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/reset-password", "app": "juice_shop", "challenge_key": "geoStalkingVisualChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Determine Emma's security question answer from Photo Wall upload and reset her password.", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-exposedCredentialsChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-798",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/main.js", "app": "juice_shop", "challenge_key": "exposedCredentialsChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Find hardcoded valid test credentials in client-side code.", "severity": "medium", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-leakedApiKeyChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-798",
+    "service_name": "juice_shop",
+    "artifact": {"type": "web_challenge", "app": "juice_shop", "challenge_key": "leakedApiKeyChallenge"},
+    "ground_truth": {"is_vulnerable": true, "description": "Find and report a leaked API key.", "severity": "critical", "difficulty": 5}
+  },
+  {
+    "gt_id": "juiceshop-sqliSearchChallenge",
+    "vulnerability_class": "Injection",
+    "cwe": "CWE-89",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/rest/products/search", "app": "juice_shop"},
+    "ground_truth": {"is_vulnerable": true, "description": "SQL injection on product search allows UNION SELECT to extract all user credentials.", "severity": "critical", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-sqliLoginChallenge",
+    "vulnerability_class": "Injection",
+    "cwe": "CWE-89",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/rest/user/login", "app": "juice_shop"},
+    "ground_truth": {"is_vulnerable": true, "description": "SQL injection on login email field bypasses password check for any user.", "severity": "critical", "difficulty": 2}
+  },
+  {
+    "gt_id": "juiceshop-massAssignmentChallenge",
+    "vulnerability_class": "Mass_Assignment",
+    "cwe": "CWE-915",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "POST", "path": "/api/Users", "app": "juice_shop"},
+    "ground_truth": {"is_vulnerable": true, "description": "Registration accepts role field allowing self-promotion to admin.", "severity": "critical", "difficulty": 3}
+  },
+  {
+    "gt_id": "juiceshop-openMetricsChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/metrics", "app": "juice_shop"},
+    "ground_truth": {"is_vulnerable": true, "description": "Prometheus metrics endpoint accessible without authentication.", "severity": "low", "difficulty": 1}
+  },
+  {
+    "gt_id": "juiceshop-adminConfigLeakChallenge",
+    "vulnerability_class": "Sensitive Data Exposure",
+    "cwe": "CWE-200",
+    "service_name": "juice_shop",
+    "artifact": {"type": "http_endpoint", "method": "GET", "path": "/rest/admin/application-configuration", "app": "juice_shop"},
+    "ground_truth": {"is_vulnerable": true, "description": "Admin application configuration accessible without authentication.", "severity": "medium", "difficulty": 1}
+  }
+]

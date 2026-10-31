@@ -1,0 +1,50 @@
+{
+  "title": "Ground Truth Entry — Canonical Format",
+  "description": "All GT entries must follow this structure for compatibility with security_ingest_gt_entry and benchmark_scorer.",
+  "required_fields": ["gt_id", "vulnerability_class", "cwe", "service_name", "artifact", "ground_truth"],
+  "example": {
+    "gt_id": "example-idor-001",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "service_name": "my_app",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "GET",
+      "path": "/resource/{id}",
+      "app": "my_app"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "Short statement for security brick ingestion.",
+      "description": "Longer description for human readers.",
+      "severity": "high",
+      "confidence": "confirmed"
+    },
+    "code_evidence": {
+      "locations": [
+        {
+          "file": "app.py",
+          "function": "get_resource",
+          "line_start": 10,
+          "line_end": 20,
+          "cwe": "CWE-639",
+          "description": "Returns resource without ownership check"
+        }
+      ]
+    },
+    "runtime_evidence": {
+      "surface": {"endpoint": "/resource/{id}", "method": "GET"},
+      "probe": {"method": "GET", "url": "http://localhost:5050/resource/123"},
+      "expected_vulnerable_response": {"status": 200},
+      "expected_secure_response": {"status": 403}
+    },
+    "exploit_evidence": {
+      "description": "Attacker accesses victim's resource.",
+      "reproduction_steps": ["curl http://localhost:5050/resource/123"],
+      "cross_tenant_access": true
+    },
+    "fix_evidence": {
+      "description": "Add ownership check."
+    }
+  }
+}

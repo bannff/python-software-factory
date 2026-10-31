@@ -1,0 +1,177 @@
+{
+  "agentinstruct": [
+    {
+      "id": "seed-single::v1",
+      "messages": [
+        {
+          "content": "How do I rotate AWS credentials safely? Explain this in a Q&A format with clear answers.",
+          "role": "user"
+        },
+        {
+          "content": "Use IAM roles and short-lived tokens.",
+          "role": "assistant"
+        }
+      ],
+      "metadata": {
+        "diversity_score": 0.5625,
+        "llm_generated": false,
+        "model": null,
+        "origin": "parity",
+        "origin_id": "seed-single",
+        "stage": "agentinstruct",
+        "transform_type": "qa",
+        "variant_id": "v1",
+        "variant_prompt": "How do I rotate AWS credentials safely? Explain this in a Q&A format with clear answers."
+      },
+      "source": "parity-fixture"
+    },
+    {
+      "id": "seed-single::v2",
+      "messages": [
+        {
+          "content": "How do I rotate AWS credentials safely? Provide a comprehensive explanation with examples.",
+          "role": "user"
+        },
+        {
+          "content": "Use IAM roles and short-lived tokens.",
+          "role": "assistant"
+        }
+      ],
+      "metadata": {
+        "diversity_score": 0.46153846153846156,
+        "llm_generated": false,
+        "model": null,
+        "origin": "parity",
+        "origin_id": "seed-single",
+        "stage": "agentinstruct",
+        "transform_type": "writing",
+        "variant_id": "v2",
+        "variant_prompt": "How do I rotate AWS credentials safely? Provide a comprehensive explanation with examples."
+      },
+      "source": "parity-fixture"
+    },
+    {
+      "id": "seed-single::v3",
+      "messages": [
+        {
+          "content": "How do I rotate AWS credentials safely? Include code examples and implementation details.",
+          "role": "user"
+        },
+        {
+          "content": "Use IAM roles and short-lived tokens.",
+          "role": "assistant"
+        }
+      ],
+      "metadata": {
+        "diversity_score": 0.46153846153846156,
+        "llm_generated": false,
+        "model": null,
+        "origin": "parity",
+        "origin_id": "seed-single",
+        "stage": "agentinstruct",
+        "transform_type": "coding",
+        "variant_id": "v3",
+        "variant_prompt": "How do I rotate AWS credentials safely? Include code examples and implementation details."
+      },
+      "source": "parity-fixture"
+    }
+  ],
+  "apigenmt": [
+    {
+      "id": "seed-single",
+      "messages": [
+        {
+          "content": "How do I rotate AWS credentials safely?",
+          "role": "user"
+        },
+        {
+          "content": "Use IAM roles and short-lived tokens.",
+          "role": "assistant"
+        }
+      ],
+      "metadata": {
+        "agentic": false,
+        "origin": "parity",
+        "stage": "apigenmt",
+        "via": "disabled"
+      },
+      "source": "parity-fixture"
+    }
+  ],
+  "reviewinstruct": [
+    {
+      "id": "seed-single",
+      "messages": [
+        {
+          "content": "How do I rotate AWS credentials safely?",
+          "role": "user"
+        },
+        {
+          "content": "Use IAM roles and short-lived tokens.",
+          "role": "assistant"
+        }
+      ],
+      "metadata": {
+        "origin": "parity",
+        "reviewed": false,
+        "stage": "reviewinstruct",
+        "via": "disabled"
+      },
+      "source": "parity-fixture"
+    }
+  ],
+  "s2m": [
+    {
+      "id": "seed-single",
+      "messages": [
+        {
+          "content": "How do I rotate AWS credentials safely?",
+          "role": "user"
+        },
+        {
+          "content": "Use IAM roles and short-lived tokens.",
+          "role": "assistant"
+        },
+        {
+          "content": "Can you provide an example?",
+          "role": "user"
+        },
+        {
+          "content": "[Example would be provided here with LLM generation enabled]",
+          "role": "assistant"
+        }
+      ],
+      "metadata": {
+        "generated_turns": 4,
+        "origin": "parity",
+        "original_turns": 2,
+        "stage": "s2m",
+        "via": "fallback"
+      },
+      "source": "parity-fixture"
+    },
+    {
+      "id": "seed-multi",
+      "messages": [
+        {
+          "content": "What is a CAN bus?",
+          "role": "user"
+        },
+        {
+          "content": "A vehicle message bus.",
+          "role": "assistant"
+        },
+        {
+          "content": "Is it encrypted?",
+          "role": "user"
+        },
+        {
+          "content": "Classically, no.",
+          "role": "assistant"
+        }
+      ],
+      "metadata": null,
+      "source": "parity-fixture"
+    }
+  ]
+}

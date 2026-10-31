@@ -1,0 +1,37 @@
+version: 1
+routing:
+  architect:
+    - path: ~/.config/opencode/skills/meta-architect/SKILL.md
+      keywords: ["architecture", "polylith", "tenets", "review"]
+    - path: ~/.config/opencode/skills/factory-foundation/SKILL.md
+      keywords: ["factory", "mcp", "bricks", "foundation"]
+
+  coder:
+    - path: ~/.config/opencode/skills/implementer/SKILL.md
+      keywords: ["implement", "code", "build", "adapter"]
+    - path: ~/.config/opencode/skills/strands-expert/SKILL.md
+      keywords: ["strands", "sdk", "agent", "orchestration"]
+
+  reviewer:
+    - path: ~/.config/opencode/skills/security-engineer/SKILL.md
+      keywords: ["security", "audit", "vulnerability"]
+    - path: ~/.config/opencode/skills/qa-tester/SKILL.md
+      keywords: ["test", "quality", "coverage"]
+
+  test_engineer:
+    - path: ~/.config/opencode/skills/qa-tester/SKILL.md
+      keywords: ["test", "property", "edge-case"]
+
+  sme:
+    - path: ~/.config/opencode/skills/strands-expert/SKILL.md
+      keywords: ["strands", "sdk", "mcp", "agent"]
+    - path: ~/.config/opencode/skills/meta-architect/SKILL.md
+      keywords: ["architecture", "design", "pattern"]
+
+  docs:
+    - path: ~/.config/opencode/skills/doc-writer/SKILL.md
+      keywords: ["documentation", "readme", "guide"]
+
+  designer:
+    - path: ~/.config/opencode/skills/ux-designer/SKILL.md
+      keywords: ["ui", "ux", "design", "interface"]

@@ -1,0 +1,44 @@
+name: Sync Labels
+
+# Sync label definitions from labels.yml to GitHub
+# Runs on push to main and can be manually triggered
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'labels.yml'
+      - 'scripts/sync_labels.py'
+      - '.github/workflows/sync-labels.yml'
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  issues: write # Required to manage labels
+  contents: read
+
+jobs:
+  sync-labels:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      
+      # GitHub CLI (gh) is pre-installed on ubuntu-latest runners
+      # The sync script uses gh CLI for GitHub API interactions
+      - name: Install dependencies
+        run: |
+          pip install pyyaml
+      
+      - name: Sync labels to GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python scripts/sync_labels.py

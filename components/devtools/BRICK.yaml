@@ -1,0 +1,31 @@
+name: devtools
+type: component
+namespace: factory.devtools
+description: Project-scoped host-local file, command, and git operations
+mcp_enabled: true
+features:
+- project_path_confinement
+- bounded_file_operations
+- argv_command_execution
+- gated_git_operations
+adapters:
+- local
+mcp_resources: []
+mcp_prompts: []
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0
+mcp_tools:
+- devtools_read_file
+- devtools_list_dir
+- devtools_search
+- devtools_git_status
+- devtools_git_diff
+- devtools_git_log
+- devtools_write_file
+- devtools_edit_file
+- devtools_run_command
+- devtools_cancel_command
+- devtools_git_stage
+- devtools_git_commit
+- devtools_git_push

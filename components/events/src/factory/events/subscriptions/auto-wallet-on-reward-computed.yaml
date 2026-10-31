@@ -1,0 +1,8 @@
+id: auto-wallet-on-reward-computed
+event_type: "reward.computed"
+handler: "mcp:blockchain_reward_dispatch"
+description: >
+  Mint blockchain rewards after a reward is computed for a workflow run.
+enabled: true
+priority: 10
+filters: {}

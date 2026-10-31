@@ -1,0 +1,10 @@
+id: auto-metrics-on-swarm-complete
+event_type: "swarm.completed"
+handler: "mcp:events_publish"
+description: >
+  Record workflow metrics after any swarm completes.
+filters:
+  event_type: "metrics.record"
+  source: "events.auto-metrics"
+enabled: true
+priority: 5

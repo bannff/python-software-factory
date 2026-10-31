@@ -1,0 +1,11 @@
+name: curator
+type: component
+namespace: factory.curator
+description: "AI-assistant control plane -- ROM ingest + compatibility scanning (management-plane only)"
+mcp_enabled: false
+features:
+- rom_ingest
+- compatibility_scan
+- playability_stub
+pip_packages:
+- pydantic>=2.0.0

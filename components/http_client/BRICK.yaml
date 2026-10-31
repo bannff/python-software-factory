@@ -1,0 +1,48 @@
+name: http_client
+type: component
+namespace: factory.http
+description: HTTP client abstraction with retry, auth, rate limiting
+mcp_enabled: true
+features:
+- http_requests
+- retry_logic
+- rate_limiting
+- auth_headers
+- timeout_handling
+- mcp_resources
+- mcp_prompts
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- httpx
+- aiohttp
+- tenacity_httpx
+mcp_tools:
+- http_get_capabilities
+- http_health_check
+- http_describe_config_schema
+- http_list_backends
+- http_get
+- http_post
+- http_request
+- http_put
+- http_delete
+mcp_resources:
+- http://schemas/request
+- http://schemas/response
+- http://docs/overview
+- http://docs/adapters
+- http://docs/{doc_name}
+- http://backends
+- http://stats
+- http://factory
+mcp_prompts:
+- make_request
+- configure_client
+- debug_request
+- batch_requests
+pip_packages:
+- aiohttp>=3.9.0
+- mcp[cli]==2.1.1
+- httpx>=0.27.0
+- pydantic>=2.0.0
+- tenacity>=8.2.0

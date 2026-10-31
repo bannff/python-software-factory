@@ -1,0 +1,10 @@
+id: auto-reward-on-chat-turn
+event_type: "chat.turn.completed"
+handler: "mcp:chat_reward_dispatch"
+description: >
+  Score the main chat agent's turn via the learning reward-source seam
+  (llm-judge) and emit reward.computed → memory/blockchain fan-out
+  (bd:python-factory-pfvo9 slice 2).
+enabled: true
+priority: 1
+filters: {}

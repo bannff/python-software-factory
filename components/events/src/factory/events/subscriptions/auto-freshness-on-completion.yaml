@@ -1,0 +1,10 @@
+id: auto-freshness-on-graph-complete
+event_type: "graph.completed"
+handler: "mcp:freshness_dispatch"
+description: >
+  bd:python-factory-v7imt.4 — Eval-freshness trigger on workflow/swarm completion.
+  Checks whether the target experiment is stale (no recent eval within threshold)
+  and persists a freshness eval via evals_persist_score if so.
+filters: {}
+enabled: true
+priority: 20

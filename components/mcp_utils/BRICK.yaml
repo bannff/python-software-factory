@@ -1,0 +1,14 @@
+name: mcp_utils
+type: component
+namespace: factory.mcp_utils
+description: Shared MCP utilities and decorators for categorizing tools across bricks
+mcp_enabled: false
+features:
+- decorators
+- tool_categorization
+- poll_noise_filter
+pip_packages:
+- mcp[cli]==2.1.1
+- httpx2>=2.5.0
+- pydantic>=2.0.0
+- starlette>=0.40.0

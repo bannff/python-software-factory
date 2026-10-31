@@ -1,0 +1,11 @@
+name: iphone-15
+vendor: Apple
+model: iPhone 15
+form_factor: phone
+os_family: ios
+fidelity: linux_proxy
+source_url: https://support.apple.com/en-in/111831
+proxy:
+  platform: linux/arm64
+  cpus: 2.0
+  memory_mb: 2048

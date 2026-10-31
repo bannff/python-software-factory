@@ -1,0 +1,55 @@
+name: memory
+type: component
+namespace: factory.memory
+description: Agent memory abstraction with pluggable backends (in-memory, Mem0, AgentCore,
+  Zep, Cognee, Neo4j)
+mcp_enabled: true
+features:
+- semantic_memory
+- short_term_memory
+- long_term_memory
+- memory_consolidation
+- relevance_scoring
+- graph_memory
+- temporal_edges
+- memory_evolution
+- typed_mcp_boundary
+adapters:
+- memory
+- mem0
+- agentcore
+- zep
+- cognee
+- neo4j
+- amem
+adapter_infra:
+  neo4j:
+    services:
+    - neo4j
+  mem0:
+    services: []
+  agentcore:
+    services: []
+  zep:
+    services: []
+  cognee:
+    services: []
+mcp_resources:
+- memory://schemas/config
+- memory://schemas/memory
+- memory://docs
+- memory://docs/{doc_name}
+- memory://health
+- memory://backends
+mcp_prompts:
+- configure_memory
+- debug_memory
+- optimize_retrieval
+pip_packages:
+- chromadb>=1.4.1
+- cognee>=0.1.0
+- mcp[cli]==2.1.1
+- neo4j>=6.1.0
+- pydantic>=2.0.0
+- rapidfuzz>=3.0.0
+- zep-cloud>=2.0.0

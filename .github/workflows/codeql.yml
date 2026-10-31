@@ -1,0 +1,33 @@
+name: CodeQL
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: python
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          # GitHub Advanced Security / code scanning is not enabled on
+          # this private repo, so the default SARIF upload step 403s
+          # ("Code scanning is not enabled for this repository").
+          # upload: false skips the upload and just runs the analysis;
+          # re-enable (or remove this line) once code scanning is
+          # turned on in repo Settings > Code security and analysis.
+          upload: false

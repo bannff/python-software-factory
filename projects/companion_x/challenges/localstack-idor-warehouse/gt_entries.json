@@ -1,0 +1,138 @@
+[
+  {
+    "gt_id": "idor-warehouse-get-001",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "GET",
+      "path": "/warehouses/{code}",
+      "app": "idor_warehouse"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "description": "GET /warehouses/<code> returns warehouse data to any caller regardless of whether the requesting vendor owns the resource. The X-Vendor-ID header is read but never compared to the warehouse owner field.",
+      "severity": "high"
+    },
+    "code_evidence": {
+      "file": "app.py",
+      "function": "get_warehouse",
+      "snippet": "vendor_id = request.headers.get('X-Vendor-ID', 'unknown')\nwh = WAREHOUSES.get(code)\nif not wh:\n    return jsonify({'error': 'not found'}), 404\n# IDOR: returns warehouse data without checking if vendor_id == wh['owner']\nreturn jsonify(wh)",
+      "missing_check": "if wh['owner'] != vendor_id: return 403"
+    },
+    "runtime_evidence": {
+      "probe": {
+        "method": "GET",
+        "url": "http://localhost:5000/warehouses/ABCDE",
+        "headers": {"X-Vendor-ID": "vendor-a"}
+      },
+      "expected_vulnerable_response": {
+        "status": 200,
+        "body_contains": {"owner": "vendor-b"}
+      },
+      "expected_secure_response": {
+        "status": 403
+      }
+    },
+    "exploit_evidence": {
+      "description": "vendor-a sends GET /warehouses/ABCDE with X-Vendor-ID: vendor-a and receives the full record owned by vendor-b, including owner field and warehouse name.",
+      "cross_tenant_access": true,
+      "data_exposed": ["code", "owner", "name"]
+    },
+    "fix_evidence": {
+      "description": "Add an ownership check immediately after the 404 guard. Return 403 Forbidden if the requesting vendor does not own the warehouse.",
+      "secure_snippet": "if wh['owner'] != vendor_id:\n    return jsonify({'error': 'forbidden'}), 403"
+    }
+  },
+  {
+    "gt_id": "idor-warehouse-delete-002",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "DELETE",
+      "path": "/warehouses/{code}",
+      "app": "idor_warehouse"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "description": "DELETE /warehouses/<code> removes the warehouse from the in-memory store without verifying that the requesting vendor owns it. Any authenticated vendor can delete any other vendor's warehouse.",
+      "severity": "critical"
+    },
+    "code_evidence": {
+      "file": "app.py",
+      "function": "delete_warehouse",
+      "snippet": "vendor_id = request.headers.get('X-Vendor-ID', 'unknown')\nwh = WAREHOUSES.get(code)\nif not wh:\n    return jsonify({'error': 'not found'}), 404\n# IDOR: deletes without checking ownership\ndel WAREHOUSES[code]\nreturn jsonify({'deleted': code, 'by': vendor_id})",
+      "missing_check": "if wh['owner'] != vendor_id: return 403"
+    },
+    "runtime_evidence": {
+      "probe": {
+        "method": "DELETE",
+        "url": "http://localhost:5000/warehouses/ABCDE",
+        "headers": {"X-Vendor-ID": "vendor-a"}
+      },
+      "expected_vulnerable_response": {
+        "status": 200,
+        "body_contains": {"deleted": "ABCDE", "by": "vendor-a"}
+      },
+      "expected_secure_response": {
+        "status": 403
+      }
+    },
+    "exploit_evidence": {
+      "description": "vendor-a sends DELETE /warehouses/ABCDE and successfully destroys vendor-b's warehouse. Subsequent GET returns 404, confirming permanent data loss.",
+      "cross_tenant_access": true,
+      "data_destroyed": ["ABCDE"]
+    },
+    "fix_evidence": {
+      "description": "Add an ownership check before the delete. Return 403 Forbidden if the requesting vendor does not own the warehouse.",
+      "secure_snippet": "if wh['owner'] != vendor_id:\n    return jsonify({'error': 'forbidden'}), 403"
+    }
+  },
+  {
+    "gt_id": "idor-warehouse-put-003",
+    "vulnerability_class": "IDOR",
+    "cwe": "CWE-639",
+    "artifact": {
+      "type": "http_endpoint",
+      "method": "PUT",
+      "path": "/warehouses/{code}",
+      "app": "idor_warehouse"
+    },
+    "ground_truth": {
+      "is_vulnerable": true,
+      "description": "PUT /warehouses/<code> applies the request body to the warehouse dict without verifying ownership. Any vendor can overwrite any field — including the owner field — on any warehouse.",
+      "severity": "critical"
+    },
+    "code_evidence": {
+      "file": "app.py",
+      "function": "update_warehouse",
+      "snippet": "vendor_id = request.headers.get('X-Vendor-ID', 'unknown')\nwh = WAREHOUSES.get(code)\nif not wh:\n    return jsonify({'error': 'not found'}), 404\n# IDOR: updates without checking ownership\ndata = request.get_json() or {}\nwh.update(data)\nreturn jsonify(wh)",
+      "missing_check": "if wh['owner'] != vendor_id: return 403"
+    },
+    "runtime_evidence": {
+      "probe": {
+        "method": "PUT",
+        "url": "http://localhost:5000/warehouses/ABCDE",
+        "headers": {"X-Vendor-ID": "vendor-a", "Content-Type": "application/json"},
+        "body": {"name": "Hijacked", "owner": "vendor-a"}
+      },
+      "expected_vulnerable_response": {
+        "status": 200,
+        "body_contains": {"name": "Hijacked", "owner": "vendor-a"}
+      },
+      "expected_secure_response": {
+        "status": 403
+      }
+    },
+    "exploit_evidence": {
+      "description": "vendor-a sends PUT /warehouses/ABCDE with body {name: 'Hijacked', owner: 'vendor-a'} and successfully mutates vendor-b's warehouse, including taking ownership of it.",
+      "cross_tenant_access": true,
+      "fields_overwritten": ["name", "owner"]
+    },
+    "fix_evidence": {
+      "description": "Add an ownership check before applying the update. Return 403 Forbidden if the requesting vendor does not own the warehouse. Additionally, strip the owner field from the update payload to prevent ownership hijacking.",
+      "secure_snippet": "if wh['owner'] != vendor_id:\n    return jsonify({'error': 'forbidden'}), 403\ndata.pop('owner', None)  # prevent ownership hijacking"
+    }
+  }
+]

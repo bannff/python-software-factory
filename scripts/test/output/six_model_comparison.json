@@ -1,0 +1,26 @@
+{
+  "lightgbm": {
+    "error": "name 'X_uri' is not defined",
+    "train_time_sec": 0.0
+  },
+  "lstm": {
+    "error": "name 'X_uri' is not defined",
+    "train_time_sec": 0.0
+  },
+  "tcn": {
+    "error": "name 'X_uri' is not defined",
+    "train_time_sec": 0.0
+  },
+  "patchtst": {
+    "error": "name 'X_uri' is not defined",
+    "train_time_sec": 0.0
+  },
+  "chronos": {
+    "error": "name 'X_uri' is not defined",
+    "train_time_sec": 0.0
+  },
+  "lnn": {
+    "error": "name 'X_uri' is not defined",
+    "train_time_sec": 0.0
+  }
+}

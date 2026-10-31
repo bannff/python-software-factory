@@ -1,0 +1,21 @@
+backend: memory
+service_name: auth-module
+event_store:
+  retention_days: 30
+execution_engines:
+  engines:
+    - engine_id: strands_graph
+      invoke_target:
+        brick_name: agent
+        tool_name: execute_strands_graph_attempt
+      cancel_target:
+        brick_name: agent
+        tool_name: cancel_strands_graph_attempt
+      outcome:
+        success:
+          pointer: /status
+          equals: completed
+        retryable:
+          pointer: /retryable
+          equals: true
+        error_pointer: /error

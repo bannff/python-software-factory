@@ -1,0 +1,14 @@
+name: launch
+type: component
+namespace: factory.launch
+description: "Arcade launch orchestrator \u2014 NCI transport protocol + handoff state\
+  \ machine"
+mcp_enabled: false
+features:
+- nci_transport
+- launch_orchestration
+- readiness_probing
+adapters:
+- udp
+- mock
+pip_packages: []

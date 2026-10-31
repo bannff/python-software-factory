@@ -1,0 +1,9 @@
+id: auto-eval-on-swarm-complete
+event_type: "swarm.completed"
+handler: "mcp:evals_evaluate_multi"
+description: >
+  Auto-evaluate agent output after any swarm completes.
+filters:
+  evaluator_names: '["faithfulness", "helpfulness"]'
+enabled: true
+priority: 10

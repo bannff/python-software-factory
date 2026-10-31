@@ -1,0 +1,11 @@
+name: zebra-tc58
+vendor: Zebra
+model: TC58
+form_factor: rugged_handheld
+os_family: android
+fidelity: linux_proxy
+source_url: https://www.zebra.com/gb/en/products/spec-sheets/mobile-computers/handheld/tc53-tc58.html
+proxy:
+  platform: linux/arm64
+  cpus: 2.0
+  memory_mb: 2048

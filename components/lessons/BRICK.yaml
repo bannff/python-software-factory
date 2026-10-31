@@ -1,0 +1,17 @@
+name: lessons
+type: component
+namespace: factory.lessons
+description: Owner-scoped typed lesson identity, curation, and recall authority
+mcp_enabled: true
+features:
+- typed_lesson_identity
+- owner_persona_scope
+- revision_fenced_lifecycle
+- accepted_memory_projection
+adapters:
+- sqlite
+mcp_resources: []
+mcp_prompts: []
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

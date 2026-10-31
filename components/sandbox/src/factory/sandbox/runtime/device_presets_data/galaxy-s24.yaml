@@ -1,0 +1,11 @@
+name: galaxy-s24
+vendor: Samsung
+model: Galaxy S24
+form_factor: phone
+os_family: android
+fidelity: linux_proxy
+source_url: https://www.samsung.com/us/business/mobile/phones/galaxy-s24/
+proxy:
+  platform: linux/arm64
+  cpus: 2.0
+  memory_mb: 2048

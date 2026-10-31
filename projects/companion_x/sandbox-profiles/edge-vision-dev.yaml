@@ -1,0 +1,23 @@
+container_name: edge-vision-dev
+cpus: 1.0
+device_target:
+  family: ipad
+  fidelity: linux_proxy
+  model: ipad-pro-11-m2
+  os_version: "17.5"
+entrypoint:
+- run
+image: sha256:040c91591c28154252bf921759cbbf5255a555f739e0d2484c837bc975c12eed
+memory_mb: 512
+name: edge-vision-dev
+peer_network:
+  alias: edge-vision-dev
+  internal: true
+  network_id: edge-vision-dev-lab
+  port: 17331
+platform: linux/arm64
+replace_existing: false
+secret_refs:
+- ditto-offline-license
+setup_commands: []
+shell: /bin/sh

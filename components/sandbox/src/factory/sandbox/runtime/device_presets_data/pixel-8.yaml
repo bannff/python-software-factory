@@ -1,0 +1,11 @@
+name: pixel-8
+vendor: Google
+model: Pixel 8
+form_factor: phone
+os_family: android
+fidelity: linux_proxy
+source_url: https://store.google.com/us/product/pixel_8_specs
+proxy:
+  platform: linux/arm64
+  cpus: 2.0
+  memory_mb: 2048

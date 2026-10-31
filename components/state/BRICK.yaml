@@ -1,0 +1,10 @@
+name: state
+type: component
+namespace: factory.state
+description: Runtime session state — what's launched, focus, last-played
+mcp_enabled: false
+features:
+- session_state
+- state_transitions
+pip_packages:
+- pydantic>=2.0.0

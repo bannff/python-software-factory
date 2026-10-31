@@ -1,0 +1,80 @@
+name: telemetry
+type: component
+namespace: factory.telemetry
+description: Observability and distributed tracing via OpenTelemetry (OTLP)
+mcp_enabled: true
+features:
+- observability
+- distributed_tracing
+- metrics
+- otlp_export
+- console_export
+- storage_persistence
+- llm_token_tracking
+- typed_mcp_boundary
+- provenance_ingest
+- provenance_reference_reads
+- provenance_materialization
+- mcp_resources
+- mcp_prompts
+adapters:
+- memory
+- aws
+adapter_infra:
+  aws:
+    services: []
+mcp_resources:
+- telemetry://schemas/settings
+- telemetry://schemas/exporter
+- telemetry://schemas/metric
+- telemetry://docs
+- telemetry://docs/overview
+- telemetry://docs/otel
+- telemetry://docs/metrics
+- telemetry://docs/tracing
+- telemetry://docs/when-to-use
+- telemetry://metrics
+- telemetry://exporters
+- telemetry://summary
+- telemetry://factory
+mcp_prompts:
+- configure_otel
+- debug_telemetry
+- create_metric
+mcp_tools:
+  # Deterministic (read-only)
+  - get_capabilities
+  - health_check
+  - get_metric_registry
+  - get_exporter_registry
+  - get_metrics_summary
+  - describe_config_schema
+  - inject_context
+  - extract_context
+  - telemetry_get_views
+  # Operational (stateful)
+  - flush_telemetry
+  - record_log
+  - record_llm_interaction
+  - record_agent_execution
+  - record_tool_invocation
+  - start_span
+  - end_span
+  - telemetry_ingest_batch
+  - telemetry_read_reference
+  - telemetry_materialize
+  # Authoring (security-gated)
+  - authoring_status
+  - list_configs
+  - read_config
+  - write_config
+  - write_metric_file
+  - delete_config
+pip_packages:
+- boto3>=1.35.0
+- click>=8.0.0
+- mcp[cli]==2.1.1
+- opentelemetry-api>=1.20.0
+- opentelemetry-instrumentation==0.62b0
+- pydantic>=2.0.0
+- pyyaml>=6.0.0

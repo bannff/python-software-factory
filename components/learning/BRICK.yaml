@@ -1,0 +1,26 @@
+name: learning
+type: component
+namespace: factory.learning
+description: "Domain-agnostic reward-signal seam \u2014 polymorphic RewardSourcePort\
+  \ dispatch with a registry overlay; unpins recursive learning from security findings"
+mcp_enabled: true
+dependencies:
+- mcp_utils
+features:
+- reward_source_registry_overlay
+- domain_agnostic_reward
+- gt_findings_reward_source
+- generic_fallback
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- games
+- evals
+mcp_tools:
+- learning_list_reward_sources
+- learning_compute_reward
+mcp_resources:
+- learning://schemas/reward-signal
+- learning://docs/learning
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

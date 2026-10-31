@@ -1,0 +1,28 @@
+[
+  {
+    "gt_id": "localstack-ssrf-001",
+    "vulnerability_class": "SSRF",
+    "cwe": "CWE-918",
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "The ssrf-vulnerable-function Lambda accepts a user-supplied URL and fetches it without validation. An attacker can use this to access internal AWS endpoints including SSM Parameter Store secrets.",
+      "confidence": "high"
+    },
+    "runtime_evidence": {
+      "surface": { "endpoint": "lambda:Invoke", "method": "POST" }
+    }
+  },
+  {
+    "gt_id": "localstack-secret-plaintext-002",
+    "vulnerability_class": "Cleartext Storage",
+    "cwe": "CWE-312",
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "The SSM parameter /app/db-password stores a database password as a plaintext String instead of SecureString, making it readable by any principal with ssm:GetParameter.",
+      "confidence": "high"
+    },
+    "runtime_evidence": {
+      "surface": { "endpoint": "ssm:GetParameter", "method": "POST" }
+    }
+  }
+]

@@ -1,0 +1,17 @@
+name: portability
+type: component
+namespace: factory.portability
+description: Owner-scoped export of Companion-X's own memory/config into an inspectable, secret-free bundle for later re-import
+mcp_enabled: true
+features:
+- allowlisted_kind_export
+- secret_free_bundle
+- deterministic_record_identity
+- redaction_defense_in_depth
+- native_mcp_v2_typed_pydantic_contracts
+adapters: []
+mcp_resources: []
+mcp_prompts: []
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0

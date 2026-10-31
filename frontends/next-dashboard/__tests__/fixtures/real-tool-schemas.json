@@ -1,0 +1,155 @@
+{
+  "_generated_by": "scripts/dump_real_tool_schemas.py",
+  "tools": [
+    {
+      "name": "cache_set",
+      "description": "Set a value in cache with optional TTL.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          },
+          "ttl_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Ttl Seconds"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "CacheSetInput",
+        "type": "object"
+      },
+      "category": "operational",
+      "op_kind": null,
+      "brick": "cache",
+      "qualified_name": "cache_set"
+    },
+    {
+      "name": "cache_keys",
+      "description": "List cache keys matching a pattern.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "pattern": {
+            "default": "*",
+            "title": "Pattern",
+            "type": "string"
+          }
+        },
+        "title": "CacheKeysInput",
+        "type": "object"
+      },
+      "category": "operational",
+      "op_kind": null,
+      "brick": "cache",
+      "qualified_name": "cache_keys"
+    },
+    {
+      "name": "cache_stats",
+      "description": "Get cache statistics.",
+      "input_schema": {
+        "additionalProperties": false,
+        "description": "Closed input for no-argument tools.",
+        "properties": {},
+        "title": "EmptyInput",
+        "type": "object"
+      },
+      "category": "operational",
+      "op_kind": null,
+      "brick": "cache",
+      "qualified_name": "cache_stats"
+    },
+    {
+      "name": "record_log",
+      "description": "",
+      "input_schema": {
+        "$defs": {
+          "JsonValue": {}
+        },
+        "additionalProperties": false,
+        "properties": {
+          "severity": {
+            "enum": [
+              "DEBUG",
+              "INFO",
+              "WARN",
+              "WARNING",
+              "ERROR"
+            ],
+            "title": "Severity",
+            "type": "string"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "attributes": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/$defs/JsonValue"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Attributes"
+          },
+          "trace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Trace Id"
+          },
+          "span_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Span Id"
+          }
+        },
+        "required": [
+          "severity",
+          "body"
+        ],
+        "title": "RecordLogInput",
+        "type": "object"
+      },
+      "category": "operational",
+      "op_kind": null,
+      "brick": "telemetry",
+      "qualified_name": "telemetry_record_log"
+    }
+  ]
+}

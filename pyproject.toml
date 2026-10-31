@@ -1,0 +1,259 @@
+[project]
+name = "python-factory"
+version = "0.1.0"
+description = "Python Software Factory - Polylith Monorepo"
+requires-python = ">=3.11"
+dependencies = [
+    "aiosqlite>=0.19.0",
+    "apprise>=1.9.0",
+    "celery>=5.6.2",
+    "blinker>=1.9.0",
+    "chromadb>=1.4.1",
+    "click>=8.0.0",
+    "croniter==6.2.4",
+    "cryptography>=49.0.0",
+    "fastapi>=0.128.0",
+    "mcp[cli]==2.1.1",
+    "gql[httpx]>=3.5.0",
+    "hypothesis>=6.0.0",
+    "httpx>=0.27.0",
+    "jinja2>=3.1.0",
+    "mcp-ui-server>=1.0.0,<2.0.0",
+    "neo4j>=6.1.0",
+    "neo4j-graphrag>=1.0.0",
+    "networkx>=3.6.1",
+    "opentelemetry-api>=1.20.0",
+    "opentelemetry-exporter-otlp>=1.20.0",
+    "opentelemetry-instrumentation==0.62b0",
+    "opentelemetry-sdk>=1.20.0",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.12.0",
+    "pyjwt[crypto]>=2.8.0",
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "python-fasthtml>=0.12.39",
+    "pyyaml>=6.0.0",
+    "rapidfuzz>=3.0.0",
+    "rank-bm25>=0.2.2",
+    "redis>=7.1.0",
+    "sdv>=1.37.0",
+    "stripe>=14.3.0a1",
+    "structlog>=25.1.0",
+    "tinydb>=4.8.2",
+    "typer>=0.12.0",
+    "uvicorn>=0.40.0",
+    "mlx-lm==0.31.2; platform_system == 'Darwin' and platform_machine == 'arm64'",
+    "mlx==0.31.1; platform_system == 'Darwin' and platform_machine == 'arm64'",
+    "datasets>=4.8.4",
+    "huggingface-hub>=1.3.3",
+    "strands-agents==1.56.0",
+    "strands-agents-evals==1.3.0",
+]
+
+[dependency-groups]
+# Dormant langchain-langgraph runtime adapter (selected via
+# AGENT_RUNTIME_ADAPTER=langchain); not installed by default.
+langgraph-legacy = [
+    "langchain==1.3.17",
+    "langchain-aws==1.7.4",
+    "langchain-openai==1.6.2",
+    "langgraph==1.2.11",
+    "langgraph-checkpoint-sqlite==3.1.1",
+]
+core-test = [
+    "authlib==1.6.12",
+    "ddgs==9.16.0",
+    "langchain-community==0.4.2",
+    "langchain-experimental==0.4.2",
+]
+# CAN capture/DBC dependencies exercised in their own CI lane. Exact pins keep
+# generated MF4 and parser provenance reproducible.
+can-test = [
+    "asammdf==8.8.22",
+    "cantools==42.0.3",
+]
+# Native Apple Silicon acceptance dependencies. Keep these aligned with the
+# strict neural passport helpers exercised by the dedicated macOS ARM lane.
+mlx-test = [
+    "chronos-forecasting==2.3.1",
+    "peft==0.19.1",
+    "safetensors==0.8.0",
+    "torch==2.13.0",
+    "transformers==5.10.1",
+]
+
+# Optional heavy ML extras for the machine_learning brick's training and
+# inference adapters (sklearn_timeseries, torch_timeseries, can_inference,
+# mlflow/tensorboard trackers). The brick loads WITHOUT these — adapters
+# lazy-import and raise only on use. On Darwin arm64, use the exact command
+# documented in projects/companion_x/README.md so LightGBM is OpenMP-free.
+ml = [
+    "joblib>=1.3.0",
+    "lightgbm==4.7.0",
+    "scikit-learn>=1.3.0",
+    "torch==2.13.0",
+    "mlflow==3.16.0",
+    "tensorboard>=2.17.0",
+    "peft==0.19.1",
+    "safetensors==0.8.0",
+    "chronos-forecasting==2.3.1",
+    "ncps==1.0.1",
+    "transformers==5.10.1",
+]
+
+[build-system]
+requires = ["hatchling", "hatch-polylith-bricks"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["factory"]
+
+[tool.hatch.metadata]
+# Kept for any future VCS-pinned dependency (harmless when none exist).
+# The Agentic-Datasets git pin was removed — its stage logic is slated for
+# native reimplementation in the dataset brick (see beads).
+allow-direct-references = true
+
+[tool.hatch.build]
+# Hatchling-native editable-mode escape hatch (bd:python-factory-9wcd).
+# Each entry is a brick `src/` dir; hatch_polylith_bricks short-circuits
+# its copy hook for these (filter_dev_mode_bricks), and Hatchling's
+# WheelBuilder.build_editable writes a single `_python_factory.pth`
+# into the wheel listing one absolute path per entry. Source-tree
+# becomes the canonical snapshot — no factory/ subtree in site-packages,
+# no PYTHONPATH overrides anywhere needed (Kiro powers, ad-hoc python -m,
+# uv run, the API). Keep parity with [tool.polylith.bricks] keys below.
+dev-mode-dirs = [
+    "bases/api/src",
+    "bases/blueprint/src",
+    "bases/mcp_server/src",
+    "bases/worker/src",
+    "components/agent/src",
+    "components/artifacts/src",
+    "components/auth/src",
+    "components/blockchain/src",
+    "components/browser/src",
+    "components/cache/src",
+    "components/connections/src",
+    "components/config/src",
+    "components/dataset/src",
+    "components/devtools/src",
+    "components/domain/src",
+    "components/evals/src",
+    "components/events/src",
+    "components/foreman/src",
+    "components/games/src",
+    "components/graph/src",
+    "components/http_client/src",
+    "components/integrations/src",
+    "components/kb/src",
+    "components/learning/src",
+    "components/lessons/src",
+    "components/llm_gateway/src",
+    "components/logger/src",
+    "components/machine_learning/src",
+    "components/mcp_utils/src",
+    "components/memory/src",
+    "components/migration/src",
+    "components/portability/src",
+    "components/metrics/src",
+    "components/notification/src",
+    "components/oracle/src",
+    "components/payments/src",
+    "components/permissions/src",
+    "components/sandbox/src",
+    "components/scheduler/src",
+    "components/security/src",
+    "components/session/src",
+    "components/storage/src",
+    "components/telemetry/src",
+    "components/terminal/src",
+    "components/test/src",
+    "components/ui/src",
+    "components/workflow/src",
+]
+
+[tool.hatch.build.hooks.polylith-bricks]
+
+[tool.uv]
+required-version = ">=0.12.0,<0.13"
+
+[tool.uv.sources]
+lightgbm = [
+    { url = "https://files.pythonhosted.org/packages/63/8e/4db5e29290d7e619c307fdb8dab0a0514090af2ce3ec483050e024ec6126/lightgbm-4.7.0.tar.gz", marker = "sys_platform == 'darwin' and platform_machine == 'arm64'" },
+]
+
+[tool.uv.workspace]
+members = [
+    "projects/*",
+]
+exclude = [
+    "projects/circuitron",
+]
+
+[tool.polylith]
+namespace = "factory"
+alias = { jwt = "pyjwt", opentelemetry = "opentelemetry-api", hfc = "fabric-sdk-py", yaml = "pyyaml", fasthtml = "python-fasthtml", rank_bm25 = "rank-bm25" }
+
+[tool.polylith.bricks]
+"bases/blueprint/src/factory/blueprint" = "factory/blueprint"
+"bases/mcp_server/src/factory/mcp_server" = "factory/mcp_server"
+"components/agent/src/factory/agent" = "factory/agent"
+"components/artifacts/src/factory/artifacts" = "factory/artifacts"
+"components/auth/src/factory/auth" = "factory/auth"
+"components/blockchain/src/factory/blockchain" = "factory/blockchain"
+"components/browser/src/factory/browser" = "factory/browser"
+"components/events/src/factory/events" = "factory/events"
+"components/foreman/src/factory/foreman" = "factory/foreman"
+"components/kb/src/factory/kb" = "factory/kb"
+"components/learning/src/factory/learning" = "factory/learning"
+"components/lessons/src/factory/lessons" = "factory/lessons"
+"components/logger/src/factory/logger" = "factory/logger"
+"components/mcp_utils/src/factory/mcp_utils" = "factory/mcp_utils"
+"components/notification/src/factory/notification" = "factory/notification"
+"components/payments/src/factory/payments" = "factory/payments"
+"components/permissions/src/factory/permissions" = "factory/permissions"
+"components/sandbox/src/factory/sandbox" = "factory/sandbox"
+"components/scheduler/src/factory/scheduler" = "factory/scheduler"
+"components/security/src/factory/security" = "factory/security"
+"components/session/src/factory/session" = "factory/session"
+"components/telemetry/src/factory/telemetry" = "factory/telemetry"
+"components/terminal/src/factory/terminal" = "factory/terminal"
+"components/test/src/factory/test" = "factory/test"
+"components/ui/src/factory/ui" = "factory/ui"
+"components/workflow/src/factory/workflow" = "factory/workflow"
+"components/storage/src/factory/storage" = "factory/storage"
+"components/cache/src/factory/cache" = "factory/cache"
+"components/connections/src/factory/connections" = "factory/connections"
+"components/config/src/factory/config" = "factory/config"
+"components/domain/src/factory/domain" = "factory/domain"
+"components/dataset/src/factory/dataset" = "factory/dataset"
+"components/devtools/src/factory/devtools" = "factory/devtools"
+"components/llm_gateway/src/factory/llm_gateway" = "factory/llm_gateway"
+"components/http_client/src/factory/http" = "factory/http"
+"components/graph/src/factory/graph" = "factory/graph"
+"components/evals/src/factory/evals" = "factory/evals"
+"components/games/src/factory/games" = "factory/games"
+"components/machine_learning/src/factory/machine_learning" = "factory/machine_learning"
+"components/memory/src/factory/memory" = "factory/memory"
+"components/migration/src/factory/migration" = "factory/migration"
+"components/portability/src/factory/portability" = "factory/portability"
+"components/metrics/src/factory/metrics" = "factory/metrics"
+"components/integrations/src/factory/integrations" = "factory/integrations"
+"components/oracle/src/factory/oracle" = "factory/oracle"
+"bases/api/src/factory/api" = "factory/api"
+"bases/worker/src/factory/worker" = "factory/worker"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "--import-mode=importlib"
+testpaths = ["components/*/test", "bases/*/test", "scripts/test"]
+

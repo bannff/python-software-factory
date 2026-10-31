@@ -1,0 +1,11 @@
+name: ipad-a16
+vendor: Apple
+model: iPad (A16)
+form_factor: tablet
+os_family: ipados
+fidelity: linux_proxy
+source_url: https://support.apple.com/en-us/122240
+proxy:
+  platform: linux/arm64
+  cpus: 3.0
+  memory_mb: 3072

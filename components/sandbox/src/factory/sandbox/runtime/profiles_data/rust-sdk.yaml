@@ -1,0 +1,41 @@
+# Ephemeral Rust dev-loop sandbox profile.
+#
+# Lifecycle an outside agent drives over MCP:
+#   sandbox.provision(profile="rust-sdk")   -> container up, tooling installed
+#   sandbox.execute(env, "git clone <repo> /work && cd /work && cargo build")
+#   sandbox.execute(env, "cd /work && cargo test && cargo clippy")
+#   ... agent edits via execute / upload_file ...
+#   (open a PR — see the secure token flow in the sandbox recipe; NEVER put a
+#    token in this file, in env_vars, or in a command string — it is logged)
+#   sandbox.terminate(env)
+#
+# NOTE: serde / schemars are CRATE dependencies of the *target repo* (declared
+# in its Cargo.toml), not global tools — cargo resolves them on `cargo build`.
+# This profile installs the toolchain + repo-agnostic dev/test tooling only.
+name: rust-sdk
+image: rust:1-slim
+shell: /bin/bash
+entrypoint: ["sleep", "infinity"]
+setup_commands:
+  # Base tooling: git + gh CLI (official apt repo) for clone + PR.
+  - >-
+    apt-get update && apt-get install -y --no-install-recommends
+    git curl ca-certificates gnupg
+  - >-
+    mkdir -p -m 755 /etc/apt/keyrings &&
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg
+    -o /etc/apt/keyrings/githubcli-archive-keyring.gpg &&
+    chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg &&
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+    > /etc/apt/sources.list.d/github-cli.list &&
+    apt-get update && apt-get install -y --no-install-recommends gh
+  # Rust lint/format components (fast — shipped via rustup).
+  - rustup component add clippy rustfmt
+  # Popular Rust test/audit tooling via prebuilt binaries (cargo-binstall
+  # avoids a slow from-source compile).
+  # cargo-binstall installs into $CARGO_HOME/bin (/usr/local/cargo/bin on the
+  # official image), which is already on PATH — so invoke it by name, not path.
+  - >-
+    curl -fsSL https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh
+    | bash
+  - cargo-binstall -y cargo-nextest cargo-audit

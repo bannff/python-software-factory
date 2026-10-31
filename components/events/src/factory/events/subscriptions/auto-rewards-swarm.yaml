@@ -1,0 +1,10 @@
+id: auto-rewards-on-swarm-complete
+event_type: "swarm.completed"
+handler: "mcp:rewards_dispatch"
+description: >
+  RL reward processing after any swarm completes.
+filters:
+  event_type: "rewards.process"
+  source: "events.auto-rewards"
+enabled: true
+priority: 1

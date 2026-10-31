@@ -1,0 +1,91 @@
+name: security
+type: component
+namespace: factory.security
+description: Polymorphic security operations with pluggable analysis adapters
+domain: security
+mcp_enabled: true
+features:
+- threat_modeling
+- code_analysis
+- penetration_testing
+- reconnaissance
+- vulnerability_scanning
+- finding_management
+- cwe_taxonomy
+- ocsf_taxonomy
+- gt_ingestion
+- pentest_scanning
+- pentest_port_scan
+- pentest_vuln_scan
+- pentest_web_fuzz
+- pentest_sql_inject
+- native_mcp_v2_typed_pydantic_contracts
+adapters:
+- threat_modeling
+- code_analysis
+- pen_testing
+- recon
+- mock
+- graph_persistence
+- memory_persistence
+- pentest_sandbox
+mcp_resources:
+- security://schemas/config
+- security://schemas/finding
+- security://schemas/analysis
+- security://schemas/gt-entry
+- security://schemas/pentest-tools
+- security://docs
+- security://docs/{doc_name}
+- security://findings
+- security://backends
+- security://health
+- security://factory
+mcp_prompts:
+- analyze_target
+- threat_model
+- review_findings
+- ingest_ground_truth
+- run_pentest_assessment
+- analyze_scan_results
+# Canonical native MCP v2 surface: 31 typed tools. Every tool uses strict same-brick
+# Pydantic v2 input/output DTOs and returns ToolResult[OutputDTO].
+mcp_tools:
+  # Deterministic (11)
+  - security.get_capabilities
+  - security.health_check
+  - security.describe_config_schema
+  - security.list_analyses
+  - security.get_analysis
+  - security.supported_types
+  - security.scan_endpoints
+  - security.classify_confidence
+  - security.trace_taint
+  - security_pentest_list_jobs
+  - security_get_views
+  # Operational (14)
+  - security.analyze
+  - security.threat_model
+  - security.code_review
+  - security.recon
+  - security.list_persisted_findings
+  - security.list_persisted_analyses
+  - security_classify_finding
+  - security_conform_finding
+  - security_ingest_gt_entry
+  - security_list_findings_for_run
+  - security_pentest_scan
+  - security_pentest_status
+  - security_pentest_results
+  - security_pentest_cancel
+  # Authoring (6; always registered; behavior is gated by authoring mode)
+  - security.authoring.get_status
+  - security.authoring.list_rules
+  - security.authoring.upsert_rule
+  - security.authoring.delete_rule
+  - security_seed_cwe_taxonomy
+  - security_seed_ocsf_taxonomy
+pip_packages:
+- mcp[cli]==2.1.1
+- pydantic>=2.0.0
+- pyyaml>=6.0.0

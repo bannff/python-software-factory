@@ -1,0 +1,28 @@
+[
+  {
+    "gt_id": "localstack-iam-privesc-001",
+    "vulnerability_class": "Privilege Escalation",
+    "cwe": "CWE-269",
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "The vulnerable-lambda-role IAM role has iam:*, s3:*, lambda:*, dynamodb:* permissions on all resources. Any principal that can assume this role gains full administrative access.",
+      "confidence": "high"
+    },
+    "runtime_evidence": {
+      "surface": { "endpoint": "iam:AssumeRole", "method": "POST" }
+    }
+  },
+  {
+    "gt_id": "localstack-s3-public-002",
+    "vulnerability_class": "Improper Access Control",
+    "cwe": "CWE-284",
+    "ground_truth": {
+      "is_vulnerable": true,
+      "statement": "The public-data-bucket S3 bucket has a bucket policy granting s3:GetObject to Principal '*', making all objects publicly readable.",
+      "confidence": "high"
+    },
+    "runtime_evidence": {
+      "surface": { "endpoint": "s3:GetBucketPolicy", "method": "GET" }
+    }
+  }
+]

@@ -1,0 +1,48 @@
+@import "tailwindcss";
+/* Shared design tokens (@theme inline + :root/.dark var blocks) now live in
+   the renderer package so the consuming surface shares ONE token definition
+   (bd:python-factory-co1ht). This @import is token-extraction-only — the
+   compiled output is byte-identical to the prior inline blocks. */
+@import "../../shared-renderer/src/theme.css";
+@plugin "@tailwindcss/typography";
+
+/* Track 6 (bd:python-factory-ons71): scan the shared-renderer package so
+   Tailwind keeps its utility classes (the renderer components live outside
+   this app's auto-detected source tree). Points at the sibling source so
+   detection is independent of the compiled lib/ output. */
+@source "../../shared-renderer/src";
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  /* Display → Density. Tailwind v4 derives padding, gap, margin, and height
+     utilities from --spacing, so one root override tightens the whole UI
+     uniformly. Applied by DisplayPreferenceSync from the durable owner
+     preference. (Utility prefixes stay out of this comment on purpose: a
+     literal star followed by a slash would terminate it early and break the
+     Tailwind PostCSS parse.) */
+  html[data-density="compact"] {
+    --spacing: 0.2rem;
+  }
+}
+
+/* Radix Collapsible animations */
+@keyframes collapsible-down {
+  from { height: 0; opacity: 0; }
+  to { height: var(--radix-collapsible-content-height); opacity: 1; }
+}
+@keyframes collapsible-up {
+  from { height: var(--radix-collapsible-content-height); opacity: 1; }
+  to { height: 0; opacity: 0; }
+}
+
+@utility animate-collapsible-down {
+  animation: collapsible-down 0.15s ease-out;
+}
+@utility animate-collapsible-up {
+  animation: collapsible-up 0.12s ease-out;
+}

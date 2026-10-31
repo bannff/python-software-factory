@@ -1,0 +1,69 @@
+name: metrics
+type: component
+namespace: factory.metrics
+description: Portfolio-level metrics, risk scoring, drift detection, and time-series tracking
+mcp_enabled: true
+features:
+  - metric_definitions
+  - time_series_recording
+  - aggregation_snapshots
+  - drift_detection
+  - trend_analysis
+  - portfolio_coverage
+  - risk_scoring
+  - mcp_resources
+  - mcp_prompts
+  - taxonomy
+  - regression_gating
+  - bayesian_estimation
+  - native_mcp_v2_typed_pydantic_contracts
+adapters:
+  - memory
+mcp_resources:
+  - metrics://schemas/metric-definition
+  - metrics://schemas/data-point
+  - metrics://schemas/snapshot
+  - metrics://docs/overview
+  - metrics://docs/metric-types
+  - metrics://registry
+  - metrics://snapshots
+  - metrics://factory
+mcp_prompts:
+  - define_metric
+  - analyze_trend
+  - configure_dashboard
+mcp_tools:
+  # Deterministic (read-only)
+  - metrics_get_capabilities
+  - metrics_health_check
+  - metrics_describe_config_schema
+  - metrics_get_registry
+  - metrics_get_definition
+  - metrics_get_snapshot
+  - metrics_get_trend
+  - metrics_get_all_snapshots
+  - metrics_get_by_taxonomy
+  - metrics_compare_baseline
+  - metrics_list_baselines
+  - metrics_measure
+  - metrics_precision_estimate
+  - metrics_sample_size
+  - metrics_iteration_efficiency
+  - metrics_get_views
+  # Operational (stateful)
+  - metrics_record
+  - metrics_record_batch
+  - metrics_compute_aggregation
+  - metrics_detect_drift
+  - metrics_seed_defaults
+  - metrics_seed_sample_data
+  # Authoring (security-gated)
+  - metrics_authoring_status
+  - metrics_define_metric
+  - metrics_update_definition
+  - metrics_delete_definition
+  - metrics_set_baseline
+pip_packages:
+  - mcp[cli]==2.1.1
+  - pydantic>=2.0.0
+  - pyyaml>=6.0.0

@@ -1,0 +1,58 @@
+name: mcp_server
+type: base
+namespace: factory.mcp_server
+description: Unified native MCP v2 aggregator with one scoped server surface
+mcp_enabled: true
+mcp_gateway_host: true
+features:
+- brick_aggregation
+- dynamic_discovery
+- progressive_discovery
+- lazy_loading
+- unified_health_check
+- unified_capabilities
+- hot_reload
+- mcp_resources
+- mcp_prompts
+- brick_resource_aggregation
+- brick_prompt_aggregation
+- native_mcp_v2_typed_pydantic_contracts
+- native_mcp_v2_transport_egress
+contract_tools:
+- get_capabilities
+- health_check
+meta_tools:
+- get_capabilities
+- health_check
+- list_bricks
+- get_brick_tools
+- get_brick_resources
+- get_brick_prompts
+- get_tool_catalog
+- call_brick_tool
+- read_brick_resource
+- render_brick_prompt
+resources:
+- mcp://docs
+- mcp://docs/{name}
+- mcp://bricks
+- mcp://bricks/{brick_name}
+- mcp://health
+- mcp://capabilities
+prompts:
+- discover_capabilities
+- find_tool
+- brick_health_check
+- troubleshoot_brick
+configuration:
+  env_vars:
+    MCP_SERVER_NAME: 'Server name (default: factory-app)'
+    MCP_INCLUDE_BRICKS: Comma-separated bricks to include
+    MCP_EXCLUDE_BRICKS: Comma-separated bricks to exclude
+    MCP_DISCOVERY_MODE: 'Discovery mode: progressive (default) or flat'
+pip_packages:
+- mcp[cli]==2.1.1
+- opentelemetry-api>=1.20.0
+- pyyaml>=6.0.0
+- starlette>=0.40.0
+- tomli>=2.0.0; python_version<'3.11'

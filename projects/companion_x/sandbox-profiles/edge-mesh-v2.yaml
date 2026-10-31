@@ -1,0 +1,18 @@
+container_name: edge-mesh-v2
+cpus: 1.0
+entrypoint:
+- run
+image: sha256:303725611532423175126b55f9ced56f042bbfba224c182066f291c9ec15cd9d
+memory_mb: 512
+name: edge-mesh-v2
+peer_network:
+  alias: edge-mesh-v2
+  internal: true
+  network_id: edge-mesh-v2-lab
+  port: 17331
+platform: linux/arm64
+replace_existing: false
+secret_refs:
+- ditto-offline-license
+setup_commands: []
+shell: /bin/sh

@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Intentionally vulnerable IAM configuration for security testing.
+  DO NOT deploy to production AWS accounts.
+
+Resources:
+  VulnerableLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: vulnerable-lambda-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: overly-permissive-policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'iam:*'
+                  - 's3:*'
+                  - 'lambda:*'
+                  - 'dynamodb:*'
+                Resource: '*'
+
+  PublicDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: public-data-bucket
+
+  PublicBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PublicDataBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: PublicRead
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Sub '${PublicDataBucket.Arn}/*'
