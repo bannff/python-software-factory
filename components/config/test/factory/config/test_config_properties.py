@@ -24,7 +24,8 @@ _dot_key = st.lists(_segment, min_size=1, max_size=3).map(".".join)
 # os.environ rejects null bytes — use printable text only
 _value = st.text(
     min_size=0, max_size=50,
-    alphabet=st.characters(blacklist_characters="\x00"),
+    # lone surrogates (Cs) are not UTF-8 encodable, so they are out of contract
+    alphabet=st.characters(blacklist_characters="\x00", blacklist_categories=("Cs",)),
 )
 
 
