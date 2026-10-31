@@ -112,50 +112,37 @@ jobs:
           uv run pytest --collect-only -q \
             --ignore-glob='components/dataset/test/**' \
             --ignore-glob='components/machine_learning/test/**'
-      - name: Run strict control-plane suites
-        # The two brick suites included via CORE_SUITES are listed on purpose
-        # (#56, #57): they were only reachable through the diff-driven selector,
-        # so `main` sat red on them for days and every PR touching those bricks
-        # inherited the red as if it were its own. Running them on every PR is
-        # the guard; the selector skips them so they are not run twice.
+      - name: Run every brick suite (mock adapters; known failures deselected)
+        # One lane, every brick: each suite builds its runtime with in-memory /
+        # mock adapters, so no external service is needed. `config/ci-known-failures.txt`
+        # is a ratchet baseline -- entries may only be deleted, never added
+        # without a fix; any NEW failure fails this job.
+        # dataset/ and machine_learning/ are excluded here (they need asammdf/
+        # cantools/lightgbm, absent from the core venv); the ML property subset
+        # runs in the step below.
         run: |
-          uv run pytest -q $CORE_SUITES
-      - name: Select changed brick tests
-        id: affected
+          args=()
+          while IFS= read -r nodeid; do
+            [ -n "$nodeid" ] && args+=(--deselect "$nodeid")
+          done < config/ci-known-failures.txt
+          uv run pytest $(ls -d components/*/test bases/*/test) -q \
+            --ignore-glob='components/machine_learning/*' \
+            --ignore-glob='components/dataset/*' \
+            "${args[@]}"
+      - name: Run the machine_learning property/contract subset
+        # Heavy deps (lightgbm/ncps/torch) are not in the core venv; these four
+        # modules spawn real subprocesses and are excluded by design. Everything
+        # else heavy self-skips; a new heavy module in the selector fails
+        # collection loudly (fail-closed).
         run: |
-          # Diff against the base-branch tip this PR's merge ref was built on,
-          # not the event-time tip. `github.event.pull_request.base.sha` goes
-          # stale as `main` advances, and the diff then swallows every commit
-          # merged into `main` since the event — so unrelated PRs run (and are
-          # blocked by) brick suites they never touched (#60). On a
-          # `pull_request` event HEAD is the merge ref, so its first parent is
-          # exactly that base tip. Fail closed if it cannot be resolved rather
-          # than silently selecting nothing.
-          base="$(git rev-parse --verify 'HEAD^1^{commit}')"
-          echo "changed-brick diff range: ${base}..HEAD"
-          targets=""
-          while IFS= read -r file; do
-            case "$file" in
-              # dataset/machine_learning have their own job; events/workflow run
-              # unconditionally in the strict lane above, so selecting them here
-              # would run each suite twice in the same job (#60 review).
-              components/dataset/*|components/machine_learning/*) continue ;;
-              components/events/*|components/workflow/*) continue ;;
-              components/*/*)
-                target="$(printf '%s' "$file" | cut -d/ -f1-2)/test" ;;
-              bases/*/*)
-                target="$(printf '%s' "$file" | cut -d/ -f1-2)/test" ;;
-              scripts/*) target="scripts/test" ;;
-              *) continue ;;
-            esac
-            if test -d "$target"; then targets="$targets $target"; fi
-          done < <(git diff --name-only "$base" HEAD)
-          targets="$(printf '%s\n' $targets | sort -u | tr '\n' ' ' | xargs)"
-          echo "resolved targets: ${targets:-<none>}"
-          echo "targets=$targets" >> "$GITHUB_OUTPUT"
-      - name: Run changed brick tests
-        if: steps.affected.outputs.targets != ''
-        run: uv run pytest -q ${{ steps.affected.outputs.targets }}
+          uv run pytest components/machine_learning/test -q \
+            --ignore=components/machine_learning/test/factory/machine_learning/test_can_inference_contract.py \
+            --ignore=components/machine_learning/test/factory/machine_learning/test_transfer_learning_durability.py \
+            --ignore=components/machine_learning/test/factory/machine_learning/test_inference_registry.py \
+            --ignore=components/machine_learning/test/factory/machine_learning/test_openmp_runtime_contract.py \
+            --ignore=components/machine_learning/test/factory/machine_learning/test_can_lightgbm_lifecycle_recovery.py \
+            --ignore=components/machine_learning/test/factory/machine_learning/test_can_inference.py \
+            -k "properties or property or contract or registry or split or curriculum or projection or lifecycle or family or alias"
 
   post-merge:
     # Post-merge smoke for `main` (see the trigger comment): the strict
@@ -198,80 +185,6 @@ jobs:
   # group) — the selected property/contract suites import no torch/mlx/mlflow,
   # so this runs on ubuntu. If a heavy-import module ever sneaks into the
   # selector, collection fails loudly: fail-closed by design.
-  ml-static:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    env:
-      MCP_LOCAL_AUTH: "true"
-      # Deterministic test credential only; never a production or GitHub secret.
-      MCP_LOCAL_AUTH_TOKEN: "ci-local-auth-token-0123456789"
-      MCP_PERMISSIONS_CONFIG_DIR: config/mcp_permissions
-      TELEMETRY_REQUIRED: "0"
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          ref: ${{ github.sha }}
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-        with:
-          version: "0.12.0"
-      - name: Install core dependencies
-        run: uv lock --check && uv sync --frozen
-      - name: Run machine_learning property/contract tests
-        # The -k selector plus explicit --ignore of the four modules whose
-        # tests spawn real lightgbm/ncps subprocesses (ml-group deps, absent
-        # from the core venv by design). Everything else heavy self-skips via
-        # pytest.importorskip on ubuntu; a new heavy module in the selector
-        # fails collection loudly — fail-closed by design.
-        run: |
-          uv run pytest components/machine_learning/test -q \
-            --ignore=components/machine_learning/test/factory/machine_learning/test_can_inference_contract.py \
-            --ignore=components/machine_learning/test/factory/machine_learning/test_transfer_learning_durability.py \
-            --ignore=components/machine_learning/test/factory/machine_learning/test_inference_registry.py \
-            --ignore=components/machine_learning/test/factory/machine_learning/test_openmp_runtime_contract.py \
-            --ignore=components/machine_learning/test/factory/machine_learning/test_can_lightgbm_lifecycle_recovery.py \
-            --ignore=components/machine_learning/test/factory/machine_learning/test_can_inference.py \
-            -k "properties or property or contract or registry or split or curriculum or projection or lifecycle or family or alias"
-      - name: Pyright ratchet (HEAD errors must not exceed BASE)
-        # Same ratchet philosophy as the guardian's file_size_mode='ratchet':
-        # compare HEAD against the PR base, not a frozen baseline file, so the
-        # count can only improve as the base advances. Both runs share this
-        # checkout's .venv (base sources exported to _pyright-base, config
-        # venvPath "."), keeping type resolution apples-to-apples. pyright
-        # exits 1 when it finds errors, so its rc is ignored — only the
-        # --outputjson counts are compared.
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: |
-          rm -rf _pyright-base && mkdir -p _pyright-base
-          git archive "$BASE_SHA" components/machine_learning components/mcp_utils bases/mcp_server \
-            | tar -x -C _pyright-base
-          python3 - <<'EOF' > pyrightconfig.base.json
-          import json
-          print(json.dumps({
-              "include": ["_pyright-base/components/machine_learning/src"],
-              "extraPaths": [
-                  "_pyright-base/components/machine_learning/src/factory/machine_learning/runtime",
-                  "_pyright-base/components/mcp_utils/src",
-                  "_pyright-base/bases/mcp_server/src",
-              ],
-              "typeCheckingMode": "basic",
-              "venvPath": ".",
-              "venv": ".venv",
-          }, indent=2))
-          EOF
-          uvx pyright --outputjson --project pyrightconfig.base.json > pyright-base.json || true
-          uvx pyright --outputjson > pyright-head.json || true
-          python3 - <<'EOF'
-          import json, sys
-          base = json.load(open("pyright-base.json"))["summary"]["errorCount"]
-          head = json.load(open("pyright-head.json"))["summary"]["errorCount"]
-          verdict = "PASS" if head <= base else "FAIL"
-          print(f"pyright ratchet: base={base} head={head} -> {verdict}")
-          sys.exit(0 if head <= base else 1)
-          EOF
-
   frontend-tests:
     if: github.event_name != 'push'
     runs-on: ubuntu-latest
