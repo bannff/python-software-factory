@@ -1,5 +1,11 @@
-bases/blueprint/test/factory/blueprint/test_deploy.py::TestIntrospect::test_finds_bases
-bases/openarcade/test/factory/openarcade/test_undeclared_imports.py::test_no_undeclared_brick_imports
+# Known pre-existing failures for the uniform brick lane (issue #163).
+# RATCHET: entries may only be DELETED. Adding one requires a reason below.
+# The lane deselects these; any other failure fails CI.
+
+# CI-only (Linux): symlinked-bundle error regex differs from macOS — needs a platform-aware assertion
+components/migration/test/factory/migration/test_bundle_stage.py::test_rejects_a_symlinked_bundle
+
+# CatalogTool harness drift (one root cause: .run/.return_type/.parameters removed from the tool wrapper). Issue: #46
 components/http_client/test/factory/http_client/test_mcp_contract.py::test_raw_transport_preserves_strict_invalid_arguments[http_delete-arguments4]
 components/http_client/test/factory/http_client/test_mcp_contract.py::test_raw_transport_preserves_strict_invalid_arguments[http_describe_config_schema-arguments7]
 components/http_client/test/factory/http_client/test_mcp_contract.py::test_raw_transport_preserves_strict_invalid_arguments[http_get-arguments0]
@@ -16,7 +22,6 @@ components/logger/test/factory/logger/test_mcp_contract.py::test_raw_invalid_pay
 components/logger/test/factory/logger/test_mcp_contract.py::test_raw_invalid_payloads_fail_at_the_mcp_boundary[logger.search-arguments3]
 components/logger/test/factory/logger/test_mcp_contract.py::test_raw_invalid_payloads_fail_at_the_mcp_boundary[logger.tail-arguments0]
 components/logger/test/factory/logger/test_mcp_contract.py::test_raw_invalid_payloads_fail_at_the_mcp_boundary[logger.tail-arguments1]
-components/migration/test/factory/migration/test_bundle_stage.py::test_rejects_a_symlinked_bundle
 components/oracle/test/factory/oracle/test_mcp_contract.py::test_invalid_verifier_state_is_successful_but_never_written
 components/oracle/test/factory/oracle/test_mcp_contract.py::test_raising_verifier_is_successful_and_persists_neutral_state_over_mcp
 components/oracle/test/factory/oracle/test_mcp_contract.py::test_raw_transport_preserves_envelope_and_schema_alias
@@ -24,3 +29,9 @@ components/oracle/test/factory/oracle/test_mcp_contract.py::test_raw_transport_r
 components/oracle/test/factory/oracle/test_mcp_contract.py::test_registered_verifier_forwards_nondefault_backend_to_graph_read_and_write
 components/payments/test/factory/payments/test_mcp_contract.py::test_exact_catalog_categories_and_typed_envelopes
 components/payments/test/factory/payments/test_mcp_contract.py::test_flat_defaults_capabilities_and_safe_config_discovery
+
+# bases/openarcade declares an undeclared mcp_utils import
+bases/openarcade/test/factory/openarcade/test_undeclared_imports.py::test_no_undeclared_brick_imports
+
+# blueprint base list assertion expects a flet_dashboard base that no longer exists
+bases/blueprint/test/factory/blueprint/test_deploy.py::TestIntrospect::test_finds_bases

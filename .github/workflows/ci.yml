@@ -123,9 +123,12 @@ jobs:
         run: |
           args=()
           while IFS= read -r nodeid; do
-            [ -n "$nodeid" ] && args+=(--deselect "$nodeid")
+            case "$nodeid" in ""|\#*) continue ;; esac
+            args+=(--deselect "$nodeid")
           done < config/ci-known-failures.txt
-          uv run pytest $(ls -d components/*/test bases/*/test) -q \
+          # xdist: the serial suite takes ~19 min on a 2-core runner; -n 4
+          # brings it to ~5 (measured locally: 7757 passed in 2m49s).
+          uv run --with pytest-xdist pytest $(ls -d components/*/test bases/*/test) -q -n 4 \
             --ignore-glob='components/machine_learning/*' \
             --ignore-glob='components/dataset/*' \
             "${args[@]}"
