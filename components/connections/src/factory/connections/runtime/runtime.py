@@ -16,6 +16,12 @@ Mount = Callable[[str, Any], Any]
 Unmount = Callable[[str], Any]
 
 
+def _reason(exc: Exception) -> str:
+    """Exception type plus first message line; never the spec, so no env/header values."""
+    lines = str(exc).strip().splitlines()
+    return f"{type(exc).__name__}: {lines[0][:200]}" if lines else type(exc).__name__
+
+
 class ConnectionsRuntime:
     """One process-wide runtime; the API base injects the gateway mount seam."""
 
@@ -26,6 +32,7 @@ class ConnectionsRuntime:
         self._sources: dict[str, Any] = {}
         self._tool_counts: dict[str, int] = {}
         self._tool_names: dict[str, tuple[str, ...]] = {}
+        self._mount_errors: dict[str, str] = {}
         self._lock = asyncio.Lock()
 
     def attach_gateway(self, register: Mount, unregister: Unmount) -> None:
@@ -64,8 +71,14 @@ class ConnectionsRuntime:
     async def mount(self, record: ServerRecord) -> int:
         """Dial one server and register it as a pseudo-brick; returns tool count."""
         async with self._lock:
+            self._mount_errors.pop(record.name, None)
             await self._unmount_locked(record.name)
-            source, tools = await open_source(record)
+            try:
+                source, tools = await open_source(record)
+            except Exception as exc:
+                # Kept for the view: registration succeeds, so the operator needs the cause.
+                self._mount_errors[record.name] = _reason(exc)
+                raise
             catalog = build_catalog(record, source, tools)
             self._sources[record.name] = source
             self._tool_counts[record.name] = len(catalog.tool_map())
@@ -76,6 +89,7 @@ class ConnectionsRuntime:
 
     async def unmount(self, name: str) -> None:
         async with self._lock:
+            self._mount_errors.pop(name, None)
             await self._unmount_locked(name)
 
     async def _unmount_locked(self, name: str) -> None:
@@ -117,6 +131,9 @@ class ConnectionsRuntime:
 
     def tool_count(self, name: str) -> int:
         return self._tool_counts.get(name, 0)
+
+    def mount_error(self, name: str) -> str | None:
+        return self._mount_errors.get(name)
 
     def tool_names(self, name: str) -> tuple[str, ...]:
         return self._tool_names.get(name, ())

@@ -67,6 +67,7 @@ class ServerView(DTO):
     headers: dict[str, str]
     enabled: bool
     mounted: bool
+    mount_error: str | None = None
     unresolved_env: list[str]
     tools_count: int
     revision: int

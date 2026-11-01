@@ -78,3 +78,14 @@ def test_stdio_server_mounts_as_gateway_brick_and_round_trips(stack, with_owner,
     assert removed.ok is True and removed.data.removed is True
     assert all(item["name"] != "mcp-echo" for item in aggregator.list_bricks()["bricks"])
     assert runtime.mounted() == ()
+
+
+def test_unreachable_server_reports_why_it_did_not_mount(stack, with_owner) -> None:
+    _, _, tools = stack
+    spec = {"transport": "stdio", "command": "definitely-not-a-command", "args": [], "env": {}, "enabled": True}
+    added = with_owner(lambda: asyncio.run(tools["connections_add_server"].fn(name="broken", spec=spec)))
+    assert added.ok is True, "registration succeeds even when the mount fails"
+    assert added.data.server.mounted is False
+    assert added.data.server.mount_error, "an unreachable server must say why"
+    listed = with_owner(lambda: tools["connections_list_servers"].fn())
+    assert listed.data.servers[0].mount_error == added.data.server.mount_error

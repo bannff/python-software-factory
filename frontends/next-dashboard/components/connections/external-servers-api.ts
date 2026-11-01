@@ -13,6 +13,8 @@ export interface ExternalServer {
   headers: Record<string, string>;
   enabled: boolean;
   mounted: boolean;
+  /** Why an enabled server is not mounted (probe/handshake failure), if known. */
+  mountError: string | null;
   unresolvedEnv: string[];
   toolsCount: number;
   revision: number;
@@ -51,6 +53,7 @@ function serverFrom(raw: unknown): ExternalServer {
     headers: namesFrom(v.headers),
     enabled: v.enabled === true,
     mounted: v.mounted === true,
+    mountError: typeof v.mount_error === "string" ? v.mount_error : null,
     unresolvedEnv: Array.isArray(v.unresolved_env) ? v.unresolved_env.filter((a): a is string => typeof a === "string") : [],
     toolsCount: typeof v.tools_count === "number" ? v.tools_count : 0,
     revision: v.revision,
