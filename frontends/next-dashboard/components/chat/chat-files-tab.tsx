@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { File as FileIcon, Folder, ChevronUp } from "lucide-react";
 import { callTool } from "@/lib/api";
+import { errorReason, withReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 
 /**
@@ -19,7 +20,11 @@ function parentDir(path: string): string {
   return idx <= 0 ? "." : path.slice(0, idx);
 }
 
-export function ChatFilesTab({ onInsert }: { onInsert: (reference: string) => void }) {
+/**
+ * `devtools_list_dir` resolves the workspace from the active chat Session, so
+ * the thread id must ride along or the brick has nothing to bind to.
+ */
+export function ChatFilesTab({ threadId, onInsert }: { threadId: string; onInsert: (reference: string) => void }) {
   const [cwd, setCwd] = useState(".");
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -27,14 +32,14 @@ export function ChatFilesTab({ onInsert }: { onInsert: (reference: string) => vo
   const load = useCallback(async (path: string) => {
     setError(null);
     try {
-      const data = unwrapToolData(await callTool("devtools_list_dir", { path })) as
+      const data = unwrapToolData(await callTool("devtools_list_dir", { path, envelope: { thread_id: threadId } })) as
         { result?: { entries?: Entry[] } } | null;
       setEntries(data?.result?.entries ?? []);
-    } catch {
-      setError("Couldn’t list this directory.");
+    } catch (cause) {
+      setError(withReason("Couldn’t list this directory.", errorReason(cause)));
       setEntries([]);
     }
-  }, []);
+  }, [threadId]);
 
   useEffect(() => { void load(cwd); }, [cwd, load]);
 
