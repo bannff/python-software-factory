@@ -34,6 +34,7 @@ describe("WorkflowLibraryView states", () => {
     render(<WorkflowLibraryView />);
     expect(screen.getByText(/Loading workflow library/i)).toBeTruthy();
     await screen.findByText(/No workflows yet/i);
+    expect(screen.getByText(/Ask the assistant to create one/i)).toBeTruthy();
     expect(screen.getByText(/No runs yet/i)).toBeTruthy();
   });
 

@@ -84,5 +84,6 @@ describe("EvalsLeaderboardView - no nested buttons (hydration guard)", () => {
     mockUseToolData.mockReturnValue({ data: { overview: {}, experiments: [] }, loading: false, error: null, refetch: vi.fn() });
     const { container } = render(<EvalsLeaderboardAggregate onRunSelect={vi.fn()} />);
     expect(container.textContent).toContain("No experiments yet");
+    expect(container.textContent).toContain("Ask the assistant to run an eval");
   });
 });

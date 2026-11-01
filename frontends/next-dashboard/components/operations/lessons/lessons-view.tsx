@@ -89,7 +89,7 @@ export default function LessonsView({
           <GraduationCap className="h-8 w-8 text-violet-400/70" />
           <h2 className="mt-3 font-medium">No lessons yet</h2>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            When you teach Companion X something — or it learns from your feedback — the lesson shows up here for you to keep or dismiss.
+            When you teach Companion X something in chat — or it learns from your feedback — the lesson shows up here for you to keep or dismiss.
           </p>
         </div>
       )}

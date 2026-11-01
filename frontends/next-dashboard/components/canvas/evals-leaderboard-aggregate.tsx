@@ -32,7 +32,7 @@ export function EvalsLeaderboardAggregate({ onRunSelect }: { onRunSelect: (runId
 
   if (loading) return <div className="flex h-full items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>;
   if (error) return <div className="flex h-full flex-col items-center justify-center gap-2 px-6"><AlertCircle className="h-5 w-5 text-destructive/60" /><p className="max-w-sm text-sm text-muted-foreground">{error}</p></div>;
-  if (!dashboard?.experiments?.length) return <div className="flex h-full flex-col items-center justify-center gap-2"><Inbox className="h-5 w-5 text-muted-foreground/50" /><p className="text-sm text-muted-foreground">No experiments yet. Run an eval to see your leaderboard.</p></div>;
+  if (!dashboard?.experiments?.length) return <div className="flex h-full flex-col items-center justify-center gap-2"><Inbox className="h-5 w-5 text-muted-foreground/50" /><p className="text-sm text-muted-foreground">No experiments yet. Ask the assistant to run an eval and your leaderboard will fill in here.</p></div>;
 
   return (
     <div className="flex h-full flex-col">

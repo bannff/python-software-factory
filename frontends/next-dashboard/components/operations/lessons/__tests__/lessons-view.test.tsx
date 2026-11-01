@@ -42,6 +42,7 @@ describe("LessonsView states", () => {
     route({ lessons_list: async () => wrap({ lessons: [] }) });
     render(<LessonsView />);
     expect(await screen.findByText(/No lessons yet/i)).toBeTruthy();
+    expect(screen.getByText(/in chat/i)).toBeTruthy();
   });
 
   it("renders retry copy without a raw code and re-fetches", async () => {
