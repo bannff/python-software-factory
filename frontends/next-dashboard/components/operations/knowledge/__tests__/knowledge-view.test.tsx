@@ -76,6 +76,7 @@ describe("KnowledgeView states", () => {
     render(<KnowledgeView />);
     await screen.findByText("readme.md");
     fireEvent.click(screen.getByRole("button", { name: "Delete document doc_1" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete document doc_1" }));
     await waitFor(() => expect(screen.queryByText("readme.md")).toBeNull());
   });
 

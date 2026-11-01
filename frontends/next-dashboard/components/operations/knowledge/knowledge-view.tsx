@@ -2,6 +2,7 @@
 
 import { useState, type ChangeEvent, type FormEvent } from "react";
 import { BookOpen, Loader2, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useKnowledge } from "./use-knowledge";
 
 /**
@@ -139,11 +140,10 @@ export default function KnowledgeView() {
                 </div>
                 {document.content && <p className="mt-1.5 line-clamp-3 text-sm">{document.content}</p>}
               </div>
-              <button type="button" onClick={() => onDelete(document.id)} disabled={pendingDelete === document.id}
-                aria-label={`Delete document ${document.id}`}
+              <ConfirmDelete label={`Delete document ${document.id}`} onConfirm={() => void onDelete(document.id)} disabled={pendingDelete === document.id}
                 className="shrink-0 rounded-md border border-border/60 p-1.5 text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive disabled:opacity-50">
                 {pendingDelete === document.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-              </button>
+              </ConfirmDelete>
             </li>
           ))}
         </ul>

@@ -90,6 +90,7 @@ describe("SkillsView", () => {
     await screen.findByText("Read the diff.");
     expect(screen.queryByRole("button", { name: "Add skill" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Delete skill" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete skill" }));
     await waitFor(() => expect(mocks.remove).toHaveBeenCalledWith("review"));
   });
 
