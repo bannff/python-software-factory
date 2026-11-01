@@ -50,6 +50,7 @@ describe("HooksView", () => {
   it("deletes a hook", async () => {
     render(<HooksView />);
     fireEvent.click(await screen.findByRole("button", { name: "Delete hook on-fail-notify" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete hook on-fail-notify" }));
     await waitFor(() => expect(mocks.remove).toHaveBeenCalledWith("on-fail-notify"));
   });
 

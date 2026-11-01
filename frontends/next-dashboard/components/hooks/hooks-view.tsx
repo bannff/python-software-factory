@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { Plus, RefreshCw, Trash2, Webhook } from "lucide-react";
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
 import { AGENT_LIFECYCLE_EVENTS, deleteHook, hookAuthoringAvailable, listHooks,
   listInvocableTools, listRecentFirings, saveHook,
@@ -108,8 +109,8 @@ export default function HooksView() {
               <button type="button" onClick={() => void toggle(hook)} disabled={!canWrite || busy === hook.id} aria-pressed={hook.enabled}
                 className={`rounded-full px-2 py-1 text-[10px] ${hook.enabled ? "bg-emerald-500/10 text-emerald-300" : "bg-muted text-muted-foreground"}`}>
                 {hook.enabled ? "Enabled" : "Disabled"}</button>
-              {canWrite && <button type="button" aria-label={`Delete hook ${hook.id}`} onClick={() => void remove(hook)} disabled={busy === hook.id}
-                className="rounded-md p-1 text-destructive disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" /></button>}
+              {canWrite && <ConfirmDelete label={`Delete hook ${hook.id}`} onConfirm={() => void remove(hook)} disabled={busy === hook.id}
+                className="rounded-md p-1 text-destructive disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" /></ConfirmDelete>}
             </div>
           </div>
           <p className="mt-3 font-mono text-xs">Runs: {hook.tool}</p>
