@@ -105,3 +105,22 @@ def test_no_read_or_reveal_tool_exists(tmp_path) -> None:
     for forbidden in ("storage.owner_secret_get", "storage.owner_secret_read",
                       "storage.owner_secret_reveal"):
         assert asyncio.run(catalog.get_tool(forbidden)) is None
+
+
+def test_missing_key_is_reported_as_its_own_reason(tmp_path) -> None:
+    """A deployment with no protected-content key must say so, not 'unavailable'."""
+    from factory.mcp_utils.interface import LocalEnvironmentKeyProvider
+
+    runtime = StorageRuntime({"owner_secret_db_path": str(tmp_path / "owner-secrets.db")})
+    runtime.get_owner_secret_store(keys=LocalEnvironmentKeyProvider(environ={}))
+    catalog = create_tool_catalog(runtime)
+    result = _call(catalog, "storage.owner_secret_set",
+                   {"name": "API_KEY", "value": "sk-123"}, envelope=_OWNER_A)
+    assert not result.ok and result.error == "owner_secret_key_missing"
+
+
+def test_unexpected_store_failure_keeps_the_generic_reason(tmp_path) -> None:
+    catalog = _fixture(tmp_path)
+    result = _call(catalog, "storage.owner_secret_set",
+                   {"name": "API_KEY", "value": "sk-123"}, envelope=None)
+    assert not result.ok and result.error == "owner_secret_unavailable"

@@ -16,7 +16,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from factory.mcp_utils.interface import ProtectedContentKeyProvider, protected_canonical_json
+from factory.mcp_utils.interface import (
+    ProtectedContentKeyProvider, ProtectedKeyUnavailable, protected_canonical_json,
+)
 
 from ..ports.owner_secrets import OwnerSecretError, OwnerSecretIdentity
 from .aead_envelope import AeadEnvelopeCodec
@@ -65,7 +67,7 @@ class SQLiteOwnerSecretStore:
                     "ON CONFLICT(tenant_id, principal_id, name) "
                     "DO UPDATE SET envelope=excluded.envelope, updated_at=excluded.updated_at",
                     (ident.tenant_id, ident.principal_id, name, envelope, now, now))
-        except OwnerSecretError:
+        except (OwnerSecretError, ProtectedKeyUnavailable):
             raise
         except Exception as exc:
             raise OwnerSecretError() from exc
