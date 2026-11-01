@@ -52,6 +52,11 @@ async def test_accepted_lesson_projects_once_with_owner_metadata(tmp_path) -> No
     assert [call[1]["tool_name"] for call in calls] == [
         "memory_retrieve", "memory_store",
     ]
+    # Memory scopes to the envelope principal (the lesson owner); a hardcoded
+    # shared principal would hide the projection from the owner's own reads.
+    for _caller, _target, kwargs in calls:
+        assert "user_id" not in kwargs["arguments"]
+        assert kwargs["envelope"]["principal_id"] == "owner"
     metadata = calls[1][2]["arguments"]["metadata"]
     assert metadata["owner_id"] == "owner"
     assert metadata["lesson_id"] == lesson.lesson_id

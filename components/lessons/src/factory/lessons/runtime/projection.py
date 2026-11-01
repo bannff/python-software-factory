@@ -20,7 +20,7 @@ async def project_accepted(store: Any, limit: int = 100) -> tuple[str, ...]:
 
 async def _find_projection(lesson: Any) -> str | None:
     data = await _call(lesson, "memory_retrieve", {
-        "query": lesson.rule, "user_id": "kiro-agent",
+        "query": lesson.rule,
         "memory_type": "long_term", "limit": 5,
         "metadata": {
             "lesson_id": lesson.lesson_id,
@@ -51,7 +51,7 @@ async def _store_projection(lesson: Any) -> str:
     if lesson.scope.value == "persona":
         tags.append(f"persona:{lesson.scope_id}")
     data = await _call(lesson, "memory_store", {
-        "content": content, "user_id": "kiro-agent",
+        "content": content,
         "memory_type": "long_term", "category": "preference",
         "metadata": {
             "tags": tags, "kind": "lesson", "status": "accepted",

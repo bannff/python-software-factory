@@ -28,8 +28,8 @@ PREAMBLE = (
     "- sandbox: LocalStack AWS emulator (sandbox.execute, "
     "sandbox.deploy_cfn, sandbox.list_stacks)\n"
     "- security: threat models, code analysis, pentest scanning\n"
-    "- memory: store observations (memory_store, user_id="
-    "'kiro-agent', category='fact')\n"
+    "- memory: store observations (memory_store, "
+    "category='fact')\n"
     "- kb: knowledge base for proven findings (kb_ingest)\n\n"
     "STORAGE: Graph=structural model, Memory=observations, "
     "KB=proven findings for RAG.\n\n"
@@ -60,7 +60,7 @@ _PERSIST = (
     "PERSIST EACH PROVEN FINDING (mirrors pentest-ops/SKILL.md STEP 4) BEFORE memory_store: "
     "graph_add_entity(entity_type='ProvenExploit', properties={run_id, app, vuln_class, cwe, "
     "severity, command_run, actual_output, steps_to_reproduce, impact}). "
-    "Then memory_store(content='...', user_id='kiro-agent', category='fact').\n")
+    "Then memory_store(content='...', category='fact').\n")
 
 PENTEST_IAM_AUDITOR = PREAMBLE + (
     "\n== YOUR ROLE: IAM Auditor (Pentest Swarm) ==\n"
