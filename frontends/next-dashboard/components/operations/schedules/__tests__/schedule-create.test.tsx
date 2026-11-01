@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const mocks = vi.hoisted(() => ({ callTool: vi.fn() }));
+vi.mock("@copilotkit/react-core/v2", () => ({ useAgent: () => ({ agent: { threadId: "thread-1" } }) }));
 vi.mock("@/lib/api", () => ({ callTool: (...args: unknown[]) => mocks.callTool(...args) }));
 
 import SchedulesView from "../schedules-view";
@@ -38,6 +39,7 @@ describe("Schedule creation", () => {
     fireEvent.change(await screen.findByLabelText("Task"), { target: { value: "Summarize activity" } });
     fireEvent.click(screen.getByRole("button", { name: "Create schedule" }));
     await waitFor(() => expect(mocks.callTool).toHaveBeenCalledWith("scheduler_add", {
+      envelope: { thread_id: "thread-1" },
       agent_id: "companion-x-default", task: "Summarize activity", kind: "interval",
       interval_seconds: 3600, one_shot_at: null, cron_expression: null, timezone_name: "UTC",
     }));
