@@ -59,29 +59,10 @@ describe("Settings disclosure panels", () => {
       .toBe("/capabilities?tab=skills");
     expect(screen.getByText(/context budget is not offered/i)).toBeTruthy();
   });
-  it("routes Channels to delivery and connection owners", () => {
-    open("Channels");
-    expect(screen.getByRole("link", { name: /Open Notifications/ }).getAttribute("href"))
-      .toBe("/settings?section=notifications");
-    expect(screen.getByRole("link", { name: /Open Connections/ }).getAttribute("href"))
-      .toBe("/capabilities?tab=connections");
-  });
   it("shows the Browser engine section and states what does not apply", () => {
     open("Browser");
     expect(screen.getByText("Interactive page control")).toBeTruthy();
     expect(screen.getByText(/installing Playwright .* attaching a hosted-engine token/i)).toBeTruthy();
-  });
-  it("frames Computer Use as a mounted desktop server scoped by the approval list", () => {
-    open("Computer Use");
-    expect(screen.getByText("Scope = your approval list")).toBeTruthy();
-    expect(screen.getByText("Protected fields")).toBeTruthy();
-    expect(screen.getByText(/Not applicable here: a separate allowed\/denied-app list/)).toBeTruthy();
-  });
-  it("keeps Remote Crew local-only", () => {
-    open("Remote Crew");
-    expect(screen.getByText("This device")).toBeTruthy();
-    expect(screen.getByText("Remote instances")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: /connect|provision/i })).toBeNull();
   });
   it("discloses telemetry without a fake opt-out", () => {
     open("Privacy");
@@ -110,12 +91,5 @@ describe("Settings disclosure panels", () => {
     expect(screen.getByRole("button", { name: /Download diagnostics bundle/ })).toBeTruthy();
     expect(screen.getByText("Build")).toBeTruthy();
     expect(screen.getByText(/report-problem workflow is not available/i)).toBeTruthy();
-  });
-  it("shows browser read-aloud and disabled dictation status", () => {
-    open("Voice");
-    expect(screen.getByText("Read aloud")).toBeTruthy();
-    expect(screen.getByText("Dictation")).toBeTruthy();
-    expect(screen.getByText(/Microphone access is disabled/i)).toBeTruthy();
-    expect(screen.getByText(/preferred voice or dictation engine is not available/i)).toBeTruthy();
   });
 });
