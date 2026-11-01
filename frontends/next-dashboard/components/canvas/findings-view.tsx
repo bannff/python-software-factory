@@ -183,7 +183,7 @@ function EmptyFindings() {
       <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10">
         <Shield className="h-6 w-6 text-emerald-500/50" />
       </div>
-      <p className="text-sm text-muted-foreground">No findings yet. Run a security scan to see results here.</p>
+      <p className="text-sm text-muted-foreground">No findings yet. Ask the assistant to run a security scan and the results will appear here.</p>
     </motion.div>
   );
 }
