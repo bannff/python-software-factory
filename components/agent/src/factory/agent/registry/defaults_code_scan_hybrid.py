@@ -93,7 +93,7 @@ _CONSOLIDATOR_PROMPT = (
     "RUN ID: {{run_id}} | APP: {{target_app}} | "
     "VULN CLASS: {{vuln_class}}\n\n"
     "STEP 0 — memory_retrieve('{{vuln_class}} consolidation',\n"
-    "  user_id='kiro-agent', limit=5)\n\n"
+    "  limit=5)\n\n"
     "3 teams scanned code independently. Your job:\n"
     "1) graph_find_entities(entity_type='SuspectedVuln',\n"
     "   properties={'run_id': '{{run_id}}'})\n"
@@ -111,7 +111,7 @@ _CONSOLIDATOR_PROMPT = (
     "                 'cwe': '<CWE id>', 'severity': '...',\n"
     "                 'file': '...', 'function': '...',\n"
     "                 'line_start': <int>, 'line_end': <int>})\n"
-    "7) memory_store(user_id='kiro-agent', memory_type="
+    "7) memory_store(memory_type="
     "'long_term', category='fact')\n"
 )
 
@@ -120,14 +120,14 @@ _VALIDATOR_PROMPT = (
     "RUN ID: {{run_id}} | APP: {{target_app}} | "
     "VULN CLASS: {{vuln_class}} | Workspace: {{sast_workspace}}\n\n"
     "STEP 0 — memory_retrieve('{{vuln_class}} validation',\n"
-    "  user_id='kiro-agent', limit=5)\n\n"
+    "  limit=5)\n\n"
     "1) graph_get_findings_for_run(run_id='{{run_id}}')\n"
     "2) file_read each cited file — verify snippet\n"
     "3) Check for mitigating controls\n"
     "4) think(cycle_count=3) — argue why NOT vulnerable\n"
     "5) Update verdict: CONFIRMED / NEEDS_REVIEW / REJECTED\n"
     "6) security_classify_finding for each\n"
-    "7) memory_store(user_id='kiro-agent', memory_type="
+    "7) memory_store(memory_type="
     "'long_term', category='fact')\n"
 )
 
