@@ -23,7 +23,8 @@ function openAutomaticSession(shell?: string) {
   }
   return automaticOpen;
 }
-export function TerminalPanel({ onClose }: { onClose: () => void }) {
+/** ``onClose`` omitted = standalone window: fills it and has no close control. */
+export function TerminalPanel({ onClose }: { onClose?: () => void }) {
   const { preferences: display, loading: displayLoading } = useDisplayPreferences();
   const scope = terminalScope;
   const sessions = useSyncExternalStore(scope.subscribe, scope.getSessions, scope.getSessions);
@@ -101,7 +102,7 @@ export function TerminalPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <section aria-label="Terminal panel"
-      className="flex h-56 shrink-0 flex-col border-t border-border/60 bg-[#070a12]">
+      className={cn("flex flex-col border-t border-border/60 bg-[#070a12]", onClose ? "h-56 shrink-0" : "min-h-0 flex-1")}>
       <header className="flex h-9 shrink-0 items-center border-b border-border/50 px-2">
         <div className="flex items-center gap-1.5 px-2 text-xs font-medium"><Terminal className="h-3.5 w-3.5" /> Terminal</div>
         <div role="tablist" aria-label="Terminal sessions" className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-2">
@@ -130,8 +131,8 @@ export function TerminalPanel({ onClose }: { onClose: () => void }) {
             className="rounded p-1 text-muted-foreground hover:bg-accent/30 hover:text-foreground">
             <Plus className="h-3 w-3" /></button>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close Terminal"
-          className="rounded p-1.5 text-muted-foreground hover:bg-accent/40 hover:text-foreground"><X className="h-3.5 w-3.5" /></button>
+        {onClose && <button type="button" onClick={onClose} aria-label="Close Terminal"
+          className="rounded p-1.5 text-muted-foreground hover:bg-accent/40 hover:text-foreground"><X className="h-3.5 w-3.5" /></button>}
       </header>
       {error && <p role="alert" className="px-3 py-1 text-[10px] text-destructive">{error}</p>}
       {(connectionStatus === "displaced" || connectionStatus === "disconnected") && handle && (

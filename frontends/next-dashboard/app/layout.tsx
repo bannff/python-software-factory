@@ -3,11 +3,7 @@ import { headers } from "next/headers";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "sonner";
-import { Topbar } from "@/components/layout/topbar";
-import { StatusBar } from "@/components/layout/status-bar";
-import TerminalDock from "@/components/terminal/terminal-dock";
 import DisplayPreferenceSync from "@/components/settings/display-preference-sync";
-import { ShortcutListener } from "@/components/layout/shortcut-listener";
 import { CopilotProvider } from "@/lib/copilotkit/provider";
 import { WorkbenchProvider } from "@/lib/workbench-context";
 import { DEV_HYDRATION_WATCHDOG_SCRIPT } from "@/lib/dev-hydration-watchdog";
@@ -48,19 +44,9 @@ export default async function RootLayout({
           nonce={nonce}
         >
           <DisplayPreferenceSync />
-          <div className="flex h-screen flex-col overflow-hidden">
-            <Topbar />
-            <WorkbenchProvider>
-              <ShortcutListener />
-              <CopilotProvider>
-                <main className="flex-1 min-h-0 overflow-hidden">
-                  {children}
-                </main>
-                <TerminalDock />
-                <StatusBar />
-              </CopilotProvider>
-            </WorkbenchProvider>
-          </div>
+          <WorkbenchProvider>
+            <CopilotProvider>{children}</CopilotProvider>
+          </WorkbenchProvider>
           <Toaster richColors position="bottom-right" />
         </ThemeProvider>
       </body>
