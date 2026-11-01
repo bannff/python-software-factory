@@ -1,11 +1,27 @@
 """Strict MCP contracts for the session brick."""
 from __future__ import annotations
 
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Any, get_origin
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class InputDTO(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _json_arrays_as_tuples(cls, data: Any) -> Any:
+        """Strict mode rejects a JSON array for a ``tuple`` field, and arrays are
+        the only sequence the wire has; accept them for the tuple-typed fields."""
+        if not isinstance(data, dict):
+            return data
+        return {
+            key: tuple(value) if isinstance(value, list)
+            and key in cls.model_fields and get_origin(cls.model_fields[key].annotation) is tuple
+            else value
+            for key, value in data.items()
+        }
 
 
 class OutputDTO(BaseModel):
