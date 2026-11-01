@@ -56,6 +56,9 @@ import WelcomeView from "../welcome-view";
 
 const mockedCallTool = callTool as unknown as ReturnType<typeof vi.fn>;
 
+/** The shape the live bridge hands back: transport wrapper around a v1 ToolResult. */
+const live = (data: unknown) => ({ tool: "x", result: { schema_version: "v1", ok: true, data } });
+
 describe("WelcomeView metric strip defensive call (bd:python-factory-d4r37)", () => {
   beforeEach(() => {
     mockedCallTool.mockReset();
@@ -71,10 +74,10 @@ describe("WelcomeView metric strip defensive call (bd:python-factory-d4r37)", ()
         return Promise.reject(new Error("brick 'security' not loaded"));
       }
       if (name === "evals_list_run_results") {
-        return Promise.resolve({ result: { latest: { pass_rate: 0.9 } } });
+        return Promise.resolve(live({ latest: { pass_rate: 0.9 } }));
       }
       if (name === "graph_get_stats") {
-        return Promise.resolve({ result: { node_count: 42 } });
+        return Promise.resolve(live({ backend: "networkx", node_count: 42, edge_count: 41, healthy: true }));
       }
       return Promise.reject(new Error(`unexpected tool ${name}`));
     });
@@ -104,13 +107,13 @@ describe("WelcomeView metric strip defensive call (bd:python-factory-d4r37)", ()
   it("renders the findings count when security tool resolves (positive path)", async () => {
     mockedCallTool.mockImplementation((name: string) => {
       if (name === "security_security.list_persisted_findings") {
-        return Promise.resolve({ result: { count: 7 } });
+        return Promise.resolve(live({ count: 7 }));
       }
       if (name === "evals_list_run_results") {
-        return Promise.resolve({ result: { latest: { pass_rate: 0.9 } } });
+        return Promise.resolve(live({ latest: { pass_rate: 0.9 } }));
       }
       if (name === "graph_get_stats") {
-        return Promise.resolve({ result: { node_count: 42 } });
+        return Promise.resolve(live({ backend: "networkx", node_count: 42, edge_count: 41, healthy: true }));
       }
       return Promise.reject(new Error(`unexpected tool ${name}`));
     });
