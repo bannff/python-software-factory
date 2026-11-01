@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { callTool } from "@/lib/api";
+import { unwrapToolData } from "@/lib/tool-result-data";
 import { useLiveToolStream } from "@/lib/hooks/use-live-tool-stream";
 import { ParticleText } from "@/components/ui/particle-text";
 import type { CanvasViewId } from "@/lib/types";
@@ -59,16 +60,14 @@ export default function WelcomeView({ onNavigate }: WelcomeViewProps) {
       // the metric strip must gracefully degrade instead of throwing.
       callTool("security_security.list_persisted_findings", { limit: 50 })
         .then((r: unknown) => {
-          const res = (r as Record<string, unknown>)?.result ?? r;
-          const n = Number((res as Record<string, unknown>)?.count ?? 0);
+          const n = Number((unwrapToolData(r) as Record<string, unknown>)?.count ?? 0);
           update(0, String(n), n > 0 ? "text-red-400" : "text-emerald-400");
         })
         .catch(() => {
           update(0, null, undefined);
         }),
       callTool("evals_list_run_results", {}).then((r: unknown) => {
-        const res = (r as Record<string, unknown>)?.result ?? r;
-        const latest = (res as Record<string, unknown>)?.latest as Record<string, unknown> | null;
+        const latest = (unwrapToolData(r) as Record<string, unknown>)?.latest as Record<string, unknown> | null;
         const rate = latest?.pass_rate != null ? `${Math.round(Number(latest.pass_rate) * 100)}%` : null;
         const color = latest?.pass_rate != null
           ? Number(latest.pass_rate) >= 0.8 ? "text-emerald-400"
@@ -79,8 +78,7 @@ export default function WelcomeView({ onNavigate }: WelcomeViewProps) {
         update(1, null, undefined);
       }),
       callTool("graph_get_stats", {}).then((r: unknown) => {
-        const res = (r as Record<string, unknown>)?.result ?? r;
-        const n = (res as Record<string, unknown>)?.node_count;
+        const n = (unwrapToolData(r) as Record<string, unknown>)?.node_count;
         update(2, n != null ? String(n) : null);
       }).catch(() => {
         update(2, null, undefined);
