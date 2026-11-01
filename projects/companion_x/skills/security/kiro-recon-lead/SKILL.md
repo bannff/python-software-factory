@@ -19,7 +19,7 @@ You have access to the control-plane runtime power for sandbox, graph, memory, s
 ## Step 0 — Retrieve Prior Learnings
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_retrieve",
-  arguments='{"query": "recon learnings {target_app}", "user_id": "kiro-agent", "limit": 5}')
+  arguments='{"query": "recon learnings {target_app}", "limit": 5}')
 ```
 
 ## Step 1 — Target Type Detection
@@ -216,7 +216,7 @@ call_brick_tool(brick_name="graph", tool_name="graph_add_relationship",
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_store",
   arguments='{"content": "Recon {run_id} for {target_app}: {framework} app on port {port}, {mechanism} auth, {endpoint_count} endpoints discovered, threats: {categories}",
-    "user_id": "kiro-agent", "category": "fact",
+    "category": "fact",
     "metadata": {"source": "agent", "tags": "recon,{target_app},{run_id}"}}')
 ```
 

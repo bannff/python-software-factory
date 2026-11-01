@@ -61,5 +61,5 @@ EVAL_METRICS_RECORDING = (
     "STEP 3 — Store summary in memory:\n"
     "  memory_store(content='EVAL: {{metric_prefix}} run "
     "{{run_id}} — avg_score=<X>, pass_rate=<Y>', "
-    "user_id='kiro-agent', category='fact')\n"
+    "category='fact')\n"
 )

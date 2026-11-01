@@ -162,7 +162,7 @@ Store what you learned as long-term memory:
 ```
 memory_store(
   content='<what you learned about IDOR in this app>',
-  user_id='kiro-agent',
+  
   memory_type='long_term',
   category='fact'
 )

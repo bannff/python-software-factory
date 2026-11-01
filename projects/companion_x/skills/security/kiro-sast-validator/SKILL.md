@@ -52,7 +52,7 @@ call_brick_tool(brick_name="graph", tool_name="graph_add_entity",
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_store",
   arguments='{"content": "Validation {run_id}: N confirmed, M rejected...",
-    "user_id": "kiro-agent", "category": "fact",
+    "category": "fact",
     "tags": ["{vuln_class}", "validation", "{run_id}"]}')
 ```
 
