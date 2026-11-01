@@ -31,6 +31,12 @@ function normalizeNodes(nodes: BrickNode[]): ReactAdapterNode[] {
   }));
 }
 
+/** `*_get_views` tools return `{views: [...]}`; a bare list is accepted too. */
+function viewsFrom(data: unknown): BrickViewDef[] {
+  const list = Array.isArray(data) ? data : (data as { views?: unknown } | null)?.views;
+  return Array.isArray(list) ? list as BrickViewDef[] : [];
+}
+
 interface BrickViewRendererProps {
   viewTool: string;
   viewIndex?: number;
@@ -44,8 +50,8 @@ export default function BrickViewRenderer({
   const workbench = useWorkbenchContext();
 
   const viewState = useMemo(() => {
-    if (!Array.isArray(data) || data.length === 0) return null;
-    const views = data as BrickViewDef[];
+    const views = viewsFrom(data);
+    if (views.length === 0) return null;
     const brick = views[0]?.brick ?? viewTool;
     const metadata = views.map((view) => ({
       id: view.id, name: view.name, description: view.metadata?.description,

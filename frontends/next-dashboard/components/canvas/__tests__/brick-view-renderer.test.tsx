@@ -48,6 +48,13 @@ describe("BrickViewRenderer", () => {
     expect(screen.queryByRole("navigation", { name: "Brick views" })).toBeNull();
   });
 
+  it("renders the live {views: [...]} payload the *_get_views tools return", () => {
+    mocks.data = { views: [view("games-play", "games-node")] };
+    renderView();
+    expect(screen.getByTestId("component-tree").textContent).toBe("games-node");
+    expect(screen.queryByText("No view data available.")).toBeNull();
+  });
+
   it("registers fetched IDs and switches by retained view ID", async () => {
     mocks.data = [view("overview", "overview-node"), view("models", "models-node")];
     renderView();
