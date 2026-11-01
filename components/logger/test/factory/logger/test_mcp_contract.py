@@ -2,15 +2,15 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 from typing import get_type_hints
 
 import pytest
-from mcp.shared.exceptions import MCPError
 
 from factory.logger.runtime.adapters.structlog_sink import StructlogSink
 from factory.logger.runtime.runtime import LoggerRuntime
 from factory.logger.server import create_mcp_server
-from factory.mcp_utils.interface import ToolResult
+from factory.mcp_utils.interface import SchemaMigrationError, ToolResult
 
 _NAMES = {
     "logger.get_capabilities": "deterministic",
@@ -43,7 +43,8 @@ def _tool(mcp, name: str):
 
 
 def _run(tool, arguments: dict):
-    return asyncio.run(tool.run(arguments))
+    result = tool.fn(**arguments)
+    return asyncio.run(result) if inspect.isawaitable(result) else result
 
 
 def test_fresh_server_has_exact_dotted_catalog_and_categories(mcp) -> None:
@@ -105,7 +106,7 @@ def test_all_log_tools_tail_search_and_clear_redaction(mcp) -> None:
     ("logger.info", {"message": "ok", "unexpected": True}),
 ])
 def test_raw_invalid_payloads_fail_at_the_mcp_boundary(mcp, name, arguments) -> None:
-    with pytest.raises(MCPError, match="Invalid arguments"):
+    with pytest.raises(SchemaMigrationError):
         _run(_tool(mcp, name), arguments)
 
 

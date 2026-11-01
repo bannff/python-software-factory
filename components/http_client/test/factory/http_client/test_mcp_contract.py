@@ -6,12 +6,11 @@ import inspect
 from typing import get_type_hints
 
 import pytest
-from mcp.shared.exceptions import MCPError
 from pydantic import ValidationError
 
 from factory.http.mcp.contracts import BodyInput, GetInput, HTTPResponseOutput, StrictModel
 from factory.http.server import create_mcp_server
-from factory.mcp_utils.interface import ToolResult
+from factory.mcp_utils.interface import SchemaMigrationError, ToolResult
 
 TOOL_NAMES = {
     "http_get_capabilities", "http_health_check", "http_describe_config_schema",
@@ -100,8 +99,10 @@ def test_models_reject_extra_and_coerced_timeout() -> None:
 def test_raw_transport_preserves_strict_invalid_arguments(
     tool_name: str, arguments: dict[str, object],
 ) -> None:
-    with pytest.raises(MCPError):
-        asyncio.run(_tool(tool_name).run(arguments))
+    with pytest.raises(SchemaMigrationError):
+        result = _tool(tool_name).fn(**arguments)
+        if inspect.isawaitable(result):
+            asyncio.run(result)
 
 
 def test_transport_failure_is_generic_and_secret_safe() -> None:

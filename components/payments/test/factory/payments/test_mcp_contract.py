@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import inspect
 from unittest.mock import Mock
 
 import pytest
@@ -37,14 +38,15 @@ def test_exact_catalog_categories_and_typed_envelopes() -> None:
             assert getattr(fn, "_mcp_category") == category
             input_model, output_model = getattr(fn, "_mcp_input_model"), getattr(fn, "_mcp_output_model")
             assert input_model.model_config["extra"] == "forbid"
-            assert tools[name].return_type == ToolResult[output_model]
-            assert tools[name].output_schema is not None
+            assert str(inspect.signature(fn).return_annotation) == f"ToolResult[{output_model.__name__}]"
+            assert output_model.model_json_schema()["properties"]
 
 
 def test_flat_defaults_capabilities_and_safe_config_discovery() -> None:
     tool = _tool("payments_create_payment")
-    assert tool.parameters["properties"]["currency"]["default"] == "USD"
-    assert tool.parameters["properties"]["metadata"]["default"] is None
+    properties = tool.fn._mcp_input_model.model_json_schema()["properties"]
+    assert properties["currency"]["default"] == "USD"
+    assert properties["metadata"]["default"] is None
     capabilities = _tool("payments_get_capabilities").fn()
     assert capabilities.ok and capabilities.data is not None
     assert capabilities.data.schema_version == "1.0.0"

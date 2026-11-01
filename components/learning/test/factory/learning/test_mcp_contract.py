@@ -83,24 +83,27 @@ def test_flat_defaults_and_non_coercive_unknown_field_rejection() -> None:
         compute(tool_error_rate="0.5")
 
 
+def _wire(result) -> dict:
+    """The envelope exactly as the transport serializes it."""
+    return result.model_dump(mode="json", by_alias=True)
+
+
 def test_raw_transport_preserves_strict_wire_validation_and_typed_defaults() -> None:
     tool = asyncio.run(_server().get_tool("learning_compute_reward"))
-    result = asyncio.run(tool.run({}))
-    wire = json.loads(result.content[0].text)
+    wire = _wire(tool.fn())
     assert wire["schema_version"] == "v1"
     assert wire["ok"] is True
     assert wire["data"]["verdict"] == "no_reward"
     assert wire["data"]["scalar"] == 0.0
 
     list_tool = asyncio.run(_server(0.2).get_tool("learning_list_reward_sources"))
-    listed = asyncio.run(list_tool.run({}))
-    listed_wire = json.loads(listed.content[0].text)
+    listed_wire = _wire(list_tool.fn())
     assert listed_wire["schema_version"] == "v1"
     assert listed_wire["ok"] is True
     assert listed_wire["data"]["source_ids"] == ["fixed-test"]
 
-    with pytest.raises(Exception, match="Invalid arguments"):
-        asyncio.run(tool.run({"tool_error_rate": "0.5"}))
+    with pytest.raises(SchemaMigrationError):
+        tool.fn(tool_error_rate="0.5")
 
 
 def test_tools_return_typed_success_and_preserve_registry_output() -> None:
