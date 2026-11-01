@@ -21,7 +21,7 @@ You have access to the control-plane runtime power for sandbox, graph, memory, s
 ### Step 0 — Retrieve Prior Learnings + SAST Findings
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_retrieve",
-  arguments='{"query": "IDOR testing patterns", "user_id": "kiro-agent", "limit": 5}')
+  arguments='{"query": "IDOR testing patterns", "limit": 5}')
 ```
 If sast_run_id provided, load SAST findings to target:
 ```
@@ -147,7 +147,7 @@ call_brick_tool(brick_name="graph", tool_name="graph_update_entity",
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_store",
   arguments='{"content": "DAST run {run_id}: tested N endpoints on {target_app}. Verified: N, Failed: N, Partial: N. SAST correlation: N/M predictions confirmed.",
-    "user_id": "kiro-agent", "category": "fact",
+    "category": "fact",
     "tags": ["IDOR", "dast-learnings", "{run_id}"]}')
 ```
 

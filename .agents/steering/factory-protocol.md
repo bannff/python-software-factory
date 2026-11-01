@@ -49,7 +49,7 @@ SCAFFOLDING — Use foreman MCP tools for all brick creation, compliance checks,
 
 TESTING — Hypothesis property tests required for all stateful bricks. Recipes in `.agents/recipes/` define E2E scenarios. Run existing tests before writing new ones. Details: `.agents/steering/hypothesis-testing.md`
 
-MEMORY — Use the control-plane runtime memory brick (NOT a-mem). `memory_store`, `memory_retrieve` via `call_brick_tool`. Always pass `user_id: "kiro-agent"`. Details: `.agents/steering/companion-memory.md`
+MEMORY — Use the control-plane runtime memory brick (NOT a-mem). `memory_store`, `memory_retrieve` via `call_brick_tool`. Omit `user_id`; the brick scopes to the authenticated principal. Details: `.agents/steering/companion-memory.md`
 
 ISSUE TRACKING — Beads (`bd`) is the single source of truth. `bd ready --json` | `bd update <id> --claim` | `bd close <id> --reason "..."` | `bd create "title" -p <0-4> --deps discovered-from:<id>`. No markdown TODOs. Details: `.agents/steering/beads-workflow.md`
 

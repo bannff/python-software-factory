@@ -66,7 +66,7 @@ Anchor on what is already known. Do not re-discover endpoints.
    probe queue — sast-open-scan already paid the discovery cost.
 3. Pull memory for prior runtime learnings on this app:
    ```
-   memory_retrieve(user_id='kiro-agent', query='DAST {{target_app}} chains', limit=5)
+   memory_retrieve(query='DAST {{target_app}} chains', limit=5)
    ```
 
 ## PHASE 1: LIVE ENDPOINT ENUMERATION
@@ -211,7 +211,7 @@ cannot rule those out, lower severity or discard.
      content="DAST open-scan for {{target_app}} (run {{run_id}}): "
              "confirmed <N> across {classes}; chain candidates: <M>; "
              "OOB callbacks: <count>; unresolved hypotheses: <list>",
-     user_id='kiro-agent', memory_type='long_term', category='fact',
+     memory_type='long_term', category='fact',
      metadata={"run_id": "{{run_id}}", "agent_id": "{{agent_id}}",
                "skill": "dast-open-scan"}
    )
