@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { saveArtifact } from "./artifact-actions";
@@ -38,8 +39,8 @@ export function ArtifactCreateDialog({
     try {
       const artifact = await saveArtifact({ name: name.trim(), content, kind, description });
       onCreated(artifact);
-    } catch {
-      setError("Could not save this artifact. Check the name and try again.");
+    } catch (cause) {
+      setError(withReason("Could not save this artifact. Check the name and try again.", errorReason(cause)));
     } finally {
       setBusy(false);
     }

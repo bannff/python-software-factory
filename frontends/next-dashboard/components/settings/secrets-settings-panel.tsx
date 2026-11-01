@@ -1,6 +1,7 @@
 "use client";
 import { KeyRound, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { errorReason, withReason } from "@/lib/error-reason";
 import {
   deleteOwnerSecret, listOwnerSecretNames, setOwnerSecret,
 } from "./secrets-settings-api";
@@ -30,14 +31,14 @@ export default function SecretsSettingsPanel() {
       await setOwnerSecret(trimmedName, value);
       setName(""); setValue(""); setSaved(trimmedName);
       await load();
-    } catch { setError("Secret could not be saved."); }
+    } catch (cause) { setError(withReason("Secret could not be saved.", errorReason(cause))); }
     finally { setBusy(false); }
   };
 
   const remove = async (target: string) => {
     setBusy(true); setError(null); setSaved(null);
     try { await deleteOwnerSecret(target); await load(); }
-    catch { setError("Secret could not be deleted."); }
+    catch (cause) { setError(withReason("Secret could not be deleted.", errorReason(cause))); }
     finally { setBusy(false); }
   };
 

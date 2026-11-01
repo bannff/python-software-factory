@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useState } from "react";
 import { CheckCheck, Loader2, MessageSquare, Quote, Send, X } from "lucide-react";
 import type { ArtifactComment } from "./artifact-types";
@@ -43,13 +44,13 @@ export function ArtifactComments({
       await postArtifactComment(slug, body, pendingAnchor);
       setBody(""); onClearAnchor?.(); onChanged();
     }
-    catch { setError("Comment could not be posted. Refresh the artifact and try again."); }
+    catch (cause) { setError(withReason("Comment could not be posted. Refresh the artifact and try again.", errorReason(cause))); }
     finally { setWorking(null); }
   };
   const review = async (id: string) => {
     setWorking(id); setError(null);
     try { await markArtifactCommentReview(slug, id); onChanged(); }
-    catch { setError("Comment status changed elsewhere. Refresh and try again."); }
+    catch (cause) { setError(withReason("Comment status changed elsewhere. Refresh and try again.", errorReason(cause))); }
     finally { setWorking(null); }
   };
   return (
