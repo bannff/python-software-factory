@@ -38,7 +38,7 @@ def view(record: ServerRecord, runtime: Any) -> ServerView:
         name=record.name, transport=spec.transport, command=spec.command,
         args=list(spec.args), cwd=spec.cwd, env=dict(spec.env),
         url=spec.url, headers=dict(spec.headers),
-        enabled=spec.enabled, mounted=mounted,
+        enabled=spec.enabled, mounted=mounted, mount_error=runtime.mount_error(record.tenant_id, record.owner_id, record.name),
         unresolved_env=sorted({
             source for source in (*spec.env.values(), *spec.headers.values())
             if not os.environ.get(source)
@@ -121,7 +121,7 @@ def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
         tenant, owner = owner_identity(envelope)
         outcome = _result(lambda: runtime.remove(tenant, owner, name, expected_revision))
         if outcome.ok:
-            await runtime.unmount(name)
+            await runtime.unmount(name, (tenant, owner))
             return ok(RemovedOutput(removed=True, name=name))
         return outcome
 
@@ -143,7 +143,7 @@ async def _mount_after(runtime: Any, write: Callable[[], ServerRecord]) -> ToolR
     if record.spec.enabled:
         await _try_mount(runtime, record)
     else:
-        await runtime.unmount(record.name)
+        await runtime.unmount(record.name, (record.tenant_id, record.owner_id))
     return ok(ServerOutput(server=view(record, runtime)))
 
 
@@ -152,8 +152,8 @@ async def _try_mount(runtime: Any, record: ServerRecord) -> None:
         return
     try:
         await runtime.mount(record)
-    except Exception:  # noqa: BLE001 - registration succeeds; mount state is visible in the view
-        await runtime.unmount(record.name)
+    except Exception:  # noqa: BLE001 - registration succeeds; the runtime keeps the reason for the view
+        return
 
 
 __all__ = ["owner_identity", "register", "view"]

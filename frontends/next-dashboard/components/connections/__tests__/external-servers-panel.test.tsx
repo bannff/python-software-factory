@@ -19,7 +19,7 @@ import { ExternalServersPanel } from "../external-servers-panel";
 
 const GITHUB = {
   name: "github", transport: "stdio" as const, command: "npx", args: ["-y", "server-github"], cwd: null,
-  env: { GITHUB_TOKEN: "GH_SOURCE_ENV" }, url: null, headers: {}, enabled: true, mounted: true, unresolvedEnv: [],
+  env: { GITHUB_TOKEN: "GH_SOURCE_ENV" }, url: null, headers: {}, enabled: true, mounted: true, mountError: null, unresolvedEnv: [],
   toolsCount: 7, revision: 3,
 };
 
@@ -43,6 +43,12 @@ describe("ExternalServersPanel", () => {
     }));
     await waitFor(() => expect(onChanged).toHaveBeenCalled());
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("says why an enabled server is not mounted", async () => {
+    mocks.list.mockResolvedValue([{ ...GITHUB, mounted: false, toolsCount: 0, mountError: "FileNotFoundError: no such command" }]);
+    render(<ExternalServersPanel ready onChanged={vi.fn()} />);
+    expect(await screen.findByText(/Couldn’t connect: FileNotFoundError: no such command/)).toBeTruthy();
   });
 
   it("imports a pasted mcpServers document", async () => {

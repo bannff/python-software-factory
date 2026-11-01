@@ -78,3 +78,78 @@ def test_stdio_server_mounts_as_gateway_brick_and_round_trips(stack, with_owner,
     assert removed.ok is True and removed.data.removed is True
     assert all(item["name"] != "mcp-echo" for item in aggregator.list_bricks()["bricks"])
     assert runtime.mounted() == ()
+
+
+def test_unreachable_server_reports_why_it_did_not_mount(stack, with_owner) -> None:
+    _, _, tools = stack
+    spec = {"transport": "stdio", "command": "definitely-not-a-command", "args": [], "env": {}, "enabled": True}
+    added = with_owner(lambda: asyncio.run(tools["connections_add_server"].fn(name="broken", spec=spec)))
+    assert added.ok is True, "registration succeeds even when the mount fails"
+    assert added.data.server.mounted is False
+    assert added.data.server.mount_error.startswith("FileNotFoundError"), "an unreachable server must say why"
+    listed = with_owner(lambda: tools["connections_list_servers"].fn())
+    assert listed.data.servers[0].mount_error == added.data.server.mount_error
+
+
+def _add(stack, with_owner, monkeypatch, failure: BaseException):
+    import factory.connections.runtime.runtime as runtime_module
+
+    async def boom(_record):
+        raise failure
+    monkeypatch.setattr(runtime_module, "open_source", boom)
+    _, _, tools = stack
+    spec = {"transport": "streamable_http", "url": "https://x.invalid/mcp", "headers": {}, "enabled": True}
+    return with_owner(lambda: asyncio.run(tools["connections_add_server"].fn(name="remote", spec=spec)))
+
+
+def test_mount_error_never_echoes_exception_text(stack, with_owner, monkeypatch) -> None:
+    added = _add(stack, with_owner, monkeypatch, RuntimeError("401 Authorization: Bearer super-secret-value"))
+    assert added.data.server.mount_error == "RuntimeError"
+    assert "super-secret-value" not in added.model_dump_json()
+
+
+def test_mount_error_unwraps_exception_groups(stack, with_owner, monkeypatch) -> None:
+    group = ExceptionGroup("unhandled errors in a TaskGroup", [ConnectionRefusedError(61, "Connection refused")])
+    added = _add(stack, with_owner, monkeypatch, group)
+    assert added.data.server.mount_error == "ConnectionRefusedError: Connection refused"
+
+
+def test_mount_error_is_scoped_to_its_owner(stack, monkeypatch) -> None:
+    runtime, _, _ = stack
+    from factory.connections.runtime.models import ServerSpec
+    import factory.connections.runtime.runtime as runtime_module
+
+    async def boom(_record):
+        raise ConnectionRefusedError(61, "Connection refused")
+    monkeypatch.setattr(runtime_module, "open_source", boom)
+    spec = ServerSpec(transport="streamable_http", url="https://x.invalid/mcp", enabled=True)
+    mine = runtime.add("local", "alice", "same", spec)
+    theirs = runtime.add("local", "bob", "same", spec)
+    try:
+        asyncio.run(runtime.mount(mine))
+    except ConnectionRefusedError:
+        pass
+    assert runtime.mount_error("local", "alice", "same") is not None
+    assert runtime.mount_error(theirs.tenant_id, theirs.owner_id, "same") is None
+
+
+def test_failed_catalog_build_is_reported_and_rolled_back(stack, with_owner, monkeypatch) -> None:
+    import factory.connections.runtime.runtime as runtime_module
+    runtime, _, tools = stack
+    closed: list[bool] = []
+
+    class Source:
+        async def close(self) -> None:
+            closed.append(True)
+
+    async def opened(_record):
+        return Source(), ()
+
+    def bad_catalog(*_args):
+        raise ValueError("duplicate tool name")
+    monkeypatch.setattr(runtime_module, "open_source", opened)
+    monkeypatch.setattr(runtime_module, "build_catalog", bad_catalog)
+    spec = {"transport": "stdio", "command": "x", "args": [], "env": {}, "enabled": True}
+    added = with_owner(lambda: asyncio.run(tools["connections_add_server"].fn(name="dup", spec=spec)))
+    assert added.data.server.mounted is False and added.data.server.mount_error == "ValueError"
+    assert closed == [True] and runtime.mounted() == ()

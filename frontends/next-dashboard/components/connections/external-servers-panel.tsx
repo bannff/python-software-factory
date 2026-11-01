@@ -59,6 +59,8 @@ export function ExternalServersPanel({ ready, onChanged }: ExternalServersPanelP
           <span className="min-w-0 flex-1"><span className="block truncate font-medium">{server.name}</span>
             <span className="block truncate font-mono text-[10px] text-muted-foreground">
               {server.transport === "stdio" ? [server.command, ...server.args].join(" ") : server.url}</span>
+            {server.enabled && !server.mounted && server.mountError && <span role="alert" className="block truncate text-[10px] text-amber-400"
+              title={server.mountError}>Couldn’t connect: {server.mountError}</span>}
             {server.unresolvedEnv.length > 0 && <span role="alert" className="block text-[10px] text-amber-400">
               Not set in the server environment: {server.unresolvedEnv.join(", ")}</span>}</span>
           <span className="text-[10px] text-muted-foreground">{server.mounted ? `${server.toolsCount} tools` : server.enabled ? "unreachable" : "off"}</span>
