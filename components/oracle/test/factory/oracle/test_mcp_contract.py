@@ -9,7 +9,6 @@ from typing import Any
 import pytest
 
 from factory.graph.mcp.core_models import EntityData, EntityLookupData, FindingStateData
-from mcp.shared.exceptions import MCPError
 from factory.mcp_utils.interface import SchemaMigrationError, ToolResult, get_service, ok, set_service
 from factory.oracle.interface import create_server, register_verifier, reset_registry
 from factory.oracle.runtime.runtime import reset_runtime
@@ -30,8 +29,14 @@ def _tool(name: str):
     return asyncio.run(_server().get_tool(name))
 
 
+def _call(tool: Any, arguments: dict[str, Any]) -> Any:
+    result = tool.fn(**arguments)
+    return asyncio.run(result) if inspect.isawaitable(result) else result
+
+
 def _wire(tool: Any, arguments: dict[str, Any]) -> dict[str, Any]:
-    return json.loads(asyncio.run(tool.run(arguments)).content[0].text)
+    """The envelope exactly as the transport serializes it."""
+    return _call(tool, arguments).model_dump(mode="json", by_alias=True)
 
 
 class _Verifier:
@@ -94,12 +99,12 @@ def test_fresh_server_has_exact_strict_typed_catalog() -> None:
 def test_raw_transport_rejects_numeric_and_extra_arguments() -> None:
     verify = _tool("oracle_verify_finding")
     assert list(inspect.signature(verify.fn).parameters) == ["finding_id", "domain", "backend"]
-    with pytest.raises(MCPError, match="Invalid arguments"):
-        asyncio.run(verify.run({"finding_id": 1}))
-    with pytest.raises(MCPError, match="Invalid arguments"):
-        asyncio.run(verify.run({"finding_id": "f", "unexpected": True}))
-    with pytest.raises(MCPError, match="Invalid arguments"):
-        asyncio.run(_tool("oracle_list_states").run({"unexpected": True}))
+    with pytest.raises(SchemaMigrationError):
+        _call(verify, {"finding_id": 1})
+    with pytest.raises(SchemaMigrationError):
+        _call(verify, {"finding_id": "f", "unexpected": True})
+    with pytest.raises(SchemaMigrationError):
+        _call(_tool("oracle_list_states"), {"unexpected": True})
     with pytest.raises(SchemaMigrationError):
         verify.fn(finding_id=1)
 

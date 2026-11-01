@@ -80,7 +80,7 @@ async def invoke_catalog_tool(
             brick_name, resolved_name, tool.fn, invoke_args,
         )
         stage = "serialize_result"
-        structured = result.model_dump(mode="json") if hasattr(result, "model_dump") else result
+        structured = result.model_dump(mode="json", by_alias=True) if hasattr(result, "model_dump") else result
         return {"ok": True, "result": {
             "kind": "tool", "structured_content": structured,
             "content": [], "meta": {},

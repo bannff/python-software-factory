@@ -103,7 +103,7 @@ def project_result(result: Any, text: type[Any]) -> Any:
     if not isinstance(result, ToolResult):
         raise TypeError("typed MCP handlers must return ToolResult")
     from mcp.types import CallToolResult
-    envelope = result.model_dump(mode="json")
+    envelope = result.model_dump(mode="json", by_alias=True)
     return CallToolResult(
         content=[text(type="text", text=json.dumps(envelope, separators=(",", ":")))],
         structured_content=envelope, is_error=not result.ok,
