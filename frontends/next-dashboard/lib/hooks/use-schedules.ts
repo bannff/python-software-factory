@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { callTool } from "@/lib/api";
 import { unwrapToolData } from "@/lib/tool-result-data";
@@ -25,6 +26,8 @@ import {
  */
 export interface ActionResult {
   status: "ok" | ScheduleErrorKind;
+  /** The server's own failure text, when it sent one. */
+  reason?: string;
 }
 
 type LifecycleTool = "scheduler_pause" | "scheduler_resume" | "scheduler_remove" | "scheduler_trigger";
@@ -96,7 +99,7 @@ export function useSchedules() {
       await refresh();
       return { status: "ok" };
     } catch (err) {
-      return { status: classifyScheduleError(err) };
+      return { status: classifyScheduleError(err), reason: errorReason(err) };
     }
   }, [refresh]);
 

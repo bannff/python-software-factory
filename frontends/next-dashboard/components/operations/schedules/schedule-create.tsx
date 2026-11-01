@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
+import { withReason } from "@/lib/error-reason";
 import type { ActionResult } from "@/lib/hooks/use-schedules";
 import { isCreateInputComplete, type ScheduleCreateInput, type ScheduleKind } from "./schedule-types";
 
@@ -40,7 +41,7 @@ export function ScheduleCreateDialog({ onClose, onCreate }: {
     const result = await onCreate(input);
     setBusy(false);
     if (result.status === "ok") onClose();
-    else setError("That schedule didn't go through. Check the fields and try again.");
+    else setError(withReason("That schedule didn't go through. Check the fields and try again.", result.reason));
   };
 
   return (

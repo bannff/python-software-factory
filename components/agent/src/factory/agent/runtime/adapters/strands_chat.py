@@ -23,7 +23,8 @@ from .strands_approval_rail import StrandsApprovalRail
 from .strands_frontend_stub import register_frontend_stubs, unregister_frontend_stubs
 from .strands_resume import resume_responses
 from .strands_session_manager import build_session_manager
-from .strands_session_repository import SqlSessionRepository
+from .session_registration import SessionRegistrar
+from .strands_session_admin import StrandsSessionAdmin
 from .strands_steer_rail import StrandsSteerHook
 from .strands_stream import strands_event_tuples
 from .strands_stream_final import finalize_done_payload, unwrap_frontend_sentinel
@@ -44,8 +45,10 @@ class StrandsChatAgent:
 
     def __init__(self, client: ScopedCapabilityClientPort, model_factory: Any,
                  model_id: str = "", memory_scope: str = "default",
-                 approval_store: ApprovalPolicyStore | None = None) -> None:
+                 approval_store: ApprovalPolicyStore | None = None,
+                 session_port: Any | None = None) -> None:
         self._client = client
+        self._registrar = SessionRegistrar(session_port)
         self._model_factory = model_factory
         self._model_id = model_id
         self._memory_scope = memory_scope
@@ -54,7 +57,7 @@ class StrandsChatAgent:
         self._tools: list[Any] | None = None
         self._steer_hook = StrandsSteerHook()
         self._work = WorkCompletedEmitterPlugin()
-        self._sessions = SqlSessionRepository()
+        self._sessions = StrandsSessionAdmin()
 
     def _request(
         self, thread_id: str, message: str, agent_id: str | None, *,
@@ -128,6 +131,7 @@ class StrandsChatAgent:
             thread_id, message, agent_id, fe_tools=fe_tools, messages=messages,
             model_id=model_id, tenant_id=tenant_id, owner_id=owner_id, memory_mode=memory_mode,
         )
+        await self._registrar.register(request, messages)
         agent = await self._agent_for(thread_id, request.agent_id)
         resume = resume_responses(agent, messages)
         self._threads.track(request.invocation_id, thread_id)
@@ -174,23 +178,16 @@ class StrandsChatAgent:
     def close(self, thread_id: str) -> None:
         """Drop the cached agent AND its durable session rows (all personas)."""
         self._threads.drop(thread_id)
-        suffix = f"-{thread_id}"
-        for session_id in self._sessions.session_ids():
-            if session_id.endswith(suffix):
-                self._sessions.delete_session(session_id)
+        self._sessions.delete_thread(thread_id)
 
     async def fork_thread(self, agent_id: str, source_thread_id: str,
                           target_thread_id: str) -> bool:
-        """Copy the thread's durable transcript onto a new id (same persona);
-        False when the source has no durable history."""
-        return self._sessions.fork_session(
-            f"{agent_id}-{source_thread_id}", f"{agent_id}-{target_thread_id}",
-        )
+        """Copy the thread's durable transcript onto a new id (same persona)."""
+        return self._sessions.fork(agent_id, source_thread_id, target_thread_id)
 
     async def history(self, agent_id: str, thread_id: str) -> list[dict[str, Any]]:
         """Return the durable transcript in AG-UI message shape."""
-        from .strands_history import session_messages_to_agui
-        return session_messages_to_agui(self._sessions, f"{agent_id}-{thread_id}")
+        return self._sessions.history(agent_id, thread_id)
 
     async def aclose(self) -> None:
         await self._threads.aclose()

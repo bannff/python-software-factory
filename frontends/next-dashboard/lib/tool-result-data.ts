@@ -9,11 +9,17 @@ function parseJson(value: unknown): unknown {
   try { return JSON.parse(value); } catch { return value; }
 }
 
-function failureMessage(value: UnknownRecord): string {
+/** The server's own failure text from an `ok:false` envelope, if it sent one. */
+export function failureReason(value: unknown): string | undefined {
+  if (!isRecord(value)) return undefined;
   const error = value.error;
-  if (isRecord(error) && typeof error.message === "string") return error.message;
+  if (isRecord(error) && typeof error.message === "string" && error.message) return error.message;
   if (typeof error === "string" && error) return error;
-  return "Tool request failed";
+  return undefined;
+}
+
+function failureMessage(value: UnknownRecord): string {
+  return failureReason(value) ?? "Tool request failed";
 }
 
 /** Unwrap transport/ToolResult layers while preserving domain-level `result`. */

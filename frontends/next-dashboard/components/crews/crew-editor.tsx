@@ -1,5 +1,7 @@
 "use client";
 
+import { unwrapToolData } from "@/lib/tool-result-data";
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useState } from "react";
 import { Loader2, Star } from "lucide-react";
 import { callTool } from "@/lib/api";
@@ -45,14 +47,17 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
       model: form.model, triggers,
     };
     try {
-      if (creating) await callTool("agent_create_crew", base);
-      else await callTool("agent_update_crew", { ...base, expected_revision: crew.revision });
+      // callTool resolves on a domain ok:false (crew_exists, revision conflict);
+      // unwrap so those throw instead of closing the editor as if saved.
+      unwrapToolData(creating
+        ? await callTool("agent_create_crew", base)
+        : await callTool("agent_update_crew", { ...base, expected_revision: crew.revision }));
       onSaved();
       onClose();
-    } catch {
-      setError(creating
+    } catch (cause) {
+      setError(withReason(creating
         ? "Couldn’t create this crew. Check the fields and try again."
-        : "Couldn’t save — this crew may have changed. Reopen it and retry.");
+        : "Couldn’t save — this crew may have changed. Reopen it and retry.", errorReason(cause)));
     } finally {
       setSaving(false);
     }

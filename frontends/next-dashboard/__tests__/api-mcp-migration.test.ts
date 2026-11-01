@@ -191,6 +191,7 @@ describe("call_brick_tool envelope regression", () => {
     const failure = await callTool("graph_get_stats", {}).catch((err: unknown) => err);
     expect(failure).toBeInstanceOf(ApiError);
     expect((failure as InstanceType<typeof ApiError>).status).toBe(502);
+    expect((failure as InstanceType<typeof ApiError>).reason).toBe("boom");
   });
 
   it("maps an inner transport ok:false envelope to ApiError 502", async () => {
@@ -209,6 +210,25 @@ describe("call_brick_tool envelope regression", () => {
     const failure = await callTool("graph_get_stats", {}).catch((err: unknown) => err);
     expect(failure).toBeInstanceOf(ApiError);
     expect((failure as InstanceType<typeof ApiError>).status).toBe(502);
+    expect((failure as InstanceType<typeof ApiError>).reason).toBe("tool boom");
+  });
+
+  it("leaves reason undefined when the failing envelope names none", async () => {
+    callToolMock.mockImplementation(async (params: { name: string }) => {
+      if (params.name === "get_tool_catalog") return singleToolCatalog();
+      return {
+        structuredContent: {
+          schema_version: "v1", ok: true,
+          data: { ok: false, dry_run: null, would_write: null },
+          error: null, idempotency_key: null,
+        },
+        content: [], isError: false,
+      };
+    });
+    const { callTool, ApiError } = await import("@/lib/api");
+    const failure = await callTool("graph_get_stats", {}).catch((err: unknown) => err);
+    expect(failure).toBeInstanceOf(ApiError);
+    expect((failure as InstanceType<typeof ApiError>).reason).toBeUndefined();
   });
 
   it("maps an unrecognizable envelope to ApiError 502", async () => {
