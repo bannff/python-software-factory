@@ -24,9 +24,9 @@ type UseToolDataOptions = {
 };
 
 /** Wrap a promise with an AbortSignal-based timeout. */
-function withTimeout<T>(promise: Promise<T>, ms: number, signal: AbortSignal): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms: number, signal: AbortSignal, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error("Request timed out")), ms);
+    const timer = setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms);
     signal.addEventListener("abort", () => {
       clearTimeout(timer);
       reject(new Error("Aborted"));
@@ -75,7 +75,7 @@ export function useToolData(
       if (controller.signal.aborted) break;
       try {
         if (i > 0) await sleep(RETRY_BACKOFF_MS, controller.signal);
-        const res = await withTimeout(bridge.callTool(toolName, args), FETCH_TIMEOUT_MS, controller.signal);
+        const res = await withTimeout(bridge.callTool(toolName, args), FETCH_TIMEOUT_MS, controller.signal, toolName);
         if (controller.signal.aborted) return;
         setData(unwrapToolResult(res));
         setLoading(false);
@@ -88,7 +88,7 @@ export function useToolData(
 
     // All attempts exhausted
     if (!controller.signal.aborted) {
-      setError(lastErr ?? "Tool call failed after retries");
+      setError(`${lastErr ?? `${toolName} failed`} (${attempts} attempts)`);
       setLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

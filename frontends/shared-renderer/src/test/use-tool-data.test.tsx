@@ -9,8 +9,8 @@
  */
 
 import React from "react";
-import { describe, expect, it } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { BridgeAdapterProvider, useToolData, type BridgeAdapter } from "../index";
 
 /** Adapter whose callTool resolves/rejects with a caller-chosen value. */
@@ -26,6 +26,8 @@ function wrapperFor(adapter: BridgeAdapter) {
     <BridgeAdapterProvider adapter={adapter}>{children}</BridgeAdapterProvider>
   );
 }
+
+afterEach(() => vi.useRealTimers());
 
 describe("useToolData", () => {
   it("starts loading then resolves data", async () => {
@@ -86,6 +88,20 @@ describe("useToolData", () => {
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toContain("boom-tool-failure");
     expect(result.current.data).toBeNull();
+  });
+
+  it("names the tool and the budget when every attempt times out", async () => {
+    vi.useFakeTimers();
+    try {
+      const hung = new ProgrammableAdapter(() => new Promise(() => undefined));
+      const { result } = renderHook(() => useToolData("artifacts_list", {}), {
+        wrapper: wrapperFor(hung),
+      });
+      await act(async () => { await vi.advanceTimersByTimeAsync(10_000 + 2_000 + 10_000 + 100); });
+      expect(result.current.error).toBe("artifacts_list timed out after 10s (2 attempts)");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("is inert when no toolName is supplied", async () => {
