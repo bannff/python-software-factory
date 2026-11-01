@@ -3,6 +3,7 @@ sessions: ``RepositorySessionManager`` per thread over the SQL repo)."""
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 from collections.abc import AsyncIterator
 from typing import Any
@@ -37,6 +38,8 @@ _EVENTS: dict[str, type] = {
     "state_delta": StateDeltaEvent, "done": DoneEvent,
 }
 
+logger = logging.getLogger(__name__)
+
 
 class StrandsChatAgent:
     """Persistent chat facade: registry owns cache/lifecycle; capabilities
@@ -44,8 +47,10 @@ class StrandsChatAgent:
 
     def __init__(self, client: ScopedCapabilityClientPort, model_factory: Any,
                  model_id: str = "", memory_scope: str = "default",
-                 approval_store: ApprovalPolicyStore | None = None) -> None:
+                 approval_store: ApprovalPolicyStore | None = None,
+                 session_port: Any | None = None) -> None:
         self._client = client
+        self._session_port = session_port
         self._model_factory = model_factory
         self._model_id = model_id
         self._memory_scope = memory_scope
@@ -128,6 +133,7 @@ class StrandsChatAgent:
             thread_id, message, agent_id, fe_tools=fe_tools, messages=messages,
             model_id=model_id, tenant_id=tenant_id, owner_id=owner_id, memory_mode=memory_mode,
         )
+        await self._register_session(request)
         agent = await self._agent_for(thread_id, request.agent_id)
         resume = resume_responses(agent, messages)
         self._threads.track(request.invocation_id, thread_id)
@@ -153,6 +159,21 @@ class StrandsChatAgent:
             reset_invocation(token)
             unregister_frontend_stubs(agent, stubs)
             self._threads.release(request.invocation_id, thread_id)
+
+    async def _register_session(self, request: RuntimeInvocation) -> None:
+        """Ensure the thread has a Session row, even with no default Crew (#54).
+
+        Idempotent. A failure is logged and the turn proceeds: losing the
+        listing entry must not cost the user the reply."""
+        if request.tenant_id is None or request.owner_id is None:
+            return
+        if self._session_port is None:
+            from .session_agent_mcp import SessionAgentMCP
+            self._session_port = SessionAgentMCP()
+        try:
+            await asyncio.to_thread(self._session_port.ensure, request)
+        except Exception:  # noqa: BLE001
+            logger.exception("session registration failed thread_id=%s", request.thread_id)
 
     async def steer(
         self, thread_id: str, send_id: str, message: str, *,

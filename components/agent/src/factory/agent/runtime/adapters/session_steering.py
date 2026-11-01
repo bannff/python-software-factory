@@ -35,6 +35,20 @@ def _default_project() -> str:
     return os.environ.get("COMPANION_X_DEFAULT_PROJECT", "").strip()
 
 
+# Mirrors bases/api ag_ui_input.prefix_context; a title must come from what the
+# user typed, not from the context block the API prepends to the prompt.
+_CONTEXT_PREFIX = "Canvas context (system-supplied, FE-pushed):"
+
+
+def session_title(prompt: str) -> str:
+    """First line of the user's own message, falling back to ``New chat``."""
+    text = prompt.strip()
+    if text.startswith(_CONTEXT_PREFIX):
+        text = text.partition("\n\n")[2].strip()
+    lines = text.splitlines()
+    return lines[0][:200] if lines and lines[0] else "New chat"
+
+
 class SessionSteeringMCP:
     """Resolve and settle steers through caller-bound native MCP only."""
 
@@ -59,7 +73,7 @@ class SessionSteeringMCP:
     def _ensure_session(self, request: RuntimeInvocation) -> dict[str, Any] | None:
         if request.tenant_id is None or request.thread_id is None:
             return None
-        title = request.prompt.strip().splitlines()[0][:200] or "New chat"
+        title = session_title(request.prompt)
         payload = self._public(
             "ensure_thread", {
                 "thread_id": request.thread_id, "title": title,
