@@ -7,6 +7,7 @@ import { Loader2, Star } from "lucide-react";
 import { callTool } from "@/lib/api";
 import { usePersonas } from "@/lib/hooks/use-personas";
 import { useModelCatalog } from "@/lib/hooks/use-model-catalog";
+import { CrewDelete } from "./crew-delete";
 import { CREW_FORM_HINT } from "./crew-field-hints";
 import { Field, InfoHint, FIELD } from "./crew-field";
 import type { Crew } from "./crew-types";
@@ -139,6 +140,7 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
             <Star className="h-3.5 w-3.5" /> Set as default
           </button>
         )}
+        {!creating && <CrewDelete crew={crew} onDeleted={() => { onSaved(); onClose(); }} />}
       </div>
     </article>
   );

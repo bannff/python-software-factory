@@ -22,7 +22,7 @@ vi.mock("@/lib/hooks/use-personas", () => ({
 vi.mock("@/lib/hooks/use-model-catalog", () => ({
   useModelCatalog: () => ({ models: [], groups: [{ provider: "openrouter", models: [{ model_id: "openrouter/x/y", provider: "openrouter", model: "x/y" }] }], loading: false, error: null, refresh: vi.fn() }),
 }));
-vi.mock("@/lib/api", () => ({ callTool: (...args: unknown[]) => mocks.callTool(...args) }));
+vi.mock("@/lib/api", () => ({ callTool: (...args: unknown[]) => mocks.callTool(...args), listTools: async () => ({ tools: [], count: 0 }) }));
 
 import CrewsView from "../crews-view";
 
