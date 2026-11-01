@@ -5,9 +5,11 @@ from collections.abc import Mapping
 import logging
 from typing import Any
 
+from pydantic import ValidationError
+
 from factory.mcp_utils.interface import (
     PROTECTED_OPERATION_ERROR_MESSAGE, PROTECTED_OPERATION_ERROR_TYPE,
-    invoke_native_tool, is_protected_operation,
+    SchemaMigrationError, invoke_native_tool, is_protected_operation,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,6 +34,15 @@ def resolve_tool_name(
         if canonical_tool_name(brick_name, source_name) == requested_public:
             return source_name
     return None
+
+
+def _invalid_fields(exc: SchemaMigrationError) -> str:
+    """Names of the rejected input fields; never their values."""
+    cause = exc.__cause__
+    if not isinstance(cause, ValidationError):
+        return ""
+    names = sorted({str(item["loc"][0]) for item in cause.errors() if item["loc"]})
+    return ", ".join(names)
 
 
 def transport_failure(
@@ -78,6 +89,12 @@ async def invoke_catalog_tool(
         from factory.mcp_utils.interface import ServiceOnlyAccessError, get_envelope
         if isinstance(exc, ServiceOnlyAccessError):
             return transport_failure(type(exc).__name__, str(exc))
+        if isinstance(exc, SchemaMigrationError):
+            fields = _invalid_fields(exc)
+            return transport_failure(
+                "InvalidArguments", f"invalid_arguments: {fields}" if fields else "invalid_arguments",
+                protected=protected,
+            )
         envelope = get_envelope() or {}
         present_keys = sorted(key for key, value in envelope.items() if value is not None)
         logger.warning(

@@ -173,3 +173,4 @@ async def test_dispatch_unexpected_failure_never_exposes_exception_details() -> 
         "error": {"type": "ToolExecutionError", "message": "tool_execution_failed"},
     }
     assert secret not in repr(result)
+
