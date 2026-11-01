@@ -77,7 +77,7 @@ def test_registration_failure_is_logged_not_fatal(
 
 
 def test_title_skips_fe_pushed_context_prefix() -> None:
-    from factory.agent.runtime.adapters.session_steering import session_title
+    from factory.agent.runtime.adapters.session_registration import session_title
 
     prompt = "Canvas context (system-supplied, FE-pushed):\n- a: b\n\nwhat is up?\nmore"
     assert session_title(prompt) == "what is up?"
