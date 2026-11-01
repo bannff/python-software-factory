@@ -39,7 +39,12 @@ def result(call: Callable[[], Any]) -> ToolResult[Any]:
     except ScheduleConflictError:
         return fail("schedule_revision_conflict")
     except ValueError as exc:
-        return fail(str(exc) if str(exc).startswith("scheduler_") else "schedule_invalid")
+        return failure_code(exc)
 
 
-__all__ = ["identity", "owner_identity", "result"]
+def failure_code(exc: ValueError) -> ToolResult[Any]:
+    """Typed code for a ValueError: ``scheduler_*`` codes pass through."""
+    return fail(str(exc) if str(exc).startswith("scheduler_") else "schedule_invalid")
+
+
+__all__ = ["failure_code", "identity", "owner_identity", "result"]

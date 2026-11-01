@@ -10,7 +10,7 @@ from factory.mcp_utils.registration import typed_tool
 from .contracts import (
     AddScheduleInput, FireOutput, RemovedOutput, RevisionInput, ScheduleOutput,
 )
-from .support import identity, owner_identity, result
+from .support import failure_code, identity, owner_identity, result
 
 
 def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
@@ -26,8 +26,11 @@ def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
                             loop_id: str | None = None, loop_cycle: int | None = None,
                             schedule_id: str | None = None,
                             envelope: dict | None = None) -> ToolResult[ScheduleOutput]:
-        tenant, owner, thread = identity(envelope)
-        origin = await _origin(thread, get_envelope() or envelope or {})
+        try:
+            tenant, owner, thread = identity(envelope)
+            origin = await _origin(thread, get_envelope() or envelope or {})
+        except ValueError as exc:
+            return failure_code(exc)
         return result(lambda: ScheduleOutput(schedule=get_runtime().lifecycle.create(
             tenant, owner, origin["session_id"], origin["thread_id"],
             agent_id, task, kind, interval_seconds=interval_seconds,

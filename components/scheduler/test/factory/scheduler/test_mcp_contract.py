@@ -67,7 +67,7 @@ def test_scheduler_creation_still_requires_thread(tmp_path) -> None:
     finally:
         reset_envelope(token)
     assert not created.ok
-    assert created.error == "tool_execution_failed"
+    assert created.error == "scheduler_identity_required", "must be typed, not tool_execution_failed"
 
 
 def test_scheduler_add_accepts_wire_iso_one_shot_at(tmp_path) -> None:
@@ -100,3 +100,22 @@ def test_scheduler_add_accepts_wire_iso_one_shot_at(tmp_path) -> None:
     schedule = created.data.schedule
     assert schedule.schedule_id == "loop_loop_1"
     assert schedule.one_shot_at.isoformat() == "2026-09-15T14:35:46.081296+00:00"
+
+
+def test_scheduler_add_reports_a_typed_error_when_the_origin_session_is_missing(tmp_path) -> None:
+    tools = {tool.name: tool for tool in asyncio.run(_catalog(tmp_path).list_tools())}
+
+    def resolve(_target, **_kwargs):
+        return {"ok": True, "result": {"structured_content": {"ok": False, "error": "session_not_found"}}}
+
+    previous = get_service("tool_invoker_for_caller")
+    set_service("tool_invoker_for_caller", lambda _caller: resolve)
+    token = set_envelope({"tenant_id": "tenant", "principal_id": "owner", "thread_id": "ghost"})
+    try:
+        created = asyncio.run(tools["scheduler_add"].fn(
+            agent_id="developer", task="work", kind="interval", interval_seconds=60,
+        ))
+    finally:
+        reset_envelope(token)
+        set_service("tool_invoker_for_caller", previous)
+    assert not created.ok and created.error == "scheduler_origin_not_found"
