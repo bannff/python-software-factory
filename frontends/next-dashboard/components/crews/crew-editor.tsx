@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useState } from "react";
 import { Loader2, Star } from "lucide-react";
 import { callTool } from "@/lib/api";
@@ -49,10 +50,10 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
       else await callTool("agent_update_crew", { ...base, expected_revision: crew.revision });
       onSaved();
       onClose();
-    } catch {
-      setError(creating
+    } catch (cause) {
+      setError(withReason(creating
         ? "Couldn’t create this crew. Check the fields and try again."
-        : "Couldn’t save — this crew may have changed. Reopen it and retry.");
+        : "Couldn’t save — this crew may have changed. Reopen it and retry.", errorReason(cause)));
     } finally {
       setSaving(false);
     }

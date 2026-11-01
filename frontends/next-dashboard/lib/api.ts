@@ -7,6 +7,7 @@ import type {
 import { getMcpClient } from "./mcp-client";
 import { fetchToolCatalog } from "./tool-catalog";
 import { resolveToolTarget } from "./tool-resolver";
+import { failureReason } from "./tool-result-data";
 
 /**
  * API client for the Python Software Factory gateway.
@@ -27,6 +28,8 @@ class ApiError extends Error {
   constructor(
     public status: number,
     public detail: string,
+    /** The server's own failure text, when the tool sent one. */
+    public reason?: string,
   ) {
     super(`API ${status}: ${detail}`);
     this.name = "ApiError";
@@ -124,12 +127,12 @@ function extractCallBrickToolValue(callResult: unknown, name: string): unknown {
     throw new ApiError(502, `Tool '${name}' returned an invalid response`);
   }
   const outer = raw as { schema_version?: string; ok?: boolean; data?: unknown };
-  if (outer.ok === false) throw new ApiError(502, `Tool '${name}' failed`);
+  if (outer.ok === false) throw toolFailure(name, raw);
   const transport = (outer.schema_version && "data" in outer ? outer.data : raw) as
     | { ok?: boolean; result?: unknown }
     | undefined;
   if (!transport || typeof transport !== "object" || transport.ok !== true) {
-    throw new ApiError(502, `Tool '${name}' failed`);
+    throw toolFailure(name, transport);
   }
   const result = transport.result as
     | { content?: Array<{ type: string; text?: string }>; structured_content?: unknown }
@@ -147,6 +150,11 @@ function extractCallBrickToolValue(callResult: unknown, name: string): unknown {
     }
   }
   throw new ApiError(502, `Tool '${name}' returned an invalid response`);
+}
+
+/** A failed tool call, keeping the structured reason the server reported. */
+export function toolFailure(name: string, envelope: unknown): ApiError {
+  return new ApiError(502, `Tool '${name}' failed`, failureReason(envelope));
 }
 
 /** Recover a JSON payload from a native `tools/call` result. */
