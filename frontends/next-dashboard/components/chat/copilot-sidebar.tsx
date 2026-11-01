@@ -62,12 +62,13 @@ const VIEW_LABELS: Record<CanvasViewId, string> = {
 
 const AGENT_ID = "companion_x";
 interface CopilotChatSidebarProps {
-  onToggle: () => void;
+  /** Omit in a standalone window: there is nothing to collapse into. */
+  onToggle?: () => void;
   activeView?: CanvasViewId;
   /** Current sidebar width in px (controlled by the workbench layout). */
   width: number;
   /** Called during drag with the requested new width. */
-  onResize: (nextWidth: number) => void;
+  onResize?: (nextWidth: number) => void;
 }
 
 export function CopilotChatSidebar({ onToggle, activeView, width, onResize }: CopilotChatSidebarProps) {
@@ -157,7 +158,7 @@ export function CopilotChatSidebar({ onToggle, activeView, width, onResize }: Co
       style={{ width }}
       className="relative flex h-full shrink-0 flex-col border-l border-border/50 bg-card/10 backdrop-blur-md"
     >
-      <ChatResizeHandle onResize={onResize} />
+      {onResize && <ChatResizeHandle onResize={onResize} />}
       <SteerDeliveryListener agentId={AGENT_ID} />
 
       {/* Header */}
@@ -194,11 +195,11 @@ export function CopilotChatSidebar({ onToggle, activeView, width, onResize }: Co
             title="Summary & panels">
             <PanelRightIcon className="h-4 w-4" />
           </button>
-          <button onClick={onToggle}
+          {onToggle && <button onClick={onToggle}
             className="rounded-md p-1 text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
             title="Close chat">
             <PanelRightClose className="h-4 w-4" />
-          </button>
+          </button>}
         </div>
       </div>
 
