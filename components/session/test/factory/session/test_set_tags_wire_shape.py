@@ -30,7 +30,7 @@ def test_set_pinned_messages_accepts_a_json_list(tmp_path: Path) -> None:
 
 def test_a_non_array_still_fails_strict_validation(tmp_path: Path) -> None:
     import pytest
-    from factory.mcp_utils.runtime.schema_migration import SchemaMigrationError
+    from factory.mcp_utils.interface import SchemaMigrationError
 
     tools = _tools(tmp_path)
     session = _create(tools)
