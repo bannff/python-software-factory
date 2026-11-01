@@ -59,7 +59,7 @@ async def _memory_rank(
     raw = await asyncio.to_thread(
         invoke, {"brick_name": "memory", "tool_name": "memory_retrieve"},
         arguments={
-            "query": query, "user_id": "kiro-agent", "memory_type": "long_term",
+            "query": query, "memory_type": "long_term",
             "limit": min(max(limit, 1), 32), "tags": ["accepted-lessons"],
             "metadata": {"owner_id": owner_id, "status": "accepted"},
         }, idempotency_key=f"lessons-recall:{owner_id}:{persona_id_key(query)}",

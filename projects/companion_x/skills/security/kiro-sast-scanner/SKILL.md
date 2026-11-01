@@ -22,7 +22,7 @@ You have access to the the control-plane runtime power for graph, memory, KB, an
 ### Step 0 — Retrieve Prior Learnings + Graph RAG
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_retrieve",
-  arguments='{"query": "{vuln_class} scan learnings", "user_id": "kiro-agent", "limit": 5}')
+  arguments='{"query": "{vuln_class} scan learnings", "limit": 5}')
 ```
 ```
 call_brick_tool(brick_name="kb", tool_name="kb_search",
@@ -127,7 +127,7 @@ call_brick_tool(brick_name="graph", tool_name="graph_add_entity",
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_store",
   arguments='{"content": "SAST scan {run_id}: found N vulns in {target_app}. Endpoints discovered: N. Taint traces: N with sink_reached. Auth gaps: N.",
-    "user_id": "kiro-agent", "category": "fact",
+    "category": "fact",
     "tags": ["{vuln_class}", "sast-learnings", "{run_id}"]}')
 ```
 

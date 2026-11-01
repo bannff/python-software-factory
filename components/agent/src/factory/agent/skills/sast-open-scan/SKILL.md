@@ -63,7 +63,7 @@ recon stage already did and in any prior findings on this run.
    ```
 4. Pull memory for prior learnings on this app:
    ```
-   memory_retrieve(user_id='kiro-agent', query='SAST {{target_app}} chains', limit=5)
+   memory_retrieve(query='SAST {{target_app}} chains', limit=5)
    ```
 
 Build on what teammates already found — do not re-discover the
@@ -229,7 +229,7 @@ After your scan pass:
      content="SAST open-scan for {{target_app}} (run {{run_id}}): "
              "<N findings across {classes}>; chain candidates: <M>; "
              "high-priority follow-ups for dast-open-scan: <list>",
-     user_id='kiro-agent', memory_type='long_term', category='fact',
+     memory_type='long_term', category='fact',
      metadata={"run_id": "{{run_id}}", "agent_id": "{{agent_id}}",
                "skill": "sast-open-scan"}
    )

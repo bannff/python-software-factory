@@ -104,7 +104,7 @@ Record what was found vs what was missing.
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_store",
   arguments='{"content": "Recon verification {run_id}: completeness={score}%, gaps={gaps}, corrections={corrections}",
-    "user_id": "kiro-agent", "category": "fact",
+    "category": "fact",
     "metadata": {"source": "agent", "tags": "recon-verify,{target_app},{run_id}"}}')
 ```
 
