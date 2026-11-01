@@ -8,13 +8,13 @@ All agent memory operations MUST go through the the control-plane runtime memory
 call_brick_tool(
   brick_name="memory",
   tool_name="memory_store",
-  arguments='{"content": "...", "user_id": "kiro-agent", "category": "fact", "metadata": {"source": "agent"}}'
+  arguments='{"content": "...", "category": "fact", "metadata": {"source": "agent"}}'
 )
 ```
 
 Categories: `preference`, `fact`, `summary`, `context`, `custom`
 
-IMPORTANT: Always pass `"user_id": "kiro-agent"` explicitly. There is no envelope auth in the current setup.
+Omit `user_id`: memories are stored and read under the authenticated principal (the signed-in UI user, or `local-operator` locally). Pass it only to act on another principal explicitly.
 
 ## Search memories (semantic)
 
@@ -22,7 +22,7 @@ IMPORTANT: Always pass `"user_id": "kiro-agent"` explicitly. There is no envelop
 call_brick_tool(
   brick_name="memory",
   tool_name="memory_retrieve",
-  arguments='{"query": "...", "user_id": "kiro-agent", "limit": 5}'
+  arguments='{"query": "...", "limit": 5}'
 )
 ```
 
@@ -32,7 +32,7 @@ call_brick_tool(
 call_brick_tool(
   brick_name="memory",
   tool_name="memory_search_by_time",
-  arguments='{"user_id": "kiro-agent", "time_from": "2026-03-01T00:00:00Z", "time_to": "2026-03-10T00:00:00Z", "limit": 10}'
+  arguments='{"time_from": "2026-03-01T00:00:00Z", "time_to": "2026-03-10T00:00:00Z", "limit": 10}'
 )
 ```
 
@@ -42,7 +42,7 @@ call_brick_tool(
 call_brick_tool(
   brick_name="memory",
   tool_name="memory_hybrid_search",
-  arguments='{"user_id": "kiro-agent", "query": "...", "limit": 10}'
+  arguments='{"query": "...", "limit": 10}'
 )
 ```
 

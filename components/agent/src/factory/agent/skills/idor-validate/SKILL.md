@@ -105,7 +105,7 @@ Store validation summary in memory:
 ```
 memory_store(
   content='Validation of {{run_id}}: X confirmed, Y needs review, Z rejected',
-  user_id='kiro-agent',
+  
   memory_type='long_term',
   category='fact'
 )

@@ -88,7 +88,7 @@ Every specialist consultation gets one memory entry via the existing memory bric
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_store", arguments={
   "content": "[CONSULT bd:<id> phase:<design|implement|verify|document|security> specialist:<name>] <verdict>: <one-paragraph summary>",
-  "user_id": "kiro-agent",
+  
   "category": "fact",
   "metadata": {
     "bd_id": "<id>",

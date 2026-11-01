@@ -179,7 +179,7 @@ register_extension("wine_pairing",
 
 ```python
 call_brick_tool(brick_name="memory", tool_name="memory_retrieve", arguments=json.dumps({
-  "user_id": "kiro-agent", "query": "varietal pairing patterns",
+  "query": "varietal pairing patterns",
   "tags": ["wine_pairing-learnings"], "metadata": {"run_id": "wine-run-1"},
   "limit": 5,
 }))

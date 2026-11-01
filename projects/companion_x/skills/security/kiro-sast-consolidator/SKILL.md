@@ -59,7 +59,7 @@ call_brick_tool(brick_name="graph", tool_name="graph_add_entity",
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_store",
   arguments='{"content": "Consolidation {run_id}: N confirmed, M needs_review...",
-    "user_id": "kiro-agent", "category": "fact",
+    "category": "fact",
     "tags": ["{vuln_class}", "consolidation", "{run_id}"]}')
 ```
 

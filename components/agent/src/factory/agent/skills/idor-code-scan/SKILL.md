@@ -141,7 +141,7 @@ Then: `security_classify_finding(finding_id, 'CWE-639')`
 ## PHASE 6: MEMORY + KB
 
 ```
-memory_store(content='...', user_id='kiro-agent',
+memory_store(content='...', 
   memory_type='long_term', category='fact')
 search(query='IDOR <target_app>', limit=5)
 ingest(content='...', source='code-scan',

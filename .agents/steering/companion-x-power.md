@@ -52,7 +52,7 @@ kiroPowers(
     "brick_name": "memory",
     "tool_name":  "memory_store",
     "arguments": json.dumps({
-      "user_id": "kiro-agent",
+      
       "content": "[CONSULT bd:<id> phase:<phase> specialist:<name>] <verdict>: ...",
       "category": "fact",
       "metadata": {
@@ -82,7 +82,7 @@ kiroPowers(
     "brick_name": "memory",
     "tool_name":  "memory_retrieve",
     "arguments": json.dumps({
-      "user_id": "kiro-agent",
+      
       "query":   "[CONSULT bd:<id>",
       "limit":   20,
     }),

@@ -20,7 +20,7 @@ You have access to the control-plane runtime power for sandbox, graph, memory, a
 Check memory for prior sandbox setup issues, timeouts, or profile-specific quirks:
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_retrieve",
-  arguments='{"query": "sandbox setup {profile} learnings", "user_id": "kiro-agent", "limit": 5}')
+  arguments='{"query": "sandbox setup {profile} learnings", "limit": 5}')
 ```
 
 ### Step 1 — List Available Profiles
@@ -90,7 +90,7 @@ call_brick_tool(brick_name="graph", tool_name="graph_add_entity",
 ```
 call_brick_tool(brick_name="memory", tool_name="memory_store",
   arguments='{"content": "Sandbox setup {run_id}: provisioned {profile} for {target_app}, env_id={env_id}, health OK, discovered N endpoints",
-    "user_id": "kiro-agent", "category": "fact",
+    "category": "fact",
     "tags": ["sandbox-setup", "{profile}", "{run_id}"]}')
 ```
 
