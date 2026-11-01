@@ -72,4 +72,22 @@ describe("Secrets Settings", () => {
     await waitFor(() => expect(screen.queryByText("TO_DELETE")).toBeNull());
     expect(await screen.findByText("No secrets stored yet.")).toBeTruthy();
   });
+
+  it("tells the operator why a save failed instead of a fixed sentence", async () => {
+    mocks.call.mockImplementation((tool: string) => {
+      if (tool === "storage.owner_secret_list") return Promise.resolve(wrap({ names: [] }));
+      if (tool === "storage.owner_secret_set") {
+        return Promise.resolve({ tool: "storage", result: { ok: false, error: "owner_secret_key_missing" } });
+      }
+      throw new Error(`unexpected ${tool}`);
+    });
+    render(<SecretsSettingsPanel />);
+    await screen.findByText("No secrets stored yet.");
+    fireEvent.change(screen.getByLabelText(/name/i), { target: { value: "TOKEN" } });
+    fireEvent.change(screen.getByLabelText(/value/i), { target: { value: "x" } });
+    fireEvent.click(screen.getByRole("button", { name: /save|add/i }));
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("Secret could not be saved");
+    expect(alert.textContent).toContain("owner_secret_key_missing");
+  });
 });

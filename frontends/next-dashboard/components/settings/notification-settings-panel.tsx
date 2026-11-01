@@ -1,4 +1,5 @@
 "use client";
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useState } from "react";
 import { Bell } from "lucide-react";
 import {
@@ -33,9 +34,9 @@ export default function NotificationSettingsPanel() {
   const save = async (next: NotificationPreferences) => {
     setBusy(true); setError(null);
     try { setPreferences(await updateNotificationPreferences(next)); }
-    catch {
+    catch (cause) {
       await load();
-      setError("Notification settings could not be saved. Current values were reloaded.");
+      setError(withReason("Notification settings could not be saved. Current values were reloaded.", errorReason(cause)));
     } finally { setBusy(false); }
   };
   const setMuted = (kind: string, muted: boolean) => {

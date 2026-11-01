@@ -1,4 +1,5 @@
 "use client";
+import { errorReason, withReason } from "@/lib/error-reason";
 import { Code2, ShieldAlert, SquareCode } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -40,7 +41,7 @@ export default function SecuritySettingsPanel() {
       : policy.toolNames.filter((item) => item !== name);
     setBusy(true); setError(null);
     try { setPolicy(await updateApprovalPolicy({ ...policy, toolNames })); }
-    catch { await load(); setError("Approval settings could not be saved. Current values were reloaded."); }
+    catch (cause) { await load(); setError(withReason("Approval settings could not be saved. Current values were reloaded.", errorReason(cause))); }
     finally { setBusy(false); }
   };
   return <section aria-labelledby="security-settings-title" className="rounded-lg border border-border/50 bg-card/30 p-5">
