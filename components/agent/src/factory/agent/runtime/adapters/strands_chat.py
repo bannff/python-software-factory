@@ -131,7 +131,7 @@ class StrandsChatAgent:
             thread_id, message, agent_id, fe_tools=fe_tools, messages=messages,
             model_id=model_id, tenant_id=tenant_id, owner_id=owner_id, memory_mode=memory_mode,
         )
-        await self._registrar.register(request)
+        await self._registrar.register(request, messages)
         agent = await self._agent_for(thread_id, request.agent_id)
         resume = resume_responses(agent, messages)
         self._threads.track(request.invocation_id, thread_id)

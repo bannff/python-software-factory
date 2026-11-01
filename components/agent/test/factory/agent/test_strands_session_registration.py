@@ -76,10 +76,33 @@ def test_registration_failure_is_logged_not_fatal(
     assert "session registration failed" in caplog.text
 
 
-def test_title_skips_fe_pushed_context_prefix() -> None:
-    from factory.agent.runtime.adapters.session_registration import session_title
+def test_title_comes_from_raw_user_text_not_context_prefix() -> None:
+    from factory.agent.runtime.adapters.session_registration import session_title, user_text
 
-    prompt = "Canvas context (system-supplied, FE-pushed):\n- a: b\n\nwhat is up?\nmore"
-    assert session_title(prompt) == "what is up?"
-    assert session_title("  plain first line\nx") == "plain first line"
+    messages = [
+        {"role": "user", "content": "older"},
+        {"role": "assistant", "content": "ok"},
+        {"role": "user", "content": "Summarize this document\nplease"},
+    ]
+    assert user_text(messages) == "Summarize this document\nplease"
+    assert user_text([{"role": "user", "content": [{"type": "text"}]}]) is None
+    assert user_text(None) is None
+    assert session_title("Summarize this document\nplease") == "Summarize this document"
     assert session_title("   ") == "New chat"
+
+
+def test_multiline_context_never_reaches_the_title() -> None:
+    port = _Port()
+    prompt = "Canvas context (system-supplied, FE-pushed):\n- a: Intro\n\nContext paragraph\n\nSummarize"
+    chat = _chat(port)
+
+    async def run() -> None:
+        async for _ in chat.stream(
+            "t-1", prompt, agent_id=None, tenant_id="t", owner_id="o",
+            messages=[{"role": "user", "content": "Summarize this document"}],
+        ):
+            pass
+
+    with pytest.raises(_Stop):
+        asyncio.run(run())
+    assert port.seen[0].prompt == "Summarize this document"

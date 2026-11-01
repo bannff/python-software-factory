@@ -3,24 +3,27 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from dataclasses import replace
 from typing import Any
 
 from ..runtime_contracts import RuntimeInvocation
 
 logger = logging.getLogger(__name__)
 
-# Mirrors bases/api ag_ui_input.prefix_context; a title must come from what the
-# user typed, not from the context block the API prepends to the prompt.
-_CONTEXT_PREFIX = "Canvas context (system-supplied, FE-pushed):"
-
-
-def session_title(prompt: str) -> str:
-    """First line of the user's own message, falling back to ``New chat``."""
-    text = prompt.strip()
-    if text.startswith(_CONTEXT_PREFIX):
-        text = text.partition("\n\n")[2].strip()
-    lines = text.splitlines()
+def session_title(text: str) -> str:
+    """First line of ``text``, falling back to ``New chat``."""
+    lines = text.strip().splitlines()
     return lines[0][:200] if lines and lines[0] else "New chat"
+
+
+def user_text(messages: list[dict[str, Any]] | None) -> str | None:
+    """The latest raw user message; unlike the turn prompt it carries no
+    FE-pushed context prefix."""
+    for message in reversed(messages or ()):
+        if message.get("role") == "user":
+            content = message.get("content")
+            return content if isinstance(content, str) else None
+    return None
 
 
 class SessionRegistrar:
@@ -32,16 +35,21 @@ class SessionRegistrar:
     def __init__(self, port: Any | None = None) -> None:
         self._port = port
 
-    async def register(self, request: RuntimeInvocation) -> None:
+    async def register(
+        self, request: RuntimeInvocation, messages: list[dict[str, Any]] | None = None,
+    ) -> None:
         if request.tenant_id is None or request.owner_id is None:
             return
         if self._port is None:
             from .session_agent_mcp import SessionAgentMCP
             self._port = SessionAgentMCP()
         try:
-            await asyncio.to_thread(self._port.ensure, request)
+            # ensure_thread titles from the prompt's first line; hand it the raw
+            # user text, not the context-prefixed turn prompt.
+            titled = replace(request, prompt=user_text(messages) or request.prompt)
+            await asyncio.to_thread(self._port.ensure, titled)
         except Exception:  # noqa: BLE001
             logger.exception("session registration failed thread_id=%s", request.thread_id)
 
 
-__all__ = ["SessionRegistrar", "session_title"]
+__all__ = ["SessionRegistrar", "session_title", "user_text"]
