@@ -71,7 +71,7 @@ from .registry import set_service, get_service
 from . import event_bus
 from .tool_event_stream import tool_invocation_stream, _SENTINEL_PING
 from .protected_content import (
-    AuthorizationAssertion, LocalEnvironmentKeyProvider, ProtectedArtifactRef,
+    AuthorizationAssertion, LocalEnvironmentKeyProvider, ProtectedArtifactRef, ProtectedKeyUnavailable,
     ProtectedContentDescriptor, ProtectedContentKeyProvider,
     ProtectedContentPolicyProfile, ProtectedContentProjection, TestKeyProvider,
     canonical_json as protected_canonical_json, sanitize_protected,
@@ -121,7 +121,7 @@ __all__ = [
     "set_caller_hint", "get_caller_hint", "get_run_id", "normalize_envelope",
     "envelope_updates_from_mapping", "push_envelope_updates", "reset_envelope",
     "set_service", "get_service", "event_bus", "tool_invocation_stream",
-    "_SENTINEL_PING", "AuthorizationAssertion", "LocalEnvironmentKeyProvider",
+    "_SENTINEL_PING", "AuthorizationAssertion", "LocalEnvironmentKeyProvider", "ProtectedKeyUnavailable",
     "ProtectedArtifactRef", "ProtectedContentDescriptor", "ProtectedContentKeyProvider",
     "ProtectedContentPolicyProfile", "ProtectedContentProjection", "TestKeyProvider",
     "protected_canonical_json", "sanitize_protected", "sanitize_protected_error",
