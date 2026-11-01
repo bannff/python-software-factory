@@ -5,6 +5,8 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
+from .canvas_paint import canvas_state_delta
+
 
 @dataclass
 class ToolChunkState:
@@ -111,40 +113,6 @@ def _structured_payload(content: Any) -> Any:
     return content
 
 
-_CANVAS_TARGETS = frozenset({"graph", "timeline", "findings", "live"})
-
-
-def _canvas_state_delta(payload: Any) -> tuple[str, str, dict[str, Any]] | None:
-    """Extract a ``(target, mode, payload)`` canvas paint from a tool result.
-
-    Port of the Strands ``state_delta_plugin`` (removed in the native-v2
-    migration, a4437ac0) to the LangGraph message path: ``ui_paint_canvas``
-    returns a v1 envelope whose ``data`` carries the ``_a2ui_canvas``
-    sentinel. The AG-UI mapper consumes the resulting ``state_delta`` event
-    and emits ``STATE_SNAPSHOT`` / ``STATE_DELTA`` so the canvas views
-    (``agentState.canvas.<slot>``) paint. Malformed sentinels return
-    ``None`` — never a stream failure.
-    """
-    if not isinstance(payload, dict) or payload.get("schema_version") != "v1":
-        return None
-    if payload.get("ok") is not True or payload.get("error") is not None:
-        return None
-    data = payload.get("data")
-    if not isinstance(data, dict):
-        return None
-    sentinel = data.get("_a2ui_canvas")
-    if not isinstance(sentinel, dict):
-        return None
-    target = sentinel.get("target")
-    mode = sentinel.get("mode", "snapshot")
-    slot_payload = sentinel.get("payload")
-    if target not in _CANVAS_TARGETS or mode not in ("snapshot", "delta"):
-        return None
-    if not isinstance(slot_payload, dict):
-        return None
-    return str(target), str(mode), slot_payload
-
-
 def message_events(
     message: Any, state: ToolChunkState | None = None,
 ) -> list[tuple[str, dict[str, Any]]]:
@@ -186,7 +154,7 @@ def message_events(
             "is_error": getattr(message, "status", "success") == "error",
         }
         events.append(("tool_result", payload))
-        paint = _canvas_state_delta(payload["payload"])
+        paint = canvas_state_delta(payload["payload"])
         if paint is not None:
             target, mode, slot_payload = paint
             events.append(("state_delta", {

@@ -25,6 +25,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from .canvas_paint import canvas_state_delta
+
 _DONE_REASONS = {
     "end_turn": "stop", "stop_sequence": "stop", "cancelled": "stop",
     # Interrupted runs surface the pending frontend payload as a
@@ -111,6 +113,10 @@ def _message_tuples(message: Any) -> list[tuple[str, dict[str, Any]]]:
                 "payload": content,
                 "is_error": tool_result.get("status") == "error",
             }))
+            paint = canvas_state_delta(content) if tool_result.get("status") != "error" else None
+            if paint is not None:
+                target, mode, slot_payload = paint
+                events.append(("state_delta", {"target": target, "mode": mode, "payload": slot_payload}))
     return events
 
 
