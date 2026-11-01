@@ -186,7 +186,7 @@ class GraphMemoryStore:
             by_category[c] = by_category.get(c, 0) + 1
         return MemoryStats(total_memories=len(entities), by_type=by_type, by_category=by_category)
 
-    def health_check(self) -> MemoryHealth:
+    def health_check(self, user_id: str | None = None) -> MemoryHealth:
         health = self._graph.health_check()
         return MemoryHealth(
             healthy=health.healthy, backend="graph", latency_ms=health.latency_ms,

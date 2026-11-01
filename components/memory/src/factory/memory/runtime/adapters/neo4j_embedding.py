@@ -190,8 +190,8 @@ class Neo4jEmbeddingMemoryStore:
     def consolidate(self, user_id: str) -> int: return self._base.consolidate(user_id)
     def stats(self, user_id: str | None = None) -> MemoryStats: return self._base.stats(user_id)
 
-    def health_check(self) -> MemoryHealth:
-        health = self._base.health_check()
+    def health_check(self, user_id: str | None = None) -> MemoryHealth:
+        health = self._base.health_check(user_id)
         if health.healthy:
             health.message = (f"Neo4j connected (embeddings: enabled, evolution: "
                               f"{'enabled' if self._llm_complete else 'disabled'})")

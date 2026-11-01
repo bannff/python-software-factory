@@ -9,7 +9,7 @@ from rapidfuzz.fuzz import ratio as _fuzz_ratio
 from typing import Any
 
 from factory.memory.core import MemoryCategory
-from factory.memory.runtime.models import Memory, MemoryHealth, MemoryQuery, MemoryStats
+from factory.memory.runtime.models import Memory, MemoryHealth, MemoryQuery, MemoryStats, scoped_health
 
 
 def _utcnow() -> datetime:
@@ -147,17 +147,13 @@ class InMemoryStore:
             newest_memory=max(dates) if dates else None,
         )
 
-    def health_check(self) -> MemoryHealth:
+    def health_check(self, user_id: str | None = None) -> MemoryHealth:
         """Check backend health."""
         start = time.perf_counter()
         count = len(self._memories)
         latency = (time.perf_counter() - start) * 1000
-        return MemoryHealth(
-            healthy=True,
-            backend="memory",
-            latency_ms=latency,
-            message=f"In-memory store with {count} memories",
-        )
+        mine = len(self._get_user_memories(user_id)) if user_id else None
+        return scoped_health("memory", "In-memory store", count, mine, user_id, latency)
 
     def _get_user_memories(self, user_id: str) -> list[Memory]:
         """Get all memories for a user."""

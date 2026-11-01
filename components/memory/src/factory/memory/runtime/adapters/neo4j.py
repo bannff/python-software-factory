@@ -188,7 +188,7 @@ class Neo4jMemoryStore:
                 total += r["n"]
         return MemoryStats(total_memories=total, by_type=by_type, by_category=by_cat)
 
-    def health_check(self) -> MemoryHealth:
+    def health_check(self, user_id: str | None = None) -> MemoryHealth:
         start = time.perf_counter()
         try:
             with self._driver.session(database=self._database) as s:

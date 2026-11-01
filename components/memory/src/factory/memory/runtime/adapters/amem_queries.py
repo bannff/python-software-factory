@@ -9,7 +9,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from factory.memory.runtime.models import Memory, MemoryHealth, MemoryQuery, MemoryStats
+from factory.memory.runtime.models import Memory, MemoryHealth, MemoryQuery, MemoryStats, scoped_health
 from factory.memory.runtime.adapters.amem_helpers import (
     flatten_meta,
     meta_to_memory,
@@ -171,16 +171,16 @@ class AMemQueryMixin:
         except Exception:
             return MemoryStats()
 
-    def health_check(self) -> MemoryHealth:
+    def health_check(self, user_id: str | None = None) -> MemoryHealth:
         start = time.perf_counter()
         try:
             count = self._collection.count()
+            mine = (len(self._collection.get(where={"user_id": user_id}, include=[])["ids"])
+                    if user_id else None)
             latency = (time.perf_counter() - start) * 1000
-            return MemoryHealth(
-                healthy=True,
-                backend="amem",
-                latency_ms=latency,
-                message=f"ChromaDB OK ({count} memories, {self._evo_count} evolutions)",
+            return scoped_health(
+                "amem", "ChromaDB OK", count, mine, user_id, latency,
+                extra=f"{self._evo_count} evolutions",
             )
         except Exception as e:
             latency = (time.perf_counter() - start) * 1000

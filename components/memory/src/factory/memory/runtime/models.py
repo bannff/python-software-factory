@@ -129,3 +129,26 @@ class Settings(BaseModel):
     authoring: AuthoringSettings = Field(default_factory=AuthoringSettings)
     default_ttl_seconds: int | None = None
     max_memories_per_user: int = 1000
+
+
+def scoped_health(
+    backend: str, label: str, collection_count: int, principal_count: int | None,
+    user_id: str | None, latency_ms: float, extra: str = "",
+) -> MemoryHealth:
+    """Health that never presents a collection-wide count as the caller's own.
+
+    Reads are scoped to a principal, so a bare "N memories" can disagree with
+    every read tool; report the collection total and the caller's slice, each
+    labelled, instead.
+    """
+    details: dict[str, Any] = {"scope": "collection", "collection_count": collection_count}
+    parts = [f"{collection_count} in the collection"]
+    if principal_count is not None:
+        details.update(user_id=user_id, principal_count=principal_count)
+        parts.append(f"{principal_count} for '{user_id}'")
+    if extra:
+        parts.append(extra)
+    return MemoryHealth(
+        healthy=True, backend=backend, latency_ms=latency_ms,
+        message=f"{label} ({', '.join(parts)})", details=details,
+    )
