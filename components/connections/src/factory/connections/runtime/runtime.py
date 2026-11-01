@@ -16,10 +16,25 @@ Mount = Callable[[str, Any], Any]
 Unmount = Callable[[str], Any]
 
 
-def _reason(exc: Exception) -> str:
-    """Exception type plus first message line; never the spec, so no env/header values."""
-    lines = str(exc).strip().splitlines()
-    return f"{type(exc).__name__}: {lines[0][:200]}" if lines else type(exc).__name__
+def _root_cause(exc: BaseException) -> BaseException:
+    while isinstance(exc, BaseExceptionGroup) and exc.exceptions:
+        exc = exc.exceptions[0]
+    return exc
+
+
+def _reason(exc: BaseException) -> str:
+    """Allowlisted diagnostic: root-cause type, plus the OS reason for OSErrors.
+
+    Arbitrary exception text can echo resolved env/header credentials, so it is
+    never forwarded.
+    """
+    cause = _root_cause(exc)
+    if isinstance(cause, OSError) and cause.strerror:
+        return f"{type(cause).__name__}: {cause.strerror}"
+    return type(cause).__name__
+
+
+ErrorKey = tuple[str, str, str]
 
 
 class ConnectionsRuntime:
@@ -32,7 +47,7 @@ class ConnectionsRuntime:
         self._sources: dict[str, Any] = {}
         self._tool_counts: dict[str, int] = {}
         self._tool_names: dict[str, tuple[str, ...]] = {}
-        self._mount_errors: dict[str, str] = {}
+        self._mount_errors: dict[ErrorKey, str] = {}
         self._lock = asyncio.Lock()
 
     def attach_gateway(self, register: Mount, unregister: Unmount) -> None:
@@ -70,37 +85,48 @@ class ConnectionsRuntime:
     # -- mount --------------------------------------------------------------
     async def mount(self, record: ServerRecord) -> int:
         """Dial one server and register it as a pseudo-brick; returns tool count."""
+        key = (record.tenant_id, record.owner_id, record.name)
         async with self._lock:
-            self._mount_errors.pop(record.name, None)
+            self._mount_errors.pop(key, None)
             await self._unmount_locked(record.name)
+            source: Any = None
             try:
                 source, tools = await open_source(record)
+                catalog = build_catalog(record, source, tools)
+                self._sources[record.name] = source
+                self._tool_counts[record.name] = len(catalog.tool_map())
+                self._tool_names[record.name] = tuple(sorted(catalog.tool_map()))
+                if self._register is not None:
+                    self._register(brick_name(record.name), catalog)
             except Exception as exc:
-                # Kept for the view: registration succeeds, so the operator needs the cause.
-                self._mount_errors[record.name] = _reason(exc)
+                # Registration succeeds regardless, so the view needs the cause.
+                self._mount_errors[key] = _reason(exc)
+                await self._unmount_locked(record.name)
+                if source is not None:
+                    await self._close(source, record.name)
                 raise
-            catalog = build_catalog(record, source, tools)
-            self._sources[record.name] = source
-            self._tool_counts[record.name] = len(catalog.tool_map())
-            self._tool_names[record.name] = tuple(sorted(catalog.tool_map()))
-            if self._register is not None:
-                self._register(brick_name(record.name), catalog)
             return len(catalog.tool_map())
 
-    async def unmount(self, name: str) -> None:
+    async def unmount(self, name: str, owner: tuple[str, str] | None = None) -> None:
+        """Drop a mount; ``owner`` also clears that owner's retained mount error."""
         async with self._lock:
-            self._mount_errors.pop(name, None)
+            if owner is not None:
+                self._mount_errors.pop((*owner, name), None)
             await self._unmount_locked(name)
+
+    @staticmethod
+    async def _close(source: Any, name: str) -> None:
+        try:
+            await source.close()
+        except Exception:  # noqa: BLE001 - teardown is best-effort
+            logger.debug("connections: close failed for %s", name, exc_info=True)
 
     async def _unmount_locked(self, name: str) -> None:
         source = self._sources.pop(name, None)
         self._tool_counts.pop(name, None)
         self._tool_names.pop(name, None)
         if source is not None:
-            try:
-                await source.close()
-            except Exception:  # noqa: BLE001 - teardown is best-effort
-                logger.debug("connections: close failed for %s", name, exc_info=True)
+            await self._close(source, name)
         if self._unregister is not None:
             self._unregister(brick_name(name))
 
@@ -116,7 +142,7 @@ class ConnectionsRuntime:
         outcome: dict[str, int | str] = {}
         for record in records:
             if not record.spec.enabled:
-                await self.unmount(record.name)
+                await self.unmount(record.name, (record.tenant_id, record.owner_id))
                 outcome[record.name] = "disabled"
                 continue
             try:
@@ -132,8 +158,8 @@ class ConnectionsRuntime:
     def tool_count(self, name: str) -> int:
         return self._tool_counts.get(name, 0)
 
-    def mount_error(self, name: str) -> str | None:
-        return self._mount_errors.get(name)
+    def mount_error(self, tenant_id: str, owner_id: str, name: str) -> str | None:
+        return self._mount_errors.get((tenant_id, owner_id, name))
 
     def tool_names(self, name: str) -> tuple[str, ...]:
         return self._tool_names.get(name, ())
