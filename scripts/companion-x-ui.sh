@@ -133,8 +133,10 @@ fi
 
 # Encrypted-at-rest stores (Settings -> Secrets, credential slots) fail closed
 # without a local key. Mint once and keep it: rotating would orphan stored secrets.
-eval "$(python3 "$FACTORY_ROOT/scripts/local_protected_keys.py" \
-    "$FACTORY_ROOT/projects/companion_x/.storage/local-protected-keys.json")"
+PROTECTED_KEY_EXPORTS="$(python3 "$FACTORY_ROOT/scripts/local_protected_keys.py" \
+    "$FACTORY_ROOT/projects/companion_x/.storage/local-protected-keys.json")" \
+    || { echo "ERROR: could not provision the local protected-content keys" >&2; exit 1; }
+eval "$PROTECTED_KEY_EXPORTS"
 
 # Select the project-owned Workflow engine registry, independent of cwd.
 export WORKFLOW_CONFIG_DIR="${WORKFLOW_CONFIG_DIR:-$FACTORY_ROOT/projects/companion_x/config}"
