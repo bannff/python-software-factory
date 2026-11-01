@@ -89,4 +89,11 @@ describe("TerminalPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Close Terminal" }));
     expect(close).toHaveBeenCalledOnce();
   });
+
+  it("fills a standalone window and offers no close control without an owner callback", async () => {
+    render(<TerminalPanel />);
+    await screen.findByRole("tab", { name: "bash" });
+    expect(screen.queryByRole("button", { name: "Close Terminal" })).toBeNull();
+    expect(screen.getByRole("region", { name: "Terminal panel" }).className).toContain("flex-1");
+  });
 });
