@@ -10,6 +10,7 @@ from factory.llm_gateway.interface import configured_chat_model_id
 from factory.mcp_utils.interface import get_service
 
 from ..runtime_contracts import RuntimeInvocation
+from .session_registration import session_title
 
 if TYPE_CHECKING:
     # Dormant laziness: langchain imports live in the langgraph-legacy group.
@@ -59,10 +60,9 @@ class SessionSteeringMCP:
     def _ensure_session(self, request: RuntimeInvocation) -> dict[str, Any] | None:
         if request.tenant_id is None or request.thread_id is None:
             return None
-        title = request.prompt.strip().splitlines()[0][:200] or "New chat"
         payload = self._public(
             "ensure_thread", {
-                "thread_id": request.thread_id, "title": title,
+                "thread_id": request.thread_id, "title": session_title(request.prompt),
                 "agent_id": request.agent_id,
                 "model": request.model_id or _process_default_model_id(),
                 "memory_scope": request.memory_scope, "mode": request.memory_mode,
