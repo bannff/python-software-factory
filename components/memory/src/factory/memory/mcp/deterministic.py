@@ -39,7 +39,7 @@ def register(mcp: Any, runtime: MemoryRuntime) -> None:
     @mcp.tool()
     @typed(input_model=EmptyInput, output_model=HealthOutput)
     def health_check() -> ToolResult[HealthOutput]:
-        return runtime.health_check().model_dump(mode="json")
+        return runtime.health_check(get_principal_id()).model_dump(mode="json")
 
     @mcp.tool()
     @typed(input_model=EmptyInput, output_model=ConfigSchemaOutput)

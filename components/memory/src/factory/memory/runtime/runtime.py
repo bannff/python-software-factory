@@ -174,9 +174,9 @@ class MemoryRuntime:
         """Get memory statistics."""
         return self._store.stats(user_id)
 
-    def health_check(self) -> MemoryHealth:
+    def health_check(self, user_id: str | None = None) -> MemoryHealth:
         """Check backend health."""
-        return self._store.health_check()
+        return self._store.health_check(user_id)
 
     def recall_path(self, memory_id: str) -> dict[str, Any] | None:
         """Row 45's recall inspection (owner direction 2026-09-16): the

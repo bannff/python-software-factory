@@ -54,6 +54,6 @@ class MemoryStore(Protocol):
         """Get memory statistics, optionally filtered by user."""
         ...
 
-    def health_check(self) -> MemoryHealth:
+    def health_check(self, user_id: str | None = None) -> MemoryHealth:
         """Check backend health."""
         ...

@@ -156,7 +156,7 @@ class ZepMemoryStore:
                 pass
         return MemoryStats(total_memories=count, by_type={"long_term": count})
 
-    def health_check(self) -> MemoryHealth:
+    def health_check(self, user_id: str | None = None) -> MemoryHealth:
         start = time.perf_counter()
         try:
             # Lightweight probe — list sessions with limit 1
