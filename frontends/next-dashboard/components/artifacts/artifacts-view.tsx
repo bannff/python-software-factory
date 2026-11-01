@@ -92,7 +92,7 @@ export default function ArtifactsView() {
             <span className="sr-only">Filter artifacts</span>
             <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Filter by name, slug, or tag" className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
           </label>
-          {error && <div role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm">Artifacts unavailable: {error}</div>}
+          {error && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm"><span>Artifacts unavailable: {error}</span><button type="button" onClick={refetch} className="rounded-md border border-border/60 px-3 py-1.5 text-xs hover:bg-muted/50">Retry</button></div>}
           {creating && <ArtifactCreateDialog onCreated={created} onClose={() => setCreating(false)} />}
           {loading && artifacts.length === 0 && <div className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Loading artifacts…</div>}
           {!loading && !error && visible.length === 0 && !creating && <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border/60 p-10 text-center"><Box className="h-8 w-8 text-violet-400/70" /><h2 className="mt-3 font-medium">{activeFolderId ? "Empty folder" : "No artifacts yet"}</h2><p className="mt-1 max-w-sm text-sm text-muted-foreground">{activeFolderId ? "Move an artifact here, or ask Companion X to save one directly into it." : "Ask Companion X to save a report, widget, or document, or click New artifact above."}</p></div>}

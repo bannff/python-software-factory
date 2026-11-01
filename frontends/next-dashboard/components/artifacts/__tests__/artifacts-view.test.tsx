@@ -56,6 +56,14 @@ describe("ArtifactsView", () => {
     expect(screen.getByRole("alert").textContent).toContain("MCP unavailable");
   });
 
+  it("offers a Retry right in the failure state that re-runs the list", () => {
+    const refetch = vi.fn();
+    tool.mockReturnValue({ data: null, loading: false, error: "artifacts_list timed out after 10s (2 attempts)", refetch });
+    render(<ArtifactsView />);
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
   it("row 63 / P1 item 10: opens the New artifact dialog and creates via the real MCP tool", async () => {
     const refetch = vi.fn();
     tool.mockReturnValue({ data: { artifacts: [] }, loading: false, error: null, refetch });
