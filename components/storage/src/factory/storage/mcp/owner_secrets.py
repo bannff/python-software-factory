@@ -13,10 +13,11 @@ surface, not an internal broker seam.
 """
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any
 
 from factory.mcp_utils.interface import (
-    ToolResult, deterministic, fail, get_envelope, ok, operational,
+    ProtectedKeyUnavailable, ToolResult, deterministic, fail, get_envelope, ok, operational,
 )
 
 from .contracts.owner_secrets import (
@@ -27,7 +28,9 @@ from .contracts.owner_secrets import (
 if TYPE_CHECKING:
     from ..runtime.runtime import StorageRuntime
 
+logger = logging.getLogger(__name__)
 _ERROR = "owner_secret_unavailable"
+_KEY_MISSING = "owner_secret_key_missing"
 
 
 def _identity() -> Any:
@@ -72,7 +75,11 @@ def register(mcp: Any, get_runtime: Any) -> None:
         try:
             get_runtime().get_owner_secret_store().set_secret(ident, parsed.name, parsed.value)
             return ok(OwnerSecretReceiptOutput(name=parsed.name, ok=True))
+        except ProtectedKeyUnavailable:
+            logger.error("owner secret store has no protected-content key configured")
+            return fail(_KEY_MISSING)
         except Exception:
+            logger.exception("owner_secret_set failed")
             return fail(_ERROR)
 
     @mcp.tool(name="storage.owner_secret_delete")

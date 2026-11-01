@@ -99,6 +99,14 @@ class ProtectedContentKeyProvider(Protocol):
     def index_key(self, tenant_id: str) -> bytes: ...
 
 
+class ProtectedKeyUnavailable(ValueError):
+    """The deployment has no usable protected-content key (a configuration
+    fault, so safe to surface; never raised for a bad or foreign secret)."""
+
+    def __init__(self) -> None:
+        super().__init__("protected key unavailable")
+
+
 class LocalEnvironmentKeyProvider:
     """Fail-closed configured key provider; key id is deployment configuration."""
     def __init__(self, key_id: str = "local-v1", environ: dict[str, str] | None = None) -> None:
@@ -108,8 +116,8 @@ class LocalEnvironmentKeyProvider:
         try:
             key = base64.b64decode(encoded or "", validate=True)
         except Exception as exc:
-            raise ValueError("protected key unavailable") from exc
-        if len(key) != 32: raise ValueError("protected key unavailable")
+            raise ProtectedKeyUnavailable() from exc
+        if len(key) != 32: raise ProtectedKeyUnavailable()
         return key
 
     def _key(self) -> bytes:
@@ -120,7 +128,7 @@ class LocalEnvironmentKeyProvider:
             values = json.loads(self._environ.get("FACTORY_PROTECTED_CONTENT_LOCAL_HISTORICAL_KEKS", "{}"))
             return values if isinstance(values, dict) and all(isinstance(k, str) and isinstance(v, str) for k, v in values.items()) else {}
         except json.JSONDecodeError as exc:
-            raise ValueError("protected key unavailable") from exc
+            raise ProtectedKeyUnavailable() from exc
 
     def active(self) -> tuple[str, bytes]: return self._key_id, self._key()
     def resolve(self, key_id: str) -> bytes:
