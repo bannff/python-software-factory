@@ -108,7 +108,7 @@ export function CopilotChatSidebar({ onToggle, activeView, width, onResize }: Co
     { id: "summary", label: "Summary", render: () => <ChatSummaryTab threadId={agent.threadId} /> },
     { id: "pins", label: "Pins", render: () => <ChatPinsTab threadId={agent.threadId} /> },
     { id: "files", label: "Files", render: () => (
-      <ChatFilesTab onInsert={(ref) => setDraft((d) => (d ? `${d} ${ref}` : ref))} />
+      <ChatFilesTab threadId={agent.threadId} onInsert={(ref) => setDraft((d) => (d ? `${d} ${ref}` : ref))} />
     ) },
     { id: "side", label: "Side", render: () => <ChatSideTab seed={sideSeed} /> },
     { id: "browser", label: "Browser", render: () => <ChatBrowserTab /> },
