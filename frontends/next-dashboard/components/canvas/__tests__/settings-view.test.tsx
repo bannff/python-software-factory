@@ -64,6 +64,25 @@ describe("SettingsView", () => {
     ]);
   });
 
+  it("only references a tabpanel that exists in the DOM", () => {
+    render(<SettingsView />);
+    const tabs = screen.getAllByRole("tab");
+    const dangling = tabs.filter((tab) => {
+      const controls = tab.getAttribute("aria-controls");
+      return controls !== null && document.getElementById(controls) === null;
+    });
+    expect(dangling).toEqual([]);
+    expect(tabs.find((tab) => tab.getAttribute("aria-selected") === "true")?.getAttribute("aria-controls"))
+      .toBe("settings-panel-overview");
+  });
+
+  it("keeps the current path when a section is selected (embedded settings)", () => {
+    window.history.pushState({}, "", "/embed/settings");
+    render(<SettingsView />);
+    fireEvent.click(screen.getByRole("tab", { name: "Display" }));
+    expect(window.location.pathname + window.location.search).toBe("/embed/settings?section=display");
+  });
+
   it("opens a valid bookmarkable Settings section", () => {
     mocks.requested = "imports";
     render(<SettingsView />);

@@ -51,7 +51,7 @@ export default function SettingsView() {
   }, [requested]);
   const select = (id: TabId) => {
     setActive(id);
-    window.history.pushState({}, "", `/settings?section=${id}`);
+    window.history.pushState({}, "", `${window.location.pathname}?section=${id}`);
   };
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -98,7 +98,8 @@ export default function SettingsView() {
               id={`settings-tab-${tab.id}`}
               type="button"
               aria-selected={selected}
-              aria-controls={`settings-panel-${tab.id}`}
+              // Only the active panel is mounted, so only that tab may point at one.
+              aria-controls={selected ? `settings-panel-${tab.id}` : undefined}
               tabIndex={selected ? 0 : -1}
               onClick={() => select(tab.id)}
               className={cn(
