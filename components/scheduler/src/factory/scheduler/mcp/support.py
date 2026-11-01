@@ -23,9 +23,14 @@ def owner_identity(explicit: dict[str, Any] | None) -> tuple[str, str]:
 def identity(explicit: dict[str, Any] | None) -> tuple[str, str, str]:
     """Resolve owner plus active thread for schedule creation."""
     tenant, owner = owner_identity(explicit)
-    ambient = get_envelope()
-    value = ambient if ambient is not None else explicit
-    thread = value.get("thread_id") or value.get("session_id")
+    # Authority (tenant/owner) is ambient-only; the active thread is context a
+    # UI caller supplies, so it may come from the explicit envelope even when
+    # an ambient one carries the principal.
+    thread = next((
+        value.get(key) for value in (get_envelope(), explicit)
+        if isinstance(value, dict) for key in ("thread_id", "session_id")
+        if value.get(key)
+    ), None)
     if not isinstance(thread, str) or not thread:
         raise ValueError("scheduler_identity_required")
     return tenant, owner, thread

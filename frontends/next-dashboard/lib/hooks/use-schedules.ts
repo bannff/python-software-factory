@@ -2,6 +2,7 @@
 
 import { errorReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAgent } from "@copilotkit/react-core/v2";
 import { callTool } from "@/lib/api";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import {
@@ -18,7 +19,8 @@ import {
 /**
  * Owner-scoped Schedules state, backed by the real ``scheduler_*`` MCP tools.
  *
- * Identity is ambient on the backend — no tenant/owner/envelope is ever sent.
+ * Authority (tenant/owner) is ambient on the backend. Creation also names the
+ * active chat thread, which becomes the schedule's origin.
  * Every lifecycle action is fenced by the record's ``revision``; a CAS
  * conflict or a vanished (deleted) schedule refreshes the truth and reports
  * the classification rather than fabricating success. Failures degrade to a
@@ -33,6 +35,7 @@ export interface ActionResult {
 type LifecycleTool = "scheduler_pause" | "scheduler_resume" | "scheduler_remove" | "scheduler_trigger";
 
 export function useSchedules() {
+  const { agent } = useAgent({ agentId: "companion_x" });
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -87,9 +90,11 @@ export function useSchedules() {
   const remove = useCallback((s: Schedule) => runAction("scheduler_remove", s), [runAction]);
   const trigger = useCallback((s: Schedule) => runAction("scheduler_trigger", s), [runAction]);
 
+  const threadId = agent?.threadId;
   const create = useCallback(async (input: ScheduleCreateInput): Promise<ActionResult> => {
     try {
       parseScheduleOutput(await callTool("scheduler_add", {
+        envelope: { thread_id: threadId },
         agent_id: input.agentId, task: input.task, kind: input.kind,
         interval_seconds: input.intervalSeconds ?? null,
         one_shot_at: input.oneShotAt ?? null,
@@ -101,7 +106,7 @@ export function useSchedules() {
     } catch (err) {
       return { status: classifyScheduleError(err), reason: errorReason(err) };
     }
-  }, [refresh]);
+  }, [refresh, threadId]);
 
   return { schedules, loading, error, refresh, create, pause, resume, remove, trigger };
 }
