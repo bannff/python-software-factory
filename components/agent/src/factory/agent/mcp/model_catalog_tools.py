@@ -6,7 +6,8 @@ projects each descriptor onto an Agent-local DTO carrying ``model_id``/
 ``configured`` by this deployment (#136), plus OpenRouter's own public per-token
 pricing when available. No endpoint, credential env name, base URL, secret, or
 raw catalog error crosses the boundary: any unavailable or malformed catalog
-collapses to one fixed safe ``ToolResult`` error.
+collapses to a fixed safe ``ToolResult`` error: ``model_catalog_not_configured``
+(nothing configured yet) or ``model_catalog_unavailable`` (anything else).
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ if TYPE_CHECKING:
     from ..agent import SuperAgent
 
 CATALOG_UNAVAILABLE = "model_catalog_unavailable"
+CATALOG_NOT_CONFIGURED = "model_catalog_not_configured"
 
 
 def build_model_catalog(
@@ -68,8 +70,11 @@ def register(mcp: Any, agent: "SuperAgent") -> None:
             return ok(build_model_catalog(
                 refresh=refresh, scope=scope, include=tuple(include or ()),
             ))
-        except (ValueError, ValidationError, OSError):
+        except (ValueError, ValidationError, OSError) as exc:
+            # ``reason`` is a stable code set by the gateway, never raw error text.
+            if getattr(exc, "reason", "") == "not_configured":
+                return fail(CATALOG_NOT_CONFIGURED)
             return fail(CATALOG_UNAVAILABLE)
 
 
-__all__ = ["CATALOG_UNAVAILABLE", "build_model_catalog", "register"]
+__all__ = ["CATALOG_NOT_CONFIGURED", "CATALOG_UNAVAILABLE", "build_model_catalog", "register"]

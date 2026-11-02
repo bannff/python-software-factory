@@ -32,6 +32,19 @@ def configured_chat_model_id() -> str:
     return os.getenv(CONFIGURED_CHAT_MODEL_ENV, "").strip()
 
 
+class CatalogUnavailable(ValueError):
+    """The catalog cannot be built; ``reason`` is a safe, stable code.
+
+    ``not_configured``: no chat model selector and no allowed profile exist, so
+    there is nothing to list (the normal state of a fresh install).
+    ``malformed``: a configured selector failed to resolve.
+    """
+
+    def __init__(self, reason: str) -> None:
+        super().__init__("chat model catalog unavailable")
+        self.reason = reason
+
+
 @dataclass(frozen=True, slots=True)
 class ChatModelDescriptor:
     """Non-secret model choice suitable for MCP and frontend projection."""
@@ -94,13 +107,13 @@ def list_chat_models(
     candidates.extend(f"openai-compat/{name}" for name in profiles)
     candidates.extend(resolvable)
     if not candidates:
-        raise ValueError("chat model catalog unavailable")
+        raise CatalogUnavailable("not_configured")
     try:
         rows = _project(candidates, configured_ids, pricing_by_model)
     except ValueError as exc:
-        raise ValueError("chat model catalog unavailable") from exc
+        raise CatalogUnavailable("malformed") from exc
     if not rows:
-        raise ValueError("chat model catalog unavailable")
+        raise CatalogUnavailable("malformed")
     if _serves_full_scope(scope):
         return ChatModelCatalog(
             models=tuple(rows), scope=FULL, hidden_count=0, unresolved=unresolved,
