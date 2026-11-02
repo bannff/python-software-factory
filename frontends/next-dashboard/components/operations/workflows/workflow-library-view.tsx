@@ -101,7 +101,9 @@ export default function WorkflowLibraryView() {
         <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border/60 p-10 text-center">
           <WorkflowIcon className="h-8 w-8 text-violet-400/70" />
           <h2 className="mt-3 font-medium">No workflows yet</h2>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">Ask the assistant to create one and it will be saved and runnable here.</p>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">{canAuthor
+            ? "Ask the assistant to create one and it will be saved and runnable here."
+            : "Workflow authoring is turned off on this server, so definitions can't be added from here."}</p>
         </div>
       )}
 

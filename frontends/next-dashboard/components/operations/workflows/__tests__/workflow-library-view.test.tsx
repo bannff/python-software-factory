@@ -34,8 +34,21 @@ describe("WorkflowLibraryView states", () => {
     render(<WorkflowLibraryView />);
     expect(screen.getByText(/Loading workflow library/i)).toBeTruthy();
     await screen.findByText(/No workflows yet/i);
-    expect(screen.getByText(/Ask the assistant to create one/i)).toBeTruthy();
+    expect(screen.getByText(/Workflow authoring is turned off/i)).toBeTruthy();
+    expect(screen.queryByText(/Ask the assistant/i)).toBeNull();
     expect(screen.getByText(/No runs yet/i)).toBeTruthy();
+  });
+
+  it("only invites creating a workflow when authoring is available", async () => {
+    mocks.listTools.mockResolvedValue({ tools: ["workflow.authoring.upsert_workflow_definition"], count: 1 });
+    route({
+      "workflow.get_workflow_registry": async () => wrap({ workflows: [] }),
+      "workflow.list_runs": async () => wrap({ runs: [] }),
+    });
+    render(<WorkflowLibraryView />);
+    await screen.findByText(/No workflows yet/i);
+    expect(screen.getByText(/Ask the assistant to create one/i)).toBeTruthy();
+    expect(screen.queryByText(/authoring is turned off/i)).toBeNull();
   });
 
   it("renders retry copy without a raw error and re-fetches", async () => {
