@@ -82,6 +82,8 @@ export default function UsageSettingsPanel() {
     <p className="mt-4 rounded-md border border-border/40 bg-muted/20 p-3 text-[11px] text-muted-foreground">
       Running totals since the gateway process started ({since}), not a calendar-range history —
       Companion X does not yet persist usage into day-by-day buckets, so a date-range picker isn&apos;t offered here.
+      Counters cover only usage reported to telemetry (LLM turns and agent tool use), not every MCP tool call,
+      so they can read 0 while the dashboard itself is busy.
     </p>
   </Shell>;
 }

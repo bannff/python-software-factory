@@ -33,6 +33,13 @@ describe("UsageSettingsPanel (feature-map row 52)", () => {
     expect(mocks.callTool).toHaveBeenCalledWith("get_metrics_summary", {});
   });
 
+  it("says the counters cover only usage reported to telemetry, not every tool call", async () => {
+    mocks.callTool.mockResolvedValue(wrap({ ...snapshot, llm: { ...snapshot.llm, interactions: 0 }, tools: { invocations: 0 } }));
+    render(<UsageSettingsPanel />);
+    expect(await screen.findByText(/reported to telemetry/i)).toBeTruthy();
+    expect(screen.getByText(/not every MCP tool call/i)).toBeTruthy();
+  });
+
   it("shows a truthful unavailable state instead of fabricating zeros on a tool failure", async () => {
     mocks.callTool.mockRejectedValue(new Error("tool failed"));
     render(<UsageSettingsPanel />);
