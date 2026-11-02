@@ -49,6 +49,17 @@ describe("Notification Settings", () => {
     expect(screen.queryByText(/controls are not available/)).toBeNull();
   });
 
+  it("captions the global mute with the action and states the delivery state separately", async () => {
+    successfulCalls();
+    render(<NotificationSettingsPanel />);
+    const control = await screen.findByLabelText("Mute all event delivery");
+    expect(control.closest("label")?.textContent).toBe("Mute");
+    expect(screen.getByText("Event delivery is on.")).toBeTruthy();
+
+    fireEvent.click(control);
+    expect(await screen.findByText("All event delivery is muted.")).toBeTruthy();
+  });
+
   it("refetches current values after a CAS conflict", async () => {
     let reads = 0;
     mocks.call.mockImplementation((tool: string) => {
