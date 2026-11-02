@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { GraduationCap, Loader2, RefreshCw } from "lucide-react";
+import { GraduationCap, MessageSquarePlus, Loader2, RefreshCw } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useAgent } from "@copilotkit/react-core/v2";
 import { useLessons } from "./use-lessons";
 import { LessonCard } from "./lesson-card";
@@ -85,13 +86,9 @@ export default function LessonsView({
       )}
 
       {!loading && !error && lessons.length === 0 && !deleted && (
-        <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border/60 p-10 text-center">
-          <GraduationCap className="h-8 w-8 text-violet-400/70" />
-          <h2 className="mt-3 font-medium">No lessons yet</h2>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            When you teach Companion X something in chat — or it learns from your feedback — the lesson shows up here for you to keep or dismiss.
-          </p>
-        </div>
+        <EmptyState icon={GraduationCap} title="No lessons yet"
+          hint="Lessons you teach in chat, or it learns from your feedback, appear here."
+          action={{ icon: MessageSquarePlus, label: "Ask what it has learned", prompt: "What have you learned about me so far?" }} />
       )}
 
       {!error && deleted && lessons.length === 0 && (
