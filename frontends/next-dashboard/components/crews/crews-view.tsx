@@ -5,6 +5,7 @@ import { Loader2, Plus, RefreshCw, Users } from "lucide-react";
 import { useCrews } from "@/lib/hooks/use-crews";
 import { CrewCard } from "./crew-card";
 import { CrewEditor } from "./crew-editor";
+import { useStartCrewSession } from "./use-start-crew-session";
 import type { Crew } from "./crew-types";
 
 type Panel = { mode: "create" } | { mode: "edit"; crew: Crew } | null;
@@ -19,6 +20,7 @@ type Panel = { mode: "create" } | { mode: "edit"; crew: Crew } | null;
 export default function CrewsView() {
   const { crews, defaultId, loading, error, refresh } = useCrews();
   const [panel, setPanel] = useState<Panel>(null);
+  const { startingId, outcome, start } = useStartCrewSession();
 
   useEffect(() => {
     const parts = window.location.pathname.split("/").filter(Boolean);
@@ -50,6 +52,13 @@ export default function CrewsView() {
         </div>
       )}
 
+      {outcome && (
+        <p role={outcome.kind === "failed" ? "alert" : "status"}
+          className={`rounded-lg border p-3 text-sm ${outcome.kind === "failed" ? "border-destructive/30 bg-destructive/5" : "border-emerald-500/30 bg-emerald-500/5"}`}>
+          {outcome.message}
+        </p>
+      )}
+
       {loading && crews.length === 0 && !error && (
         <div className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> Loading crews…
@@ -72,6 +81,8 @@ export default function CrewsView() {
               key={crew.id}
               crew={crew}
               isDefault={crew.id === defaultId}
+              starting={startingId === crew.id}
+              onStart={() => void start(crew)}
               onOpen={() => setPanel({ mode: "edit", crew })}
             />
           ))}

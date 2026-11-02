@@ -17,7 +17,7 @@ const EXCERPT_CHAR_CAP = 2000;
  * Two distinct mechanical-title shapes exist today, both correctly treated
  * as "not yet a real generated title" (found via live verification on the
  * smoke instance, not assumed): (1) the literal `"New session"` placeholder
- * `start-default-crew-session.ts` sets when a session is created via the
+ * `start-crew-session.ts` sets when a session is created via the
  * deck's own **New session** button; (2) the FAR more common real path —
  * `session_steering.py::ensure_thread` sets the title to the raw first
  * line of the user's own first message (`request.prompt...splitlines()[0]`,
