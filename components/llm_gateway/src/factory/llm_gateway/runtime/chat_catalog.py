@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from .catalog_errors import CatalogUnavailable
 from .chat_profile import resolve_chat_profile
 from .openai_compat_policy import configured_profile_names
 from .openrouter_catalog import ModelPricing, openrouter_models, openrouter_pricing
@@ -94,13 +95,13 @@ def list_chat_models(
     candidates.extend(f"openai-compat/{name}" for name in profiles)
     candidates.extend(resolvable)
     if not candidates:
-        raise ValueError("chat model catalog unavailable")
+        raise CatalogUnavailable("not_configured")
     try:
         rows = _project(candidates, configured_ids, pricing_by_model)
     except ValueError as exc:
-        raise ValueError("chat model catalog unavailable") from exc
+        raise CatalogUnavailable("malformed") from exc
     if not rows:
-        raise ValueError("chat model catalog unavailable")
+        raise CatalogUnavailable("malformed")
     if _serves_full_scope(scope):
         return ChatModelCatalog(
             models=tuple(rows), scope=FULL, hidden_count=0, unresolved=unresolved,

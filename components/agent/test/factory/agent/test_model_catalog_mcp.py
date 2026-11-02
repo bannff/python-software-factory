@@ -15,7 +15,9 @@ import pytest
 from factory.agent.mcp.contracts.model_catalog import (
     ChatModelDTO, ModelCatalogInput, ModelCatalogOutput,
 )
-from factory.agent.mcp.model_catalog_tools import CATALOG_UNAVAILABLE, register
+from factory.agent.mcp.model_catalog_tools import (
+    CATALOG_NOT_CONFIGURED, CATALOG_UNAVAILABLE, register,
+)
 from factory.llm_gateway.interface import ChatModelCatalog, ChatModelDescriptor
 from factory.mcp_utils.interface import ToolCatalog
 
@@ -149,6 +151,14 @@ async def test_malformed_catalog_maps_to_same_fixed_error(monkeypatch) -> None:
     result = (await _tool()).fn(scope="all")
     assert result.ok is False and result.error == CATALOG_UNAVAILABLE
     assert "SENTINEL" not in json.dumps(result.model_dump())
+
+
+@pytest.mark.asyncio
+async def test_fresh_install_reports_not_configured_not_a_generic_failure(monkeypatch) -> None:
+    for name in ("COMPANION_X_CHAT_MODEL", "COMPANION_X_OPENAI_COMPAT_PROFILES"):
+        monkeypatch.delenv(name, raising=False)
+    result = (await _tool()).fn()
+    assert result.ok is False and result.error == CATALOG_NOT_CONFIGURED
 
 
 @pytest.mark.asyncio
