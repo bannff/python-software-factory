@@ -280,6 +280,7 @@ def _experiment_health() -> dict[str, Any]:
             "item_key": "experiment_name",
             "empty_icon": "beaker",
             "empty_message": "No experiment families yet. Run an eval to build history.",
+            "empty_action": "Run an eval on the default agent so the experiment history starts.",
             "header": {
                 "icon": "chart-bar",
                 "stats_tool": "evals_get_dashboard_summary",

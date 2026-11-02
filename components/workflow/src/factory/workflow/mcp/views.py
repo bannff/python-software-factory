@@ -127,6 +127,7 @@ def _runs_list() -> dict[str, Any]:
             "item_key": "run_id",
             "empty_icon": "play",
             "empty_message": "No workflow runs yet.",
+            "empty_action": "Run a workflow so it appears here.",
             "header": {
                 "icon": "play",
                 "stats_tool": "workflow_get_dashboard_summary",
