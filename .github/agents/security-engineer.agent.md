@@ -2,7 +2,7 @@
 name: "Factory Security Engineer"
 description: "Use only for high-value security reviews involving authentication, authorization, permissions, data access, sandboxing, secrets, threat models, or externally exposed changes in the Python Factory."
 model: "opencode-go/mimo-v2.5"
-tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'the control-plane runtime/*', 'python-factory/*', todo]
+tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'companion-x/*', 'python-factory/*', todo]
 user-invocable: false
 argument-hint: "Describe the high-value change, threat surface, and acceptance criteria."
 ---
