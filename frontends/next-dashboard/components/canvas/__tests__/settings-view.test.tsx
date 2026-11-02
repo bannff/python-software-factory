@@ -58,9 +58,9 @@ describe("SettingsView", () => {
   it("renders the complete Settings section inventory", () => {
     render(<SettingsView />);
     expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
-      "Overview", "Import & Export", "Chat", "Display", "Voice", "Notifications",
-      "Shortcuts", "Skills", "Channels", "Browser", "Computer Use", "Remote Crew",
-      "Privacy", "Security", "Secrets", "Usage", "Developer", "About", "Releases",
+      "Overview", "Import & Export", "Chat", "Display", "Notifications",
+      "Shortcuts", "Skills", "Browser",
+      "Privacy", "Security", "Secrets", "Usage", "Developer", "About",
     ]);
   });
 
@@ -102,7 +102,7 @@ describe("SettingsView", () => {
     expect(imports.getAttribute("tabindex")).toBe("0");
 
     fireEvent.keyDown(screen.getByRole("tablist"), { key: "End" });
-    expect(screen.getByRole("tab", { name: "Releases" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("tab", { name: "About" }).getAttribute("aria-selected")).toBe("true");
   });
 
   it("shows truthful Overview config summaries from live health", () => {
