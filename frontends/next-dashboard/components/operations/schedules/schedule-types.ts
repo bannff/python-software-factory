@@ -59,6 +59,24 @@ export interface ScheduleCreateInput {
 /** The scheduler's own floor (`interval_seconds` ge=60); it rejects, not clamps, anything lower. */
 export const MIN_INTERVAL_SECONDS = 60;
 
+export type ScheduleField = "agentId" | "task" | "intervalSeconds" | "oneShotAt";
+
+/** Typed scheduler admission refusals that belong to one form field, keyed by the code `errorReason` surfaces. */
+const FIELD_ERRORS: Readonly<Record<string, readonly [ScheduleField, string]>> = {
+  scheduler_task_required: ["task", "Enter what this schedule should do."],
+  scheduler_agent_not_found: ["agentId", "That agent doesn't exist. Pick one from the list."],
+  scheduler_interval_too_short: ["intervalSeconds", `Use at least ${MIN_INTERVAL_SECONDS} seconds.`],
+  scheduler_one_shot_in_past: ["oneShotAt", "Pick a time in the future."],
+};
+
+export type ScheduleFieldErrors = Partial<Record<ScheduleField, string>>;
+
+/** The field-level error for a server refusal, or undefined when it is not field-specific. */
+export function scheduleFieldError(reason: string | undefined): ScheduleFieldErrors | undefined {
+  const mapped = reason === undefined ? undefined : FIELD_ERRORS[reason];
+  return mapped && { [mapped[0]]: mapped[1] };
+}
+
 export function isCreateInputComplete(input: ScheduleCreateInput): boolean {
   if (!input.agentId.trim() || !input.task.trim()) return false;
   if (input.kind === "interval") return Number.isFinite(input.intervalSeconds) && (input.intervalSeconds ?? 0) >= MIN_INTERVAL_SECONDS;
