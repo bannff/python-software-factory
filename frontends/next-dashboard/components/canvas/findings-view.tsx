@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, ChevronRight } from "lucide-react";
+import { Shield, ChevronRight, Play } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { useFindings } from "@/lib/hooks/use-findings";
 import { ComponentTree } from "@companion-x/shared-renderer";
@@ -179,11 +180,7 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
 
 function EmptyFindings() {
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full flex-col items-center justify-center gap-3 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10">
-        <Shield className="h-6 w-6 text-emerald-500/50" />
-      </div>
-      <p className="text-sm text-muted-foreground">No findings yet. Ask the assistant to run a security scan and the results will appear here.</p>
-    </motion.div>
+    <EmptyState icon={Shield} title="No findings yet"
+      action={{ icon: Play, label: "Run a security scan", prompt: "Run a security scan" }} />
   );
 }
