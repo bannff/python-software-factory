@@ -1,4 +1,5 @@
 "use client";
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { KeyRound, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { errorReason, withReason } from "@/lib/error-reason";
@@ -79,10 +80,10 @@ export default function SecretsSettingsPanel() {
         : <div className="mt-2 grid gap-2">{names.map((storedName) => (
             <article key={storedName} className="flex items-center justify-between rounded-md border border-border/40 p-3">
               <code className="text-sm">{storedName}</code>
-              <button type="button" aria-label={`Delete ${storedName}`} onClick={() => void remove(storedName)}
+              <ConfirmDelete label={`Delete ${storedName}`} onConfirm={() => void remove(storedName)}
                 disabled={busy} className="rounded p-1 text-muted-foreground hover:text-destructive disabled:opacity-50">
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </ConfirmDelete>
             </article>
           ))}</div>}
   </section>;

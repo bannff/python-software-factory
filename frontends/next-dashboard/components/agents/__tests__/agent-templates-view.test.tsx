@@ -76,6 +76,8 @@ describe("AgentTemplatesView", () => {
       id: "user-one", description: "Updated", system_prompt: "Help",
     })));
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    expect(mocks.remove).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete" }));
     await waitFor(() => expect(mocks.remove).toHaveBeenCalledWith("user-one"));
   });
 
@@ -147,6 +149,8 @@ describe("AgentTemplatesView", () => {
     fireEvent.click(screen.getByRole("button", { name: /User one/ }));
     await waitFor(() => expect(mocks.read).toHaveBeenCalledWith("user-one"));
     fireEvent.click(screen.getByRole("button", { name: "Reset" }));
+    expect(mocks.reset).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Confirm reset" }));
     await waitFor(() => expect(mocks.reset).toHaveBeenCalledWith("user-one"));
   });
 });

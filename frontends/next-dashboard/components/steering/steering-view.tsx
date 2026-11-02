@@ -3,6 +3,7 @@
 import { errorReason, withReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useState } from "react";
 import { Compass, Loader2, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
 import { authoringGateNotice, getAuthoringCapabilities,
   type AuthoringCapabilities } from "@/lib/authoring-capabilities";
@@ -85,9 +86,9 @@ export default function SteeringView() {
         {caps && !saving && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "steering", creating ? "create" : "update")}</p>}
         {(saving || (!creating && active && caps?.steering.delete)) && <div className="flex gap-2">{saving && <button type="button" onClick={() => void save()} disabled={busy || !id || !content.trim()}
           className="inline-flex w-fit items-center gap-2 rounded-md bg-violet-500 px-3 py-2 text-xs text-white disabled:opacity-40"><Save className="h-3.5 w-3.5" /> Save</button>}
-          {!creating && active && caps?.steering.delete && <button type="button" aria-label="Delete steering document" onClick={() => void remove()} disabled={busy}
+          {!creating && active && caps?.steering.delete && <ConfirmDelete label="Delete steering document" onConfirm={() => void remove()} disabled={busy}
             className="inline-flex w-fit items-center gap-2 rounded-md border border-destructive/40 px-3 py-2 text-xs text-destructive disabled:opacity-40">
-            <Trash2 className="h-3.5 w-3.5" /> Delete</button>}</div>}
+            <Trash2 className="h-3.5 w-3.5" /> Delete</ConfirmDelete>}</div>}
         {!creating && active && caps && !caps.steering.delete && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "steering", "delete")}</p>}</div>
         : <div className="flex min-h-56 flex-col items-center justify-center text-center text-muted-foreground"><Compass className="mb-3 h-8 w-8 text-violet-400" />
           <p className="text-sm">Select a steering document to read or edit it.</p></div>}

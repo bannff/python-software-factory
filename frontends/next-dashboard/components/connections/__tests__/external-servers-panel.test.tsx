@@ -72,6 +72,8 @@ describe("ExternalServersPanel", () => {
   it("removes with CAS revision and reloads capabilities", async () => {
     render(<ExternalServersPanel ready onChanged={vi.fn()} />);
     fireEvent.click(await screen.findByLabelText("Remove github"));
+    expect(mocks.remove).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByLabelText("Confirm remove github"));
     await waitFor(() => expect(mocks.remove).toHaveBeenCalledWith("github", 3));
     fireEvent.click(screen.getByRole("button", { name: "Reload capabilities" }));
     await waitFor(() => expect(mocks.reload).toHaveBeenCalled());
