@@ -1,6 +1,6 @@
 "use client";
 
-import { Cpu, Database, FolderGit2, Sparkles, Users } from "lucide-react";
+import { Cpu, Database, FolderGit2, Loader2, Play, Sparkles, Users } from "lucide-react";
 import type { Crew } from "./crew-types";
 
 function SummaryRow({ icon: Icon, label, value, hint }: {
@@ -22,15 +22,16 @@ function SummaryRow({ icon: Icon, label, value, hint }: {
  * materialized summaries (persona, project, model, memory scope) so a
  * first-time user understands what the Crew binds without opening it.
  */
-export function CrewCard({ crew, isDefault, onOpen }: {
-  crew: Crew; isDefault: boolean; onOpen: () => void;
+export function CrewCard({ crew, isDefault, starting, onOpen, onStart }: {
+  crew: Crew; isDefault: boolean; starting: boolean; onOpen: () => void; onStart: () => void;
 }) {
   return (
+    <div className="group relative flex min-w-0 flex-col rounded-xl border border-border/60 bg-card/30 transition-all hover:-translate-y-0.5 hover:border-violet-500/40 hover:bg-card/60 hover:shadow-lg hover:shadow-violet-500/5">
     <button
       type="button"
       onClick={onOpen}
       aria-label={`Edit crew ${crew.name}`}
-      className="group flex min-w-0 flex-col gap-3 rounded-xl border border-border/60 bg-card/30 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-violet-500/40 hover:bg-card/60 hover:shadow-lg hover:shadow-violet-500/5"
+      className="flex min-w-0 flex-col gap-3 p-4 pb-12 text-left"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-start gap-3">
@@ -60,5 +61,16 @@ export function CrewCard({ crew, isDefault, onOpen }: {
           hint="Which saved context this crew can recall" />
       </dl>
     </button>
+    <button
+      type="button"
+      onClick={onStart}
+      disabled={starting}
+      aria-label={`Start session with ${crew.name}`}
+      title="Start session"
+      className="absolute bottom-3 right-3 rounded-lg border border-border/60 p-2 text-violet-400 transition-colors hover:bg-violet-500/10 disabled:opacity-50"
+    >
+      {starting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+    </button>
+    </div>
   );
 }

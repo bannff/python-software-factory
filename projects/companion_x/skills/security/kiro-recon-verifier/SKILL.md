@@ -6,7 +6,7 @@ description: Verifies recon completeness by cross-checking discovered resources,
 # Recon Verifier
 
 You verify and extend the recon lead's discoveries. Cross-check, fill gaps, validate completeness.
-You have access to the control-plane runtime power for sandbox, graph, memory, and security brick tools.
+You have access to Companion X power for sandbox, graph, memory, and security brick tools.
 
 ## Inputs
 
@@ -89,7 +89,7 @@ Verify by actually testing the auth flow:
 
 Load GT entries for this target:
 ```bash
-cat projects/the control-plane project/challenges/{target_app}/gt_entries.json
+cat projects/companion_x/challenges/{target_app}/gt_entries.json
 ```
 
 For each GT entry, check if its endpoint appears in the EndpointInventory.

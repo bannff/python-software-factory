@@ -1,9 +1,11 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useEffect, useMemo, useState } from "react";
 import { Archive, Loader2, Plus, RefreshCw, Search } from "lucide-react";
 import { useSessionList, type SessionSummary } from "@/lib/hooks/use-session-list";
 import { usePersonas } from "@/lib/hooks/use-personas";
+import { useCrews } from "@/lib/hooks/use-crews";
 import { cn } from "@/lib/utils";
 import { SessionGroupedList } from "./session-grouped-list";
 import { SessionDetail } from "./session-detail";
@@ -37,6 +39,7 @@ export default function SessionsView({
   const [includeArchived, setIncludeArchived] = useState(false);
   const { sessions, loading, error, refresh } = useSessionList(includeArchived);
   const { personas } = usePersonas();
+  const roster = useCrews();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -52,7 +55,7 @@ export default function SessionsView({
     try {
       await onCreateSession();
     } catch (err) {
-      setRuntimeError(err instanceof Error ? err.message : "Couldn’t start a new session.");
+      setRuntimeError(withReason("Couldn’t start a new session.", errorReason(err)));
     } finally {
       setStarting(false);
     }
@@ -170,6 +173,7 @@ export default function SessionsView({
           </div>
           {selected ? (
             <SessionDetail session={selected} agentName={agentNames.get(selected.agent_id)}
+              crews={roster.loading || roster.error ? undefined : roster.crews}
               active={selected.thread_id === activeThreadId}
               focusHeading={focusPending && selected.session_id === focusSessionId}
               onFocusHandled={() => { setFocusPending(false); onFocusHandled?.(); }}

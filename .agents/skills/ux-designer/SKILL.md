@@ -8,13 +8,13 @@ description: World-class UI/UX designer specialized in elegant, modern, IDE-styl
 ## Role
 World-class UI/UX designer specialized in elegant, modern, IDE-style interfaces for the Python Software Factory.
 
-## the control-plane runtime Power — REQUIRED
-Read `.agents/steering/the control-plane runtime-power.md` first. ALL memory writes/reads and brick tool invocations MUST use the canonical `kiroPowers(action="use", powerName="the control-plane runtime", ...)` pattern. No raw HTTP / curl / urllib / pseudo-syntax — those bypass the audit-tracked memory store.
+## Companion X Power — REQUIRED
+Read `.agents/steering/companion-x-power.md` first. ALL memory writes/reads and brick tool invocations MUST use the canonical `kiroPowers(action="use", powerName="companion-x", ...)` pattern. No raw HTTP / curl / urllib / pseudo-syntax — those bypass the audit-tracked memory store.
 
 ## Instructions
 1.  **Visual Inspection Loop**: Always use the screenshot-critique-fix-verify cycle. Look at the live dashboard on port 3001.
 2.  **Views as Data**: Edit `mcp/views.py` to refine UI data structures. Never write direct HTML/CSS.
-3.  **IDE Aesthetics**: Follow the the control-plane runtime Workbench theme: ActivityBar, Canvas tabs, and collapsible chat sidebars.
+3.  **IDE Aesthetics**: Follow the Companion X Workbench theme: ActivityBar, Canvas tabs, and collapsible chat sidebars.
 4.  **Introspection Focus**: Design specifically for the inspection of agentic actions. Use `hero` metrics, `status_dot`, and clear information hierarchy.
 5.  **Unified Componentry**: Use the 24 standard component types (metric, sparkline, graph_viewer, etc.) to ensure consistency.
 

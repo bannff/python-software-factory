@@ -5,12 +5,12 @@ from typing import Any
 from ..entity_contract import normalize_entity_properties
 from ..models import TaxonomyEdgeSpec
 from ..ports import Entity, Relationship, GraphPath, GraphHealth, KnowledgeGraph, QueryResult
-from .neo4j_provenance import Neo4jProvenanceUnsupportedMixin
+from .neo4j_provenance import Neo4jProvenanceMixin
 from . import neo4j_runs
 from ..neighbor_limits import DEFAULT_NEIGHBOR_LIMIT, validate_neighbor_limit
 
 
-class Neo4jGraph(Neo4jProvenanceUnsupportedMixin):
+class Neo4jGraph(Neo4jProvenanceMixin):
     """Neo4j-based knowledge graph adapter."""
     def __init__(
         self, uri: str = "bolt://localhost:7687", user: str = "neo4j",

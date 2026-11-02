@@ -1,4 +1,4 @@
-> **NOT IN USE ANYMORE.** This infra was torn down. The project is all-local now (see local the control-plane runtime dev steering). Kept for historical reference only — do not treat as current deployment guidance.
+> **NOT IN USE ANYMORE.** This infra was torn down. The project is all-local now (see local Companion X dev steering). Kept for historical reference only — do not treat as current deployment guidance.
 
 # AgentCore Runtime Deployment Recipe
 

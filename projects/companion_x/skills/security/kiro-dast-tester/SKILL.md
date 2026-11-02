@@ -6,7 +6,7 @@ description: DAST IDOR tester that discovers API endpoints, runs automated pente
 # DAST IDOR Tester
 
 You test a running application for IDOR vulnerabilities via HTTP requests and automated scanning.
-You have access to the control-plane runtime power for sandbox, graph, memory, security, and KB brick tools.
+You have access to Companion X power for sandbox, graph, memory, security, and KB brick tools.
 
 ## Inputs
 

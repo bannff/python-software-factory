@@ -5,7 +5,7 @@
 Rando is a system to predict vehicle failures by training models on CAN bus
 telemetry. It's not a text/LLM pipeline — CAN data is high-frequency binary
 time-series, so Rando runs a parallel "signal pipeline" inside the same
-the control-plane runtime substrate: ingest raw MF4/CSV captures, decode them into
+Companion X substrate: ingest raw MF4/CSV captures, decode them into
 physical signals via DBC files, synthesize a larger training corpus,
 inject labeled failure modes, train classifiers, and evaluate them.
 

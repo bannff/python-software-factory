@@ -1,6 +1,6 @@
 # Recipe: Evals Page — UI Data Flow
 
-End-to-end data flow from the evals brick MCP tools through the Next.js renderer to the the control-plane runtime dashboard.
+End-to-end data flow from the evals brick MCP tools through the Next.js renderer to the Companion X dashboard.
 
 ## Bricks Used
 - `evals` — Suite management, test cases, run tracking
@@ -11,7 +11,7 @@ Seed default eval suites, add a custom case, then verify the rendering pipeline:
 
 ## Prerequisites
 
-- the control-plane runtime gateway running (MCP aggregator available)
+- Companion X gateway running (MCP aggregator available)
 - No AWS required (custom backend)
 
 ## Steps

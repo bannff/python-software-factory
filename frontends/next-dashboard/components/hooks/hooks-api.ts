@@ -20,12 +20,16 @@ export const AGENT_LIFECYCLE_EVENTS = [
   { value: "learning.applied", label: "A learning is applied" },
 ] as const;
 
+/** `system` subscriptions are seeded by the platform and read-only; only `authored` ones can be changed. */
+export type HookOrigin = "system" | "authored";
+
 export interface Hook {
   id: string;
   eventType: string;
   tool: string;
   description: string;
   enabled: boolean;
+  origin: HookOrigin;
 }
 
 function row(raw: unknown): Hook | null {
@@ -37,6 +41,7 @@ function row(raw: unknown): Hook | null {
     id: value.id, eventType: value.event_type, tool: value.handler,
     description: typeof value.description === "string" ? value.description : "",
     enabled: value.enabled !== false,
+    origin: value.origin === "authored" ? "authored" : "system",
   };
 }
 
@@ -67,6 +72,13 @@ export async function saveHook(hook: Hook): Promise<void> {
     dry_run: false,
   })) as { ok?: boolean; error?: string };
   if (result?.ok !== true) throw new Error(result?.error || "Hook was not saved.");
+}
+
+export async function setHookEnabled(id: string, enabled: boolean): Promise<void> {
+  const result = unwrapToolData(await callTool("events_authoring_set_enabled", {
+    subscription_id: id, enabled,
+  })) as { ok?: boolean; error?: string };
+  if (result?.ok !== true) throw new Error(result?.error || "Hook was not updated.");
 }
 
 export async function deleteHook(id: string): Promise<void> {

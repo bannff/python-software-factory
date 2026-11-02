@@ -241,7 +241,7 @@ Live timing is not required to have a different or equal digest or row count
 relative to training timing. Its digest and shape are request/execution
 evidence; the passport's training timing digest and shape remain promotion and
 conformance authority. LSTM, TCN, and PatchTST omit timing and reject it when
-supplied. Deployable the control-plane runtime exact-pins `ncps==1.0.1`.
+supplied. Deployable Companion X exact-pins `ncps==1.0.1`.
 
 ### 3.4 Event Types
 

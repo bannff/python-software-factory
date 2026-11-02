@@ -1,6 +1,6 @@
 # Recipe: Timeline Page — UI Data Flow
 
-End-to-end data flow from agent session events through the `timeline-view.tsx` renderer to the the control-plane runtime dashboard.
+End-to-end data flow from agent session events through the `timeline-view.tsx` renderer to the Companion X dashboard.
 
 ## Bricks Used
 - `agent` — Via CopilotKit AG-UI state (steps and tool calls, live)
@@ -12,7 +12,7 @@ An agent session produces steps and tool calls via AG-UI Server-Sent Events. The
 
 ## Prerequisites
 
-- the control-plane runtime gateway running with CopilotKit AG-UI bridge
+- Companion X gateway running with CopilotKit AG-UI bridge
 - Graph brick reachable through the MCP aggregator (any backend — `networkx` for local dev, `neo4j` for the full stack)
 - Active agent session for live updates (history view works without one)
 

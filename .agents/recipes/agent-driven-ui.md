@@ -1,6 +1,6 @@
 # Recipe: Agent-Driven UI (Five Carriers, End-to-End)
 
-How the the control-plane runtime agent draws stuff through SDK-native CopilotKit, Strands,
+How the Companion X agent draws stuff through SDK-native CopilotKit, Strands,
 AG-UI, and mcp-ui primitives. The five carriers cover inline A2UI, canvas
 state, sub-agent activity, typed React components, and arbitrary UIResources.
 
@@ -8,7 +8,7 @@ state, sub-agent activity, typed React components, and arbitrary UIResources.
 > five-carrier model. This recipe is the integration playbook with concrete
 > producer → wire → consumer citations and smoke commands.
 
-> **Persona note (bd:python-factory-hadbi.1).** The "the control-plane runtime agent" referenced throughout this recipe is now an `AgentConfig` registration named `the control-plane runtime-default` (`components/agent/src/factory/agent/registry/defaults_companion_x.py`), resolved at chat-build time via the `COMPANION_X_CHAT_AGENT_ID` env var (default `the control-plane runtime-default`, LOUD-FAIL on miss). Its `system_prompt` is the verbatim original `COMPANION_X_PROMPT` from `runtime/companion/prompt.py`, so behavior is byte-identical to pre-pivot. Future personas register their own `AgentConfig` (with `system_prompt`, `model`, optional `skills`, `description`) and flip the env — no code change in the chat adapter or the five-carrier wiring. End-to-end walkthrough: `.agents/recipes/domain-agnostic-substrate.md`.
+> **Persona note (bd:python-factory-hadbi.1).** The "Companion X agent" referenced throughout this recipe is now an `AgentConfig` registration named `companion-x-default` (`components/agent/src/factory/agent/registry/defaults_companion_x.py`), resolved at chat-build time via the `COMPANION_X_CHAT_AGENT_ID` env var (default `companion-x-default`, LOUD-FAIL on miss). Its `system_prompt` is the verbatim original `COMPANION_X_PROMPT` from `runtime/companion/prompt.py`, so behavior is byte-identical to pre-pivot. Future personas register their own `AgentConfig` (with `system_prompt`, `model`, optional `skills`, `description`) and flip the env — no code change in the chat adapter or the five-carrier wiring. End-to-end walkthrough: `.agents/recipes/domain-agnostic-substrate.md`.
 
 ## The five carriers, condensed
 

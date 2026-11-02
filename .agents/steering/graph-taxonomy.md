@@ -7,7 +7,7 @@ inclusion: manual
 
 ## Overview
 
-All brick data converges in one Neo4j instance. the control-plane runtime renders it in the Graph view. Two persistence patterns exist:
+All brick data converges in one Neo4j instance. Companion X renders it in the Graph view. Two persistence patterns exist:
 
 - **Direct driver** — graph, memory, storage bricks own a `neo4j.GraphDatabase` connection and run Cypher directly.
 - **MCP aggregator** — evals, metrics, security, ML bricks call `graph_graph_add_entity` / `graph_graph_add_relationship` through the MCP gateway. Preferred for new adapters.
@@ -392,7 +392,7 @@ re-registration is always an error). Resolve a merged view with
 ### `edge` — mesh workflow coordination
 
 Vocabulary of the mesh-workflow design
-(`projects/the control-plane project/experiments/edge_models/edge-mesh-workflow-design/`): the registry is
+(`projects/companion_x/experiments/edge_models/edge-mesh-workflow-design/`): the registry is
 the source of truth for exact property lists and sha256 id derivations; this section indexes it.
 
 - **Nodes:** `EdgeDevice` (mesh member, `mesh_membership`), `EdgeWorkflow` (workflow

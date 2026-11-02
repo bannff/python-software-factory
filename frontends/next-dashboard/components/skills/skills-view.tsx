@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { BookOpen, Loader2, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
@@ -31,7 +32,7 @@ export default function SkillsView() {
     try {
       const [rows, capabilities] = await Promise.all([listSkills(), getAuthoringCapabilities()]);
       setSkills(rows); setCaps(capabilities);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Skills unavailable."); }
+    } catch (cause) { setError(withReason("Skills unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   }, [ready]);
   useEffect(() => { void refresh(); }, [refresh]);
@@ -42,7 +43,7 @@ export default function SkillsView() {
   const select = async (skill: SkillSummary) => {
     setCreating(false); setBusy(true); setError(null);
     try { setDetail(await readSkill(skill.id)); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Skill detail unavailable."); }
+    catch (cause) { setError(withReason("Skill detail unavailable.", errorReason(cause))); }
     finally { setBusy(false); }
   };
   const set = (key: keyof typeof EMPTY) => (
@@ -53,14 +54,14 @@ export default function SkillsView() {
     try {
       const row = await addSkill(form);
       await refresh(); setDetail(await readSkill(row.id)); setCreating(false); setForm(EMPTY);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn’t add skill."); }
+    } catch (cause) { setError(withReason("Couldn’t add skill.", errorReason(cause))); }
     finally { setBusy(false); }
   };
   const remove = async () => {
     if (!detail) return;
     setBusy(true); setError(null);
     try { await deleteSkill(detail.id); setDetail(null); await refresh(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn’t remove skill."); }
+    catch (cause) { setError(withReason("Couldn’t remove skill.", errorReason(cause))); }
     finally { setBusy(false); }
   };
 

@@ -147,13 +147,13 @@ All artifacts are immutable and digest-verified:
 
 ## Local Dev
 
-Use the the control-plane runtime power so calls cross the same MCP boundary as deployed consumers:
+Use the Companion X power so calls cross the same MCP boundary as deployed consumers:
 
 ```python
 kiroPowers(
     action="use",
-    powerName="the control-plane runtime",
-    serverName="the control-plane runtime",
+    powerName="companion-x",
+    serverName="companion-x",
     toolName="call_brick_tool",
     arguments={
         "brick_name": "dataset",

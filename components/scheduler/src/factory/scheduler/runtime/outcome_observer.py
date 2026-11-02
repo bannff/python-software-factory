@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any
 
 from factory.mcp_utils.interface import get_service
 
 from .models import FireState
+
+logger = logging.getLogger(__name__)
 
 _TERMINAL = {
     "succeeded": FireState.SUCCEEDED,
@@ -19,7 +22,11 @@ async def observe_outcomes(lifecycle: Any, limit: int = 100) -> tuple[str, ...]:
     settled = []
     for fire in lifecycle.store.list_enrolled(limit):
         schedule = lifecycle.get(fire.tenant_id, fire.owner_id, fire.schedule_id)
-        status = await _workflow_status(schedule, fire.workflow_run_id or "")
+        try:
+            status = await _workflow_status(schedule, fire.workflow_run_id or "")
+        except Exception:  # noqa: BLE001 - an unobservable run must not hide the others
+            logger.exception("scheduler outcome observation failed fire=%s", fire.launch_id)
+            continue
         state = _TERMINAL.get(status)
         if state is None:
             continue

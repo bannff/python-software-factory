@@ -9,7 +9,7 @@ This spec depends on the ML dataset-generation working copy:
 
 This spec defines how to turn CAN frame data into agentic datasets and then train models that predict vehicle failures.
 
-The first implementation should live in the control-plane runtime, not as a separate standalone project, but only after the ML dataset-generation working copy is in place. the control-plane runtime already has the richer substrate in this workspace: agent orchestration, graph, memory, events, storage, dataset, evals, and machine_learning support. A separate project under `projects/` should only be introduced later if the product needs its own deployment boundary, runtime isolation, or customer-facing packaging.
+The first implementation should live in Companion X, not as a separate standalone project, but only after the ML dataset-generation working copy is in place. Companion X already has the richer substrate in this workspace: agent orchestration, graph, memory, events, storage, dataset, evals, and machine_learning support. A separate project under `projects/` should only be introduced later if the product needs its own deployment boundary, runtime isolation, or customer-facing packaging.
 
 The intended workflow is:
 
@@ -167,9 +167,9 @@ Recommended contents:
 
 This makes the dataset reproducible, inspectable, and safe to hand to `machine_learning`, `evals`, or any RAG-like consumer.
 
-## 6. the control-plane runtime Surfaces To Reuse
+## 6. Companion X Surfaces To Reuse
 
-the control-plane runtime already contains the most useful bricks for this workflow.
+Companion X already contains the most useful bricks for this workflow.
 
 | Brick | Use in this spec | Relevant files |
 |---|---|---|
@@ -250,9 +250,9 @@ The spec should support multiple outputs, not just one:
 - false alarm rate
 - episode-level recall
 
-## 9. the control-plane runtime Implementation Notes
+## 9. Companion X Implementation Notes
 
-The existing the control-plane runtime stack can enhance the predictions in ways a standalone ML project cannot:
+The existing Companion X stack can enhance the predictions in ways a standalone ML project cannot:
 
 - The graph brick gives you a place to model vehicle and ECU relationships.
 - The taxonomy registry gives you a stable CAN domain ontology.
@@ -315,9 +315,9 @@ This GitHub spec is the working copy that should be used for implementation work
 
 ### Repository References
 
-- [the control-plane runtime README](../../projects/the control-plane project/README.md)
-- [the control-plane runtime entrypoint](../../projects/the control-plane project/main.py)
-- [the control-plane runtime ML job example](../../projects/the control-plane project/run_ml_job.py)
+- [Companion X README](../../projects/companion_x/README.md)
+- [Companion X entrypoint](../../projects/companion_x/main.py)
+- [Companion X ML job example](../../projects/companion_x/run_ml_job.py)
 - [Dataset brick interface](../../components/dataset/src/factory/dataset/interface.py)
 - [Dataset brick CLI worker](../../components/dataset/src/factory/dataset/cli.py)
 - [Graph taxonomy registry](../../components/graph/src/factory/graph/runtime/taxonomy_registry.py)

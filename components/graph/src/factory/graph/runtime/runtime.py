@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any
 
 from factory.mcp_utils.runtime.tool_failure import SafeDiagnostic
@@ -17,7 +18,21 @@ class GraphRuntime:
     def __init__(self, config: dict[str, Any] | None = None) -> None:
         self._config = config or {}
         self._graphs: dict[str, KnowledgeGraph] = {}
-        self._default_backend = self._config.get("default_backend", "persistent_networkx")
+        self._default_backend = self._config.get("default_backend") or self._env_backend()
+
+    @classmethod
+    def _env_backend(cls) -> str:
+        """``GRAPH_BACKEND`` selects the deployment default; unset keeps the
+        durable local adapter. An unknown value fails loudly at startup rather
+        than silently serving a different store than the operator configured."""
+        configured = os.environ.get("GRAPH_BACKEND", "").strip()
+        if not configured:
+            return "persistent_networkx"
+        if configured not in cls.available_backends():
+            raise ValueError(
+                f"GRAPH_BACKEND={configured!r} is not one of {cls.available_backends()}",
+            )
+        return configured
 
     @property
     def default_backend(self) -> str:
@@ -56,7 +71,7 @@ class GraphRuntime:
     @staticmethod
     def provenance_backends() -> list[str]:
         """Backends with the durable Graph provenance contract."""
-        return ["persistent_networkx", "networkx"]
+        return ["persistent_networkx", "networkx", "neo4j"]
 
 
 _runtime: GraphRuntime | None = None

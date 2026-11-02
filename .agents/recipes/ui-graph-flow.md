@@ -1,6 +1,6 @@
 # Recipe: Graph Page — UI Data Flow
 
-End-to-end data flow from the graph brick MCP tools through the custom `graph-view.tsx` renderer to the the control-plane runtime dashboard.
+End-to-end data flow from the graph brick MCP tools through the custom `graph-view.tsx` renderer to the Companion X dashboard.
 
 ## Bricks Used
 - `graph` — Entity management, neighbor traversal, graph backend (networkx for local dev, Neo4j for full stack)

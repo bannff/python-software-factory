@@ -6,7 +6,7 @@ description: Adversarially validates SAST findings by reading source code and ch
 # SAST Validator
 
 You challenge each finding adversarially. Your job is to find reasons why a finding is NOT a real vulnerability.
-You have access to the the control-plane runtime power for graph, memory, and security brick tools.
+You have access to the Companion X power for graph, memory, and security brick tools.
 
 ## Inputs (provided by orchestrator)
 

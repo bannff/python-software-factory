@@ -1,13 +1,15 @@
 "use client";
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useState } from "react";
 import { Plus, RefreshCw, Trash2, Webhook } from "lucide-react";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
+import { eventHistoryLabel, hasEventHistory } from "./event-history";
 import { AGENT_LIFECYCLE_EVENTS, deleteHook, hookAuthoringAvailable, listHooks,
-  listInvocableTools, listRecentFirings, saveHook,
+  listInvocableTools, listRecentFirings, saveHook, setHookEnabled,
   type Hook, type HookFiring } from "./hooks-api";
 
-const EMPTY: Hook = { id: "", eventType: AGENT_LIFECYCLE_EVENTS[0].value, tool: "", description: "", enabled: true };
+const EMPTY: Hook = { id: "", eventType: AGENT_LIFECYCLE_EVENTS[0].value, tool: "", description: "", enabled: true, origin: "authored" };
 
 export default function HooksView() {
   const { ready, status } = useMcpConnection();
@@ -27,12 +29,13 @@ export default function HooksView() {
     try {
       const [rows, writable, invocable] = await Promise.all([listHooks(), hookAuthoringAvailable(), listInvocableTools()]);
       setHooks(rows); setCanWrite(writable); setTools(invocable);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Hooks unavailable."); }
+    } catch (cause) { setError(withReason("Hooks unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   }, [ready]);
   useEffect(() => { void refresh(); }, [refresh]);
 
   const loadFirings = async (hook: Hook) => {
+    if (!hasEventHistory(hook)) return;
     try {
       const rows = await listRecentFirings(hook.eventType);
       setFirings((value) => ({ ...value, [hook.id]: rows }));
@@ -42,20 +45,20 @@ export default function HooksView() {
 
   const toggle = async (hook: Hook) => {
     setBusy(hook.id); setError(null);
-    try { await saveHook({ ...hook, enabled: !hook.enabled }); await refresh(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn't update hook."); }
+    try { await setHookEnabled(hook.id, !hook.enabled); await refresh(); }
+    catch (cause) { setError(withReason("Couldn't update hook.", errorReason(cause))); }
     finally { setBusy(null); }
   };
   const remove = async (hook: Hook) => {
     setBusy(hook.id); setError(null);
     try { await deleteHook(hook.id); await refresh(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn't delete hook."); }
+    catch (cause) { setError(withReason("Couldn't delete hook.", errorReason(cause))); }
     finally { setBusy(null); }
   };
   const create = async () => {
     setBusy(form.id); setError(null);
     try { await saveHook(form); setCreating(false); setForm(EMPTY); await refresh(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn't create hook."); }
+    catch (cause) { setError(withReason("Couldn't create hook.", errorReason(cause))); }
     finally { setBusy(null); }
   };
 
@@ -100,24 +103,27 @@ export default function HooksView() {
         <Webhook className="mx-auto mb-3 h-8 w-8 text-violet-400" /><p>No hooks configured.</p></div>
       : <div className="grid gap-3 md:grid-cols-2">{hooks.map((hook) => {
         const event = AGENT_LIFECYCLE_EVENTS.find((option) => option.value === hook.eventType);
-        const recent = firings[hook.id] ?? [];
+        const history = eventHistoryLabel(hook, firings[hook.id] ?? []);
         return <article key={hook.id} className="rounded-xl border border-border/60 bg-card/20 p-4">
           <div className="flex items-start justify-between gap-3">
             <div><h3 className="font-medium">{hook.id}</h3>
               <p className="text-xs text-muted-foreground">When {event?.label ?? hook.eventType}</p></div>
             <div className="flex items-center gap-1">
-              <button type="button" onClick={() => void toggle(hook)} disabled={!canWrite || busy === hook.id} aria-pressed={hook.enabled}
-                className={`rounded-full px-2 py-1 text-[10px] ${hook.enabled ? "bg-emerald-500/10 text-emerald-300" : "bg-muted text-muted-foreground"}`}>
-                {hook.enabled ? "Enabled" : "Disabled"}</button>
-              {canWrite && <ConfirmDelete label={`Delete hook ${hook.id}`} onConfirm={() => void remove(hook)} disabled={busy === hook.id}
-                className="rounded-md p-1 text-destructive disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" /></ConfirmDelete>}
+              {hook.origin === "system"
+                ? <span className="rounded-full bg-muted px-2 py-1 text-[10px] text-muted-foreground"
+                    title="Platform subscription; read-only">System</span>
+                : <>
+                  <button type="button" onClick={() => void toggle(hook)} disabled={!canWrite || busy === hook.id} aria-pressed={hook.enabled}
+                    className={`rounded-full px-2 py-1 text-[10px] ${hook.enabled ? "bg-emerald-500/10 text-emerald-300" : "bg-muted text-muted-foreground"}`}>
+                    {hook.enabled ? "Enabled" : "Disabled"}</button>
+                  {canWrite && <ConfirmDelete label={`Delete hook ${hook.id}`} onConfirm={() => void remove(hook)} disabled={busy === hook.id}
+                    className="rounded-md p-1 text-destructive disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" /></ConfirmDelete>}
+                </>}
             </div>
           </div>
           <p className="mt-3 font-mono text-xs">Runs: {hook.tool}</p>
           {hook.description && <p className="mt-2 text-xs text-muted-foreground">{hook.description}</p>}
-          <p className="mt-3 text-[11px] text-muted-foreground">
-            {recent.length === 0 ? "No recent firings." : `Last fired ${new Date(recent[0].timestamp).toLocaleString()} (${recent.length} recent)`}
-          </p>
+          {history && <p className="mt-3 text-[11px] text-muted-foreground">{history}</p>}
         </article>;
       })}</div>}
     {!canWrite && ready && !loading && <p className="mt-3 text-[11px] text-muted-foreground">Hook changes are disabled by the Events authoring gate.</p>}

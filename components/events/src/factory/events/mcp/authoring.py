@@ -8,7 +8,8 @@ from factory.mcp_utils.interface import ToolResult, authoring, make_serializable
 
 from .contracts.authoring import (
     AuthoringMutationOutput, AuthoringStatusOutput, DeleteSubscriptionInput,
-    UpsertSubscriptionInput, ValidateSubscriptionsInput, ValidationOutput,
+    SetSubscriptionEnabledInput, UpsertSubscriptionInput, ValidateSubscriptionsInput,
+    ValidationOutput,
 )
 from .contracts.base import EmptyInput
 
@@ -42,7 +43,7 @@ def register(
         if result.get("ok") and not dry_run:
             from ..runtime.subscriptions import SubscriptionDefinition
             get_runtime().get_subscription_registry().register(
-                SubscriptionDefinition.model_validate(subscription_data),
+                SubscriptionDefinition.model_validate(subscription_data), "authored",
             )
         return make_serializable(result)
 
@@ -52,4 +53,16 @@ def register(
         result = get_authoring().delete_subscription(subscription_id)
         if result.get("ok"):
             get_runtime().get_subscription_registry().unregister(subscription_id)
+        return make_serializable(result)
+
+    @mcp.tool()
+    @authoring(input_model=SetSubscriptionEnabledInput, output_model=AuthoringMutationOutput)
+    def events_authoring_set_enabled(subscription_id: str, enabled: bool) -> ToolResult[AuthoringMutationOutput]:
+        """Enable or disable an authored subscription without re-sending its definition."""
+        result = get_authoring().set_enabled(subscription_id, enabled)
+        if result.get("ok"):
+            registry = get_runtime().get_subscription_registry()
+            current = registry.get(subscription_id)
+            if current is not None:
+                registry.register(current.model_copy(update={"enabled": enabled}), "authored")
         return make_serializable(result)

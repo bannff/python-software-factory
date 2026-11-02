@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import asyncio
 
+import pytest
+
 from factory.lessons.runtime.adapters.sql import SQLLessonStore
 from factory.lessons.runtime.lifecycle import LessonLifecycle
 from factory.lessons.runtime.models import LessonSource
@@ -25,7 +27,7 @@ def _session_factory(_caller):
         assert target == {"brick_name": "session", "tool_name": "resolve_thread"}
         return {"ok": True, "result": {"structured_content": {
             "ok": True, "data": {"session": {
-                "session_id": "session", "thread_id": "thread", "state": "active",
+                "session_id": "session", "thread_id": "thread", "archived_at": None,
             }},
         }}}
     return invoke
@@ -73,3 +75,23 @@ def test_curation_merges_explicit_session_under_ambient_owner(tmp_path) -> None:
     assert result.data.lesson.tenant_id == "tenant"
     assert result.data.lesson.owner_id == "owner"
     assert result.data.lesson.status.value == "accepted"
+
+
+def test_archived_session_is_restricted_for_lesson_writes() -> None:
+    from factory.lessons.mcp.support import verify_session
+    from factory.mcp_utils.interface import get_service, set_service
+
+    def factory(_caller):
+        return lambda target, **kw: {"ok": True, "result": {"structured_content": {
+            "ok": True, "data": {"session": {
+                "session_id": "s", "thread_id": "t", "archived_at": "2026-11-01T00:00:00Z",
+            }},
+        }}}
+
+    previous = get_service("tool_invoker_for_caller")
+    set_service("tool_invoker_for_caller", factory)
+    try:
+        with pytest.raises(ValueError, match="lesson_session_restricted"):
+            asyncio.run(verify_session("t", {"tenant_id": "tenant", "principal_id": "owner"}))
+    finally:
+        set_service("tool_invoker_for_caller", previous)

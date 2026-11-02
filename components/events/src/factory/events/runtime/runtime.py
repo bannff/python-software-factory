@@ -53,10 +53,10 @@ class EventsRuntime:
 
     def _load_config(self) -> None:
         """Load subscriptions from config and built-in directories."""
-        self._load_subs_from(self._config_dir / "subscriptions")
-        self._load_subs_from(Path(__file__).parent.parent / "subscriptions")
+        self._load_subs_from(self._config_dir / "subscriptions", "authored")
+        self._load_subs_from(Path(__file__).parent.parent / "subscriptions", "system")
 
-    def _load_subs_from(self, directory: Path) -> None:
+    def _load_subs_from(self, directory: Path, origin: str) -> None:
         """Load subscription YAML files from a directory."""
         if not directory.exists():
             return
@@ -65,7 +65,7 @@ class EventsRuntime:
                 data = yaml.safe_load(f.read_text())
                 if data:
                     self._subscription_registry.register(
-                        SubscriptionDefinition.model_validate(data))
+                        SubscriptionDefinition.model_validate(data), origin)
             except Exception:
                 pass
 

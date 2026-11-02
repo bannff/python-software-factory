@@ -1,6 +1,6 @@
 # Recipe: ML Page — UI Data Flow
 
-End-to-end data flow from the machine_learning brick MCP tools through the Next.js renderer to the the control-plane runtime dashboard.
+End-to-end data flow from the machine_learning brick MCP tools through the Next.js renderer to the Companion X dashboard.
 
 ## Bricks Used
 - `machine_learning` — Fine-tuning jobs, experiment tracking
@@ -11,7 +11,7 @@ Create and start a fine-tuning job, then verify the rendering pipeline: job list
 
 ## Prerequisites
 
-- the control-plane runtime gateway running (MCP aggregator available)
+- Companion X gateway running (MCP aggregator available)
 - No AWS required (memory backend)
 
 ## Known Bug: Tool Name Prefix Mismatch

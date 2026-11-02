@@ -1,16 +1,16 @@
-# the control-plane runtime Runtime Observability Handoff
+# Companion X Runtime Observability Handoff
 
 **Status:** In progress, ready for PR
-**Area:** the control-plane runtime local runtime, Timeline, Metrics, tool visibility
+**Area:** Companion X local runtime, Timeline, Metrics, tool visibility
 **Date:** 2026-05-04
 
 ## What We Were Doing
 
-The work shifted from general the control-plane runtime local setup into a focused observability pass for the lightweight local stack.
+The work shifted from general Companion X local setup into a focused observability pass for the lightweight local stack.
 
 The concrete goals were:
 
-- make local the control-plane runtime coherent with its actual lightweight runtime behavior
+- make local Companion X coherent with its actual lightweight runtime behavior
 - wire the local chat path to Ollama so the dashboard could be tested without Bedrock
 - verify whether tool calls were actually happening instead of trusting model text
 - make Timeline honest about what is live-only versus historically persisted
@@ -20,13 +20,13 @@ The concrete goals were:
 
 ### Local runtime alignment
 
-- `projects/the control-plane project/.env.example` now reflects a lightweight local stack: `networkx`, `sqlite`, `chromadb`, `amem`, memory-backed worker/storage defaults, and `ollama` as the local LLM backend.
-- `projects/the control-plane project/README.md` was updated to document that local mode is live-first and lightweight, and to describe the Ollama startup path.
+- `projects/companion_x/.env.example` now reflects a lightweight local stack: `networkx`, `sqlite`, `chromadb`, `amem`, memory-backed worker/storage defaults, and `ollama` as the local LLM backend.
+- `projects/companion_x/README.md` was updated to document that local mode is live-first and lightweight, and to describe the Ollama startup path.
 - `components/llm_gateway` gained first-class Ollama support, including provider and embedding adapter wiring.
 
 ### Chat and tool path cleanup
 
-- the control-plane runtime chat stayed on the stable Strands chat path (now `StrandsMCPChatAgent` via the chat factory; legacy `StrandsChatAgent` was retired in bd:python-factory-5y8r).
+- Companion X chat stayed on the stable Strands chat path (now `StrandsMCPChatAgent` via the chat factory; legacy `StrandsChatAgent` was retired in bd:python-factory-5y8r).
 - chat tool construction now prefers native per-tool Strands/MCP tools before falling back to the generic wrapper path
 - explicit tool names mentioned in prompts are preserved during tool selection so directly requested tools are not filtered out
 - AG-UI now passes `thread_id` into the tool context so downstream instrumentation can associate work with the current run
@@ -49,7 +49,7 @@ The concrete goals were:
 
 ## Direction We Were Taking
 
-The direction is to treat the control-plane runtime observability as runtime-first and truthful to the current deployment mode.
+The direction is to treat Companion X observability as runtime-first and truthful to the current deployment mode.
 
 That means:
 
@@ -90,7 +90,7 @@ The next useful slice is to deepen observability without regressing the lightwei
 
 ## PR Framing
 
-This change set is best described as a the control-plane runtime local runtime observability pass:
+This change set is best described as a Companion X local runtime observability pass:
 
 - align lightweight local mode and Ollama defaults
 - improve real tool exposure in chat

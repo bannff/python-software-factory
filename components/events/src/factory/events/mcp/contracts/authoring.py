@@ -18,6 +18,11 @@ class DeleteSubscriptionInput(DTO):
     subscription_id: str
 
 
+class SetSubscriptionEnabledInput(DTO):
+    subscription_id: str
+    enabled: bool
+
+
 class AuthoringStatusOutput(DTO):
     enabled: bool
     config_dir: str

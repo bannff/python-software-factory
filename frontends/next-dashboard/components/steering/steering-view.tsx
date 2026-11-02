@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useState } from "react";
 import { Compass, Loader2, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
@@ -26,7 +27,7 @@ export default function SteeringView() {
     try {
       const [rows, capabilities] = await Promise.all([listSteering(), getAuthoringCapabilities()]);
       setDocuments(rows); setCaps(capabilities);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Steering unavailable."); }
+    } catch (cause) { setError(withReason("Steering unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   }, [ready]);
   useEffect(() => { void refresh(); }, [refresh]);
@@ -34,7 +35,7 @@ export default function SteeringView() {
   const select = async (document: SteeringDocument) => {
     setCreating(false); setBusy(true); setError(null);
     try { const row = await readSteering(document.id); setActive(row); setId(row.id); setContent(row.content); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Document unavailable."); }
+    catch (cause) { setError(withReason("Document unavailable.", errorReason(cause))); }
     finally { setBusy(false); }
   };
   const startCreate = () => { setCreating(true); setActive(null); setId(""); setContent(""); setError(null); };
@@ -43,14 +44,14 @@ export default function SteeringView() {
     try {
       const row = await saveSteering({ id, content, ...(active ? { expectedSha256: active.sha256 } : {}) });
       setActive(row); setCreating(false); await refresh();
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn’t save steering."); }
+    } catch (cause) { setError(withReason("Couldn’t save steering.", errorReason(cause))); }
     finally { setBusy(false); }
   };
   const remove = async () => {
     if (!active) return;
     setBusy(true); setError(null);
     try { await deleteSteering(active.id, active.sha256); setActive(null); setCreating(false); await refresh(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn’t delete steering."); }
+    catch (cause) { setError(withReason("Couldn’t delete steering.", errorReason(cause))); }
     finally { setBusy(false); }
   };
 

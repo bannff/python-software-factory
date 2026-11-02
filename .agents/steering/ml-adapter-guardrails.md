@@ -237,7 +237,7 @@ Training timing and production timing are intentionally separate:
 
 The MLX trust root is `ML_MODEL_PASSPORT_ROOT`, not a family-specific override.
 
-The deployable the control-plane runtime environment and the machine-learning brick both
+The deployable Companion X environment and the machine-learning brick both
 exact-pin `ncps==1.0.1`; the passport also seals and verifies that framework
 version before native LTC execution.
 

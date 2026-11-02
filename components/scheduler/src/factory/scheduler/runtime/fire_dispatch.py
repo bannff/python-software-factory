@@ -2,32 +2,70 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any
 
 from factory.mcp_utils.interface import get_service
 
 from .models import FireState
 
+logger = logging.getLogger(__name__)
+
 
 async def replay_claimed(lifecycle: Any, limit: int = 100) -> tuple[str, ...]:
     dispatched = []
     for fire in lifecycle.store.list_claimed(limit):
-        schedule = lifecycle.get(fire.tenant_id, fire.owner_id, fire.schedule_id)
-        if schedule.delivery_mode == "maintenance":
-            succeeded = await _run_maintenance(schedule, fire)
-            run_id = f"maintenance-{fire.launch_id}"
-            enrolled = lifecycle.store.mark_enrolled(fire, run_id, fire.revision)
-            if enrolled is None:
-                continue
-            state = FireState.SUCCEEDED if succeeded else FireState.FAILED
-            if lifecycle.store.mark_outcome(enrolled, state, enrolled.revision) is not None:
-                dispatched.append(run_id)
+        try:
+            run_id = await _dispatch(lifecycle, fire)
+        except Exception:  # noqa: BLE001 - one poisoned fire must not block the tick
+            logger.exception(
+                "scheduler dispatch failed schedule=%s fire=%s",
+                fire.schedule_id, fire.fire_sequence,
+            )
+            await _settle_failed(lifecycle, fire)
             continue
-        run_id = await _spawn_agent(schedule, fire)
-        updated = lifecycle.store.mark_enrolled(fire, run_id, fire.revision)
-        if updated is not None:
+        if run_id is not None:
             dispatched.append(run_id)
     return tuple(dispatched)
+
+
+async def _dispatch(lifecycle: Any, fire: Any) -> str | None:
+    schedule = lifecycle.get(fire.tenant_id, fire.owner_id, fire.schedule_id)
+    if schedule.delivery_mode == "maintenance":
+        succeeded = await _run_maintenance(schedule, fire)
+        run_id = f"maintenance-{fire.launch_id}"
+        enrolled = lifecycle.store.mark_enrolled(fire, run_id, fire.revision)
+        if enrolled is None:
+            return None
+        state = FireState.SUCCEEDED if succeeded else FireState.FAILED
+        done = lifecycle.store.mark_outcome(enrolled, state, enrolled.revision)
+        return run_id if done is not None else None
+    run_id = await _spawn_agent(schedule, fire)
+    return run_id if lifecycle.store.mark_enrolled(fire, run_id, fire.revision) else None
+
+
+async def _settle_failed(lifecycle: Any, fire: Any) -> None:
+    """Take a never-dispatched fire through enrolled -> failed.
+
+    The failure counter and auto-pause hang off the enrolled -> failed edge, so
+    a fire that cannot dispatch is settled the same way a failed run is;
+    otherwise it would stay ``claimed`` forever and never count against the
+    schedule.
+    """
+    enrolled = lifecycle.store.mark_enrolled(
+        fire, f"dispatch-failed-{fire.launch_id}", fire.revision,
+    )
+    if enrolled is None:
+        return
+    failed = lifecycle.store.mark_outcome(enrolled, FireState.FAILED, enrolled.revision)
+    if failed is None:
+        return
+    from .observability import project_outcome
+    current = lifecycle.get(fire.tenant_id, fire.owner_id, fire.schedule_id)
+    try:
+        await project_outcome(current, failed, "failed", current.state.value == "auto_paused")
+    except Exception:  # noqa: BLE001 - projection never gates scheduling
+        logger.exception("scheduler failure projection skipped fire=%s", fire.launch_id)
 
 
 async def _run_maintenance(schedule: Any, fire: Any) -> bool:
