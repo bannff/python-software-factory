@@ -43,10 +43,29 @@ class SafeDiagnostic(ValueError):
     """
 
 
+class TypedToolFailure(ValueError):
+    """A domain-negative condition with a stable, public failure ``code``.
+
+    Raise it from a tool so the caller receives ``error=<code>`` instead of the
+    opaque ``tool_execution_failed`` sentinel. The code is public API: use a
+    short ``<brick>_<reason>`` token. The message is for logs only.
+    """
+
+    def __init__(self, code: str, message: str = "") -> None:
+        super().__init__(message or code)
+        self.code = code
+
+
 def tool_execution_failure(func: Callable[..., Any]) -> ToolResult[None]:
     """Emit a secret-safe failure event and return the public typed envelope."""
     tool_identity = f"{func.__module__}.{func.__qualname__}"
     exc = sys.exc_info()[1]
+    if isinstance(exc, TypedToolFailure):
+        logger.warning(
+            "typed_mcp_tool_failed tool=%s code=%s message=%s",
+            tool_identity, exc.code, exc,
+        )
+        return ToolResult(ok=False, data=None, error=exc.code)
     if isinstance(exc, SafeDiagnostic):
         logger.error(
             "typed_mcp_tool_execution_failed tool=%s diagnostic=%s",

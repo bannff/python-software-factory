@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import logging
 
-from factory.mcp_utils.interface import get_envelope, get_service
+from factory.mcp_utils.interface import TypedToolFailure, get_envelope, get_service
 
 from ..runtime.models import ProjectBinding
 
@@ -22,7 +22,7 @@ async def project_binding(explicit: dict | None) -> ProjectBinding:
     thread_id = envelope.get("thread_id") or envelope.get("session_id")
     if not isinstance(thread_id, str) or not thread_id:
         logger.error("devtools_project_binding_failed reason=missing_thread")
-        raise ValueError("active Session thread is required")
+        raise TypedToolFailure("devtools_session_required", "active Session thread is required")
     session_envelope = {
         key: value for key, value in envelope.items()
         if key != "thread_id" and value is not None
@@ -31,7 +31,7 @@ async def project_binding(explicit: dict | None) -> ProjectBinding:
     invoke = factory("devtools") if callable(factory) else None
     if not callable(invoke):
         logger.error("devtools_project_binding_failed reason=service_unavailable")
-        raise ValueError("Session project binding is unavailable")
+        raise TypedToolFailure("devtools_binding_unavailable", "Session project binding is unavailable")
     raw = await asyncio.to_thread(
         invoke, {"brick_name": "session", "tool_name": "resolve_thread"},
         arguments={"thread_id": thread_id, "envelope": session_envelope},
@@ -50,11 +50,11 @@ async def project_binding(explicit: dict | None) -> ProjectBinding:
             "devtools_project_binding_failed reason=session_unavailable error=%s",
             safe_error,
         )
-        raise ValueError("active Session project binding is unavailable")
+        raise TypedToolFailure("devtools_session_unavailable", "active Session project binding is unavailable")
     project = session.get("project")
     if not isinstance(project, str) or not project:
         logger.error("devtools_project_binding_failed reason=project_unbound")
-        raise ValueError("Session has no project binding")
+        raise TypedToolFailure("devtools_project_unbound", "Session has no project binding")
     from factory.devtools.interface import validate_project
     root = validate_project(
         session["tenant_id"], session["owner_id"], session["session_id"], project,
