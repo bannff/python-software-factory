@@ -50,10 +50,11 @@ def _neo4j_runtime() -> MemoryRuntime:
         database=neo4j["database"],
     )
     embed = get_infra("memory.embeddings", "").lower()
-    if embed in ("1", "true", "yes", "bedrock", "openai"):
+    if embed in ("1", "true", "yes", "auto", "bedrock", "openai", "ollama"):
         from factory.memory.runtime.embedding import LLMGatewayEmbedder
         from factory.memory.runtime.adapters.neo4j_embedding import Neo4jEmbeddingMemoryStore
-        emb_backend = embed if embed in ("bedrock", "openai") else "bedrock"
+        # A named provider wins; true/auto defer to FACTORY_LLM_EMBEDDING_ADAPTER.
+        emb_backend = embed if embed in ("bedrock", "openai", "ollama") else None
         embedder = LLMGatewayEmbedder(backend=emb_backend)
         llm_complete = _get_llm_complete()
         store = Neo4jEmbeddingMemoryStore(base=base, embedder=embedder, llm_complete=llm_complete)

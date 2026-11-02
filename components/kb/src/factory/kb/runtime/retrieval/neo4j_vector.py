@@ -58,12 +58,25 @@ class Neo4jVectorStore(VectorStore):
 
     def _ensure_index(self) -> None:
         cfg = self._config
-        q = (f"CREATE VECTOR INDEX {cfg.index_name} IF NOT EXISTS FOR (n:{cfg.node_label}) "
+        q = (f"CREATE VECTOR INDEX {cfg.index_name} FOR (n:{cfg.node_label}) "
              f"ON (n.{cfg.embedding_property}) OPTIONS {{indexConfig: "
              f"{{`vector.dimensions`: $dims, `vector.similarity_function`: 'cosine'}}}}")
         with self._driver.session(database=cfg.database) as s:
-            try: s.run(q, dims=cfg.embedding_dimensions)
-            except Exception: pass
+            try:
+                have = s.run("SHOW VECTOR INDEXES YIELD name, options WHERE name = $n "
+                             "RETURN options", n=cfg.index_name).single()
+                if have is not None:
+                    size = have["options"].get("indexConfig", {}).get("vector.dimensions")
+                    if size == cfg.embedding_dimensions:
+                        return
+                    # IF NOT EXISTS never resizes: a provider change would otherwise
+                    # fail every search. Rebuild; documents must be re-embedded.
+                    logger.warning("KB vector index is %s-d, embedder is %s-d: rebuilding "
+                                   "(re-ingest to re-embed)", size, cfg.embedding_dimensions)
+                    s.run(f"DROP INDEX {cfg.index_name}")
+                s.run(q, dims=cfg.embedding_dimensions)
+            except Exception as exc:  # noqa: BLE001 - search falls back to text
+                logger.warning("KB vector index setup failed: %s", exc)
 
     def _run(self, cypher: str, **params: Any) -> list[Any]:
         with self._driver.session(database=self._config.database) as s:
