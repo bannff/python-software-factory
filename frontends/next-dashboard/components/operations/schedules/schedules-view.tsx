@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CalendarClock, Loader2, Plus, RefreshCw } from "lucide-react";
 import { useSchedules } from "@/lib/hooks/use-schedules";
 import { ScheduleCard } from "./schedule-card";
 import { ScheduleCreateDialog } from "./schedule-create";
 import { ScheduleDetail } from "./schedule-detail";
+import type { Schedule } from "./schedule-types";
 
 /**
  * Schedules surface (M7 Operations, Option A). A responsive list/detail:
@@ -26,6 +27,7 @@ export default function SchedulesView({ focusScheduleId, onFocusHandled }: {
   const [selected, setSelected] = useState<string | null>(null);
   const [wantFocus, setWantFocus] = useState(false);
   const [gone, setGone] = useState(false);
+  const removing = useRef<string | null>(null);
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
@@ -35,9 +37,19 @@ export default function SchedulesView({ focusScheduleId, onFocusHandled }: {
   // A previously-selected schedule that vanished (deleted elsewhere) → notice.
   useEffect(() => {
     if (selected && !loading && !schedules.some((s) => s.scheduleId === selected)) {
-      setGone(true); setSelected(null);
+      // Our own delete is not news; only a schedule that vanished elsewhere is.
+      if (removing.current === selected) removing.current = null;
+      else setGone(true);
+      setSelected(null);
     }
   }, [selected, schedules, loading]);
+
+  const removeTracked = async (schedule: Schedule) => {
+    removing.current = schedule.scheduleId;
+    const result = await remove(schedule);
+    if (result.status !== "ok") removing.current = null;
+    return result;
+  };
 
   const active = schedules.find((s) => s.scheduleId === selected) ?? null;
 
@@ -117,7 +129,7 @@ export default function SchedulesView({ focusScheduleId, onFocusHandled }: {
               focusOnMount={wantFocus}
               onFocusHandled={() => { setWantFocus(false); onFocusHandled?.(); }}
               onClose={() => setSelected(null)}
-              actions={{ pause, resume, remove, trigger }}
+              actions={{ pause, resume, trigger, remove: removeTracked }}
             />
           ) : (
             <div className="hidden items-center justify-center rounded-xl border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground lg:flex">
