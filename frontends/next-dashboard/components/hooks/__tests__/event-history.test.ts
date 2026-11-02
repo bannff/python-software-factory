@@ -3,7 +3,7 @@ import { eventHistoryLabel, hasEventHistory } from "../event-history";
 import type { Hook } from "../hooks-api";
 
 const hook = (over: Partial<Hook>): Hook =>
-  ({ id: "h", eventType: "agent.completed", tool: "t", description: "", enabled: true, ...over });
+  ({ id: "h", eventType: "agent.completed", tool: "t", description: "", enabled: true, origin: "authored", ...over });
 const seen = [{ eventId: "e1", timestamp: "2026-11-02T10:00:00Z" }];
 
 describe("event history line", () => {
