@@ -58,3 +58,22 @@ class TestGraphRuntime:
         runtime = GraphRuntime()
         health = runtime.health_check()
         assert health == {}
+
+
+def test_default_backend_follows_graph_backend_env(monkeypatch) -> None:
+    from factory.graph.runtime.runtime import GraphRuntime
+
+    monkeypatch.setenv("GRAPH_BACKEND", "neo4j")
+    assert GraphRuntime().default_backend == "neo4j"
+    assert GraphRuntime({"default_backend": "networkx"}).default_backend == "networkx"
+    monkeypatch.delenv("GRAPH_BACKEND")
+    assert GraphRuntime().default_backend == "persistent_networkx"
+
+
+def test_unknown_graph_backend_env_is_rejected(monkeypatch) -> None:
+    import pytest
+    from factory.graph.runtime.runtime import GraphRuntime
+
+    monkeypatch.setenv("GRAPH_BACKEND", "mongo")
+    with pytest.raises(ValueError, match="GRAPH_BACKEND"):
+        GraphRuntime()
