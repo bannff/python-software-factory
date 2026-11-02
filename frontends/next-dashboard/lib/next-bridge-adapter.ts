@@ -1,5 +1,6 @@
 import type { BridgeAdapter } from "@companion-x/shared-renderer";
 import { callTool } from "@/lib/api";
+import { sendPrompt } from "@/lib/chat/send-prompt";
 
 /**
  * NextBridgeAdapter — the Next dashboard's {@link BridgeAdapter}
@@ -16,4 +17,6 @@ import { callTool } from "@/lib/api";
 export class NextBridgeAdapter implements BridgeAdapter {
   callTool = (name: string, args: Record<string, unknown> = {}): Promise<unknown> =>
     callTool(name, args);
+
+  sendPrompt = (text: string): void => sendPrompt(text);
 }
