@@ -2,12 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ListChecks, ChevronRight, Play } from "lucide-react";
+import { ListChecks, Play } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { useFindings } from "@/lib/hooks/use-findings";
 import { ComponentTree } from "@companion-x/shared-renderer";
 import { FindingDetail } from "./finding-detail";
+import { FindingRow } from "./finding-row";
+import { kindCounts } from "./finding-kinds";
 import {
   usePaintedComponents,
   type CanvasState,
@@ -16,10 +18,6 @@ import {
   SEV_ORDER,
   SEV_PILL_COLORS,
   SEV_BAR_COLORS,
-  SEV_CARD_BG,
-  SEV_CARD_GLOW,
-  STRIDE_COLORS,
-  arnFragment,
 } from "./findings-view-style";
 import type { Step, FindingSeverity, ActiveToolCall } from "@/lib/types";
 
@@ -33,6 +31,7 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
   const findings = useFindings(toolCalls);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterSev, setFilterSev] = useState<FindingSeverity | "all">("all");
+  const [filterKind, setFilterKind] = useState<string | null>(null);
 
   /* Carrier #2: when the agent paints `state.canvas.findings` with an
    * A2UI components tree, render that tree directly (lossless A2UI
@@ -64,7 +63,9 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
 
   const total = findings.length || 1; // avoid div/0
 
-  const filtered = filterSev === "all" ? findings : findings.filter((f) => f.severity === filterSev);
+  const kinds = kindCounts(findings);
+  const filtered = findings.filter((f) =>
+    (filterSev === "all" || f.severity === filterSev) && (filterKind === null || f.type === filterKind));
   const sorted = [...filtered].sort((a, b) => SEV_ORDER.indexOf(a.severity) - SEV_ORDER.indexOf(b.severity));
 
   return (
@@ -116,59 +117,35 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
             </button>
           ))}
         </div>
+
+        {/* Row 3: kind chips — only when more than one kind is present */}
+        {kinds.length > 1 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {kinds.map(([kind, n]) => (
+              <button key={kind} type="button" aria-pressed={filterKind === kind}
+                onClick={() => setFilterKind(filterKind === kind ? null : kind)}
+                className={cn("rounded-full border border-border/50 px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent/30",
+                  filterKind === kind && "bg-accent/40 text-foreground")}>
+                {kind} {n}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Findings list */}
       <div className="flex-1 overflow-auto p-4">
         {sorted.length > 0 ? (
           <div className="space-y-2">
-            {sorted.map((finding) => {
-              const hasGlow = finding.severity === "critical" || finding.severity === "high";
-              return (
-                <div key={finding.id}>
-                  <motion.button
-                    onClick={() => setExpandedId(expandedId === finding.id ? null : finding.id)}
-                    className={cn(
-                      "flex w-full items-center gap-3 rounded-lg border border-border/50 px-3 py-2.5 text-left hover:bg-accent/20 transition-colors",
-                      "bg-card/30",
-                      SEV_CARD_BG[finding.severity] ?? "",
-                    )}
-                    style={hasGlow ? SEV_CARD_GLOW[finding.severity] : undefined}
-                    animate={hasGlow ? {
-                      boxShadow: [
-                        SEV_CARD_GLOW[finding.severity].boxShadow as string,
-                        SEV_CARD_GLOW[finding.severity].boxShadow?.toString().replace("0.15", "0.25").replace("0.1", "0.18") ?? "",
-                        SEV_CARD_GLOW[finding.severity].boxShadow as string,
-                      ],
-                    } : undefined}
-                    transition={hasGlow ? { duration: 3, repeat: Infinity, ease: "easeInOut" } : undefined}
-                  >
-                    <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium shrink-0", SEV_PILL_COLORS[finding.severity])}>
-                      {finding.severity}
-                    </span>
-                    {finding.cwe && (
-                      <span className="font-mono text-[9px] bg-muted/40 rounded px-1 text-muted-foreground shrink-0">{finding.cwe}</span>
-                    )}
-                    <span className="flex-1 text-sm font-medium truncate">{finding.title}</span>
-                    {finding.category && (
-                      <span className={cn("rounded-full px-1.5 py-0.5 text-[9px] font-medium shrink-0", STRIDE_COLORS[finding.category] ?? "bg-muted/40 text-muted-foreground")}>
-                        {finding.category}
-                      </span>
-                    )}
-                    {finding.affected_resource_arn && (
-                      <span className="text-[9px] text-muted-foreground/60 font-mono truncate max-w-[140px] shrink-0">
-                        {arnFragment(finding.affected_resource_arn)}
-                      </span>
-                    )}
-                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", finding.source === "live" ? "bg-violet-400 animate-pulse" : "bg-blue-400/60")} title={finding.source === "live" ? "live session" : "graph"} />
-                    <ChevronRight className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform shrink-0", expandedId === finding.id && "rotate-90")} />
-                  </motion.button>
-                  <AnimatePresence>
-                    {expandedId === finding.id && <FindingDetail finding={finding} />}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
+            {sorted.map((finding) => (
+              <div key={finding.id}>
+                <FindingRow finding={finding} expanded={expandedId === finding.id}
+                  onToggle={() => setExpandedId(expandedId === finding.id ? null : finding.id)} />
+                <AnimatePresence>
+                  {expandedId === finding.id && <FindingDetail finding={finding} />}
+                </AnimatePresence>
+              </div>
+            ))}
           </div>
         ) : (
           <EmptyFindings />
