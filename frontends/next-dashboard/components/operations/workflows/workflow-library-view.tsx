@@ -19,6 +19,7 @@ export default function WorkflowLibraryView() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
+  const [failure, setFailure] = useState<{ subject: string; message: string } | null>(null);
 
   const onCreate = async (event: FormEvent) => {
     event.preventDefault();
@@ -31,23 +32,18 @@ export default function WorkflowLibraryView() {
     else { setId(""); setYamlText(""); setAdding(false); }
   };
 
-  const onDelete = async (definitionId: string) => {
-    setPending(definitionId);
-    await deleteDefinition(definitionId);
+  const act = async (subject: string, action: () => Promise<string | null>) => {
+    setPending(subject);
+    setFailure(null);
+    const message = await action();
     setPending(null);
+    if (message) setFailure({ subject, message });
   };
-
-  const onRun = async (definitionId: string) => {
-    setPending(definitionId);
-    await startRun(definitionId);
-    setPending(null);
-  };
-
-  const onCancel = async (runId: string) => {
-    setPending(runId);
-    await cancelRun(runId);
-    setPending(null);
-  };
+  const onDelete = (definitionId: string) => act(definitionId, () => deleteDefinition(definitionId));
+  const onRun = (definitionId: string) => act(definitionId, () => startRun(definitionId));
+  const onCancel = (runId: string) => act(runId, () => cancelRun(runId));
+  const failureFor = (subject: string) => failure?.subject === subject
+    ? <p role="alert" className="mt-1 text-xs text-destructive">{failure.message}</p> : null;
 
   return (
     <section className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-5 p-6" aria-labelledby="workflows-title">
@@ -120,6 +116,7 @@ export default function WorkflowLibraryView() {
                   <span>v{definition.version}</span>
                   {definition.tags.map((tag) => <span key={tag} className="rounded-full bg-violet-500/15 px-2 py-0.5 text-violet-300">{tag}</span>)}
                 </div>
+                {failureFor(definition.id)}
               </div>
               <div className="flex shrink-0 gap-1">
                 <button type="button" onClick={() => void onRun(definition.id)} disabled={pending === definition.id}
@@ -151,6 +148,7 @@ export default function WorkflowLibraryView() {
                   <span className="text-muted-foreground">{run.workflowId}</span>
                   <span className="ml-2 rounded-full bg-muted px-2 py-0.5">{run.status}</span>
                   {run.error && <p className="mt-1 text-destructive">{run.error}</p>}
+                  {failureFor(run.runId)}
                 </div>
                 {(run.status === "running" || run.status === "pending") && (
                   <button type="button" onClick={() => void onCancel(run.runId)} disabled={pending === run.runId}
