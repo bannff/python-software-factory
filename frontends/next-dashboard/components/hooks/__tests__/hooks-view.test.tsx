@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 const mocks = vi.hoisted(() => ({
-  list: vi.fn(), available: vi.fn(), invocable: vi.fn(), save: vi.fn(), remove: vi.fn(), firings: vi.fn(),
+  list: vi.fn(), available: vi.fn(), invocable: vi.fn(), save: vi.fn(), setEnabled: vi.fn(), remove: vi.fn(), firings: vi.fn(),
 }));
 vi.mock("@/lib/hooks/use-mcp-connection", () => ({ useMcpConnection: () => ({ ready: true, status: "connected" }) }));
 vi.mock("../hooks-api", async () => {
@@ -12,18 +12,20 @@ vi.mock("../hooks-api", async () => {
     hookAuthoringAvailable: (...args: unknown[]) => mocks.available(...args),
     listInvocableTools: (...args: unknown[]) => mocks.invocable(...args),
     saveHook: (...args: unknown[]) => mocks.save(...args),
+    setHookEnabled: (...args: unknown[]) => mocks.setEnabled(...args),
     deleteHook: (...args: unknown[]) => mocks.remove(...args),
     listRecentFirings: (...args: unknown[]) => mocks.firings(...args),
   };
 });
 import HooksView from "../hooks-view";
 
-const hook = { id: "on-fail-notify", eventType: "workflow.failed", tool: "agent_read_skill", description: "", enabled: true };
+const hook = { id: "on-fail-notify", eventType: "workflow.failed", tool: "agent_read_skill", description: "", enabled: true, origin: "authored" as const };
 beforeEach(() => {
   mocks.list.mockReset().mockResolvedValue([hook]);
   mocks.available.mockReset().mockResolvedValue(true);
   mocks.invocable.mockReset().mockResolvedValue(["agent_read_skill", "workflow_get_run"]);
   mocks.save.mockReset().mockResolvedValue(undefined);
+  mocks.setEnabled.mockReset().mockResolvedValue(undefined);
   mocks.remove.mockReset().mockResolvedValue(undefined);
   mocks.firings.mockReset().mockResolvedValue([]);
 });
@@ -37,14 +39,24 @@ describe("HooksView", () => {
     fireEvent.change(screen.getByLabelText("Run this tool"), { target: { value: "agent_read_skill" } });
     fireEvent.click(screen.getByRole("button", { name: "Create hook" }));
     await waitFor(() => expect(mocks.save).toHaveBeenCalledWith({
-      id: "on-fail-notify", eventType: "workflow.failed", tool: "agent_read_skill", description: "", enabled: true,
+      id: "on-fail-notify", eventType: "workflow.failed", tool: "agent_read_skill", description: "", enabled: true, origin: "authored",
     }));
   });
 
   it("toggles enabled state on an existing hook", async () => {
     render(<HooksView />);
     fireEvent.click(await screen.findByRole("button", { name: "Enabled" }));
-    await waitFor(() => expect(mocks.save).toHaveBeenCalledWith({ ...hook, enabled: false }));
+    await waitFor(() => expect(mocks.setEnabled).toHaveBeenCalledWith("on-fail-notify", false));
+    expect(mocks.save).not.toHaveBeenCalled();
+  });
+
+  it("lists platform subscriptions as read-only: no toggle, no delete", async () => {
+    mocks.list.mockResolvedValue([{ ...hook, id: "graph-projection", origin: "system" }]);
+    render(<HooksView />);
+    await screen.findByText("graph-projection");
+    expect(screen.getByText("System")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Enabled" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Delete hook graph-projection" })).toBeNull();
   });
 
   it("deletes a hook", async () => {
