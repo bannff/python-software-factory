@@ -62,6 +62,7 @@ from .runtime.native_v2_composer import NativeMCPV2Composer, NativeToolRegistrat
 from .runtime.native_v2_instrumentation import invoke_native_tool
 from .runtime.envelope_projection import project_envelope_arguments
 from .runtime.tool_catalog import CatalogTool, ToolCatalog
+from .runtime.tool_failure import TypedToolFailure
 from .runtime.tool_result import ToolResult, fail, ok
 from .poll_noise import POLL_NOISE
 from .serialization import make_serializable
@@ -87,7 +88,7 @@ from .protected_telemetry import telemetry_attributes
 
 __all__ = [
     "deterministic", "operational", "authoring", "typed", "op_kind", "OP_KINDS",
-    "ToolResult", "ok", "fail", "CatalogTool", "ToolCatalog",
+    "ToolResult", "TypedToolFailure", "ok", "fail", "CatalogTool", "ToolCatalog",
     "ElicitationForm", "ElicitationFormRequest", "ElicitationHandler",
     "ElicitationResponse", "PrepareCallable", "PrepareNeedsElicitation",
     "PrepareReady", "PrepareResult", "SideEffectFreePrepare",

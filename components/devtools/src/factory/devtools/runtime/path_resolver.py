@@ -4,12 +4,15 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from factory.mcp_utils.interface import TypedToolFailure
+
 from .models import ProjectBinding, RelativePath
 from .sensitive_policy import ensure_not_sensitive
 
 
-class PathRefused(ValueError):
-    pass
+class PathRefused(TypedToolFailure):
+    def __init__(self, message: str = "path refused") -> None:
+        super().__init__("devtools_path_refused", message)
 
 
 def bind_project(

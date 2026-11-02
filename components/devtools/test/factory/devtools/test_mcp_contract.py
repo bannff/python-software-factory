@@ -94,7 +94,7 @@ def test_archived_or_unbound_session_is_refused(tmp_path, monkeypatch) -> None:
     result = asyncio.run(fn(
         argv=["pytest"], envelope={"thread_id": "thread"},
     ))
-    assert result.ok is False and result.error == "tool_execution_failed"
+    assert result.ok is False and result.error == "devtools_session_unavailable"
 
 
 def test_git_tools_have_exact_modalities_and_authoring_is_disabled(monkeypatch) -> None:
