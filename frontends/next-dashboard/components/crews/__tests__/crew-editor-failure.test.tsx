@@ -9,7 +9,7 @@ vi.mock("@/lib/hooks/use-model-catalog", () => ({
   useModelCatalog: () => ({ models: [], groups: [], loading: false, error: null, refresh: vi.fn() }),
 }));
 const callTool = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/api", () => ({ callTool }));
+vi.mock("@/lib/api", () => ({ callTool, listTools: () => Promise.resolve({ tools: [] }) }));
 
 import { CrewEditor } from "../crew-editor";
 
