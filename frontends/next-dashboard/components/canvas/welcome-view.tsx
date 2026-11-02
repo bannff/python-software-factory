@@ -7,7 +7,7 @@ import { callTool } from "@/lib/api";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import { useLiveToolStream } from "@/lib/hooks/use-live-tool-stream";
 import { ParticleText } from "@/components/ui/particle-text";
-import { CapabilityGrid } from "./welcome-capabilities";
+import { CapabilityTable } from "./welcome-capabilities";
 import type { CanvasViewId } from "@/lib/types";
 
 interface WelcomeViewProps {
@@ -86,14 +86,14 @@ export default function WelcomeView({ onNavigate }: WelcomeViewProps) {
         />
       </div>
 
-      {/* Capability cards */}
+      {/* Capability list */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
         className="relative z-10 w-full max-w-xl mb-6 px-4"
       >
-        <CapabilityGrid onNavigate={onNavigate} />
+        <CapabilityTable onNavigate={onNavigate} />
       </motion.div>
 
       {/* Status strip — anchored at bottom */}

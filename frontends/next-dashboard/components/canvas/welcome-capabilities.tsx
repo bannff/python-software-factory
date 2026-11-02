@@ -18,15 +18,16 @@ export const CAPABILITIES: { icon: LucideIcon; label: string; desc: string; view
   { icon: Container, label: "Sandbox",    desc: "Docker containers for agent execution", viewId: "sandbox" },
 ];
 
-/** Metrics-pane style: icon cards, label only; the description is a tooltip. */
-export function CapabilityGrid({ onNavigate }: { onNavigate?: (viewId: CanvasViewId) => void }) {
+/** One bordered table of rows: icon, name, description. */
+export function CapabilityTable({ onNavigate }: { onNavigate?: (viewId: CanvasViewId) => void }) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-border/30 bg-border/20">
       {CAPABILITIES.map(({ icon: Icon, label, desc, viewId }) => (
-        <button key={viewId} type="button" title={desc} onClick={() => onNavigate?.(viewId)}
-          className="group flex flex-col items-center gap-2 rounded-xl border border-border/50 bg-card/30 px-3 py-4 transition-colors hover:bg-accent/20">
-          <Icon className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-foreground" aria-hidden />
-          <span className="text-xs font-medium text-foreground/80">{label}</span>
+        <button key={viewId} type="button" onClick={() => onNavigate?.(viewId)}
+          className="group flex items-center gap-3 bg-card/40 px-4 py-2.5 text-left transition-colors hover:bg-accent/30">
+          <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground/40 transition-colors group-hover:text-foreground/70" aria-hidden />
+          <span className="w-20 shrink-0 text-[12px] font-medium text-foreground/70">{label}</span>
+          <span className="text-[11px] text-muted-foreground/40 transition-colors group-hover:text-muted-foreground/60">{desc}</span>
         </button>
       ))}
     </div>

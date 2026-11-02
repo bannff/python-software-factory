@@ -1,20 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { CapabilityGrid, CAPABILITIES } from "../welcome-capabilities";
+import { CapabilityTable, CAPABILITIES } from "../welcome-capabilities";
 
-describe("CapabilityGrid", () => {
-  it("shows one icon card per capability and navigates on click", () => {
+describe("CapabilityTable", () => {
+  it("shows one row per capability and navigates on click", () => {
     const onNavigate = vi.fn();
-    render(<CapabilityGrid onNavigate={onNavigate} />);
+    render(<CapabilityTable onNavigate={onNavigate} />);
     expect(screen.getAllByRole("button")).toHaveLength(CAPABILITIES.length);
-    fireEvent.click(screen.getByRole("button", { name: "Findings" }));
+    fireEvent.click(screen.getByRole("button", { name: /Findings/ }));
     expect(onNavigate).toHaveBeenCalledWith("findings");
   });
 
-  it("keeps the description as a tooltip, not body text", () => {
-    render(<CapabilityGrid onNavigate={vi.fn()} />);
-    const card = screen.getByRole("button", { name: "Graph" });
-    expect(card.getAttribute("title")).toMatch(/knowledge graphs/i);
-    expect(screen.queryByText(/knowledge graphs/i)).toBeNull();
+  it("shows each description as a visible row, not a tooltip", () => {
+    render(<CapabilityTable onNavigate={vi.fn()} />);
+    expect(screen.getByText(/knowledge graphs/i)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Graph/ }).getAttribute("title")).toBeNull();
   });
 });
