@@ -134,6 +134,25 @@ class EventsAuthoring:
 
         return {"ok": True, "path": str(target_path)}
 
+    def set_enabled(self, subscription_id: str, enabled: bool) -> dict[str, Any]:
+        """Flip ``enabled`` on an authored subscription, keeping every other field.
+
+        Toggling through ``upsert`` re-sent a lossy projection and reset priority
+        and filters; this reads the stored definition and changes one key.
+        """
+        if not self.is_enabled():
+            return {"ok": False, "error": "Authoring tools are disabled"}
+        valid, result = self._validate_path(subscription_id)
+        if not valid:
+            return {"ok": False, "error": result}
+        if not isinstance(result, Path) or not result.exists():
+            return {"ok": False, "error": "Subscription not found"}
+        data = yaml.safe_load(result.read_text()) or {}
+        data["enabled"] = enabled
+        subscription = SubscriptionDefinition.model_validate(data)
+        result.write_text(yaml.safe_dump(subscription.model_dump(), default_flow_style=False))
+        return {"ok": True, "path": str(result)}
+
     def delete_subscription(self, subscription_id: str) -> dict[str, Any]:
         """Delete a subscription definition."""
         if not self.is_enabled():

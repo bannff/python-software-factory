@@ -54,8 +54,8 @@ describe("HooksView", () => {
     await waitFor(() => expect(mocks.remove).toHaveBeenCalledWith("on-fail-notify"));
   });
 
-  it("shows no-firings state when history is empty", async () => {
+  it("shows an empty event-history state", async () => {
     render(<HooksView />);
-    await screen.findByText("No recent firings.");
+    await screen.findByText("No recent events of this type.");
   });
 });

@@ -65,11 +65,12 @@ def register(mcp: Any, get_runtime: Callable[[], "EventsRuntime"],
     @mcp.tool()
     @deterministic(input_model=EmptyInput, output_model=SubscriptionRegistryOutput)
     def events_get_subscription_registry() -> ToolResult[SubscriptionRegistryOutput]:
-        subscriptions = get_runtime().get_subscription_registry().list_all()
+        registry = get_runtime().get_subscription_registry()
         rows = [{"id": item.id, "event_type": item.event_type, "handler": item.handler,
                  "description": item.description, "enabled": item.enabled,
-                 "priority": item.priority, "has_filters": bool(item.filters)}
-                for item in subscriptions]
+                 "priority": item.priority, "has_filters": bool(item.filters),
+                 "origin": registry.origin_of(item.id)}
+                for item in registry.list_all()]
         return {"subscriptions": rows, "total": len(rows)}
 
     @mcp.tool()
