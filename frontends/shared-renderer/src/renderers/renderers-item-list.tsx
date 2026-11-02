@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Loader2 } from "lucide-react";
+import { Loader2, Play } from "lucide-react";
 import { useBridge } from "../bridge-adapter-context";
 import type { RendererProps } from "./renderer-types";
 import { useToolData } from "./use-tool-data";
@@ -19,7 +19,7 @@ function HeaderIcon({ name }: { name?: string }) {
 
 /* ── Empty state ── */
 
-function EmptyState({ icon, message }: { icon?: string; message?: string }) {
+function EmptyState({ icon, message, action }: { icon?: string; message?: string; action?: { prompt: string; send: (text: string) => void } }) {
   const hasIcon = Boolean(icon && (resolveIcon(icon) || isPictograph(icon)));
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full flex-col items-center justify-center gap-3 text-center">
@@ -29,6 +29,12 @@ function EmptyState({ icon, message }: { icon?: string; message?: string }) {
         </div>
       )}
       <p className="max-w-lg text-sm text-muted-foreground">{message ?? "No items found."}</p>
+      {action && (
+        <button type="button" onClick={() => action.send(action.prompt)}
+          className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-3 py-1.5 text-xs hover:bg-accent/40">
+          <Play className="h-3.5 w-3.5" aria-hidden /> {action.prompt}
+        </button>
+      )}
     </motion.div>
   );
 }
@@ -144,7 +150,8 @@ export function ItemListRenderer({ node }: RendererProps) {
             })}
           </div>
         ) : (
-          <EmptyState icon={p.empty_icon} message={emptyMessage} />
+          <EmptyState icon={p.empty_icon} message={emptyMessage}
+            action={p.empty_action && bridge.sendPrompt ? { prompt: p.empty_action, send: bridge.sendPrompt } : undefined} />
         )}
       </div>
     </div>
