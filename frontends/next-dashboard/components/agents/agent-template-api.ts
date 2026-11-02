@@ -14,8 +14,9 @@ function authoringResult(raw: unknown): Record<string, unknown> {
 
 export async function listUserTemplateIds(): Promise<string[]> {
   const result = authoringResult(await callTool("agent_list_config_items", { kind: "agent" }));
-  return Array.isArray(result.items)
-    ? result.items.filter((item): item is string => typeof item === "string") : [];
+  if (!Array.isArray(result.items)) return [];
+  return result.items.flatMap((item): string[] =>
+    typeof item?.id === "string" ? [item.id] : []);
 }
 
 export async function readUserTemplate(id: string): Promise<Record<string, unknown>> {
