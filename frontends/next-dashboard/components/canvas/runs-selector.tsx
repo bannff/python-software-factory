@@ -4,6 +4,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { useCallback, useEffect, useState } from "react";
 import { CheckCircle2, ChevronDown, Circle, Loader2, RefreshCw, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { errorReason, withReason } from "@/lib/error-reason";
 
 export interface RunEntry {
   run_id: string;
@@ -39,7 +40,7 @@ export function RunsSelector({ listRecentRuns, focusedRunId, onFocusRun, onClear
     setLoading(true);
     setError(null);
     try { setRuns(await listRecentRuns(20)); }
-    catch (reason) { setError(reason instanceof Error ? reason.message : "Runs unavailable"); }
+    catch (reason) { setError(withReason("Runs unavailable", errorReason(reason))); }
     finally { setLoading(false); }
   }, [listRecentRuns]);
 

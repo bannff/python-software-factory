@@ -27,7 +27,7 @@ export default function NotificationSettingsPanel() {
         listNotificationChannels(), getNotificationPreferences(),
       ]);
       setChannels(nextChannels); setPreferences(nextPreferences);
-    } catch { setError("Notification settings unavailable."); }
+    } catch (cause) { setError(withReason("Notification settings unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { void load(); }, [load]);

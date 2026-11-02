@@ -6,6 +6,7 @@ import {
   listFactoryPrompts, renderFactoryPrompt, type FactoryPrompt,
   type PromptCatalog, type RenderedPromptMessage,
 } from "./prompts-api";
+import { errorReason, withReason } from "@/lib/error-reason";
 
 const EMPTY: PromptCatalog = { prompts: [], failedBricks: [] };
 
@@ -30,7 +31,7 @@ export default function PromptsView() {
         ? next.prompts.find((item) => item.brick === current.brick && item.name === current.name) ?? null
         : null);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Prompts unavailable.");
+      setError(withReason("Prompts unavailable.", errorReason(cause)));
     } finally { setLoading(false); }
   }, [ready]);
   useEffect(() => { void refresh(); }, [refresh]);
@@ -49,7 +50,7 @@ export default function PromptsView() {
     if (!selected) return;
     setRendering(true); setError(null);
     try { setMessages(await renderFactoryPrompt(selected, values)); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Prompt could not be rendered."); }
+    catch (cause) { setError(withReason("Prompt could not be rendered.", errorReason(cause))); }
     finally { setRendering(false); }
   };
   const requiredMissing = selected?.arguments.some((argument) =>
