@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useState } from "react";
 import { getSkillPolicy, updateSkillPolicy, type SkillPolicy } from "./skills-api";
 
@@ -14,7 +15,7 @@ export function useSkillPolicy() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try { setPolicy(await getSkillPolicy()); setError(null); }
-    catch { setError("Skill policy unavailable"); }
+    catch (cause) { setError(withReason("Skill policy unavailable", errorReason(cause))); }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);
