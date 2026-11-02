@@ -6,13 +6,14 @@ from typing import Any
 from factory.mcp_utils.interface import authoring as authoring_decorator
 
 from factory.integrations.runtime.runtime import IntegrationsRuntime
+from factory.integrations.mcp.contracts import ConnectorIdInput, ObjectOutput, RegisterInput
 
 
 def register(mcp: Any, runtime: IntegrationsRuntime) -> None:
     """Register authoring tools."""
 
     @mcp.tool()
-    @authoring_decorator
+    @authoring_decorator(input_model=RegisterInput, output_model=ObjectOutput)
     def integrations_register(
         connector_id: str,
         name: str,
@@ -45,10 +46,10 @@ def register(mcp: Any, runtime: IntegrationsRuntime) -> None:
             timeout_seconds=timeout_seconds,
             retry_count=retry_count,
         )
-        return connector.model_dump()
+        return connector.model_dump(mode="json")
 
     @mcp.tool()
-    @authoring_decorator
+    @authoring_decorator(input_model=ConnectorIdInput, output_model=ObjectOutput)
     def integrations_unregister(connector_id: str) -> dict[str, Any]:
         """Unregister a connector.
 

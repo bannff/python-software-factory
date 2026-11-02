@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Any
 from factory.mcp_utils.interface import deterministic
 
+from .contracts import EmptyInput, ViewsOutput
 from .views_tabs import integrations_actions, integrations_read_tabs
 
 
@@ -17,10 +18,10 @@ def register(mcp: Any) -> None:
     """Register Integrations view definitions."""
 
     @mcp.tool()
-    @deterministic
-    def integrations_get_views() -> list[dict[str, Any]]:
+    @deterministic(input_model=EmptyInput, output_model=ViewsOutput)
+    def integrations_get_views() -> dict[str, Any]:
         """Return UIView definitions for the Integrations brick."""
-        return [
+        return {"views": [
             {
                 "id": "integrations-dashboard",
                 "name": "Integrations",
@@ -53,7 +54,7 @@ def register(mcp: Any) -> None:
                     "nav_order": 60,
                 },
             },
-        ]
+        ]}
 
 
 def _children() -> list[dict[str, Any]]:
