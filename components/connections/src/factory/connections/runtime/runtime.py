@@ -22,16 +22,29 @@ def _root_cause(exc: BaseException) -> BaseException:
     return exc
 
 
-def _reason(exc: BaseException) -> str:
-    """Allowlisted diagnostic: root-cause type, plus the OS reason for OSErrors.
+# Only MCP protocol errors forward text; httpx/OS errors can embed token URLs.
+_MESSAGE_SAFE = frozenset({"MCPError", "McpError"})
 
-    Arbitrary exception text can echo resolved env/header credentials, so it is
-    never forwarded.
-    """
+
+def _reason(exc: BaseException, secrets: tuple[str, ...] = ()) -> str:
+    """Root-cause type, the OS reason, or a scrubbed first line of an MCP error."""
     cause = _root_cause(exc)
+    name = type(cause).__name__
     if isinstance(cause, OSError) and cause.strerror:
-        return f"{type(cause).__name__}: {cause.strerror}"
-    return type(cause).__name__
+        return f"{name}: {cause.strerror}"
+    if name not in _MESSAGE_SAFE:
+        return name
+    text = str(cause)
+    for secret in sorted(filter(None, secrets), key=len, reverse=True):
+        text = text.replace(secret, "***")
+    line = (text.strip().splitlines() or [""])[0][:160]
+    return f"{name}: {line}" if line else name
+
+
+def _secret_values(spec: Any) -> tuple[str, ...]:
+    """Env/header values plus what their SOURCE_ENV_NAME entries resolve to."""
+    refs = (*spec.env.values(), *spec.headers.values())
+    return tuple(v for v in (*refs, *(os.environ.get(r, "") for r in refs)) if len(v) >= 4)
 
 
 ErrorKey = tuple[str, str, str]
@@ -100,7 +113,7 @@ class ConnectionsRuntime:
                     self._register(brick_name(record.name), catalog)
             except Exception as exc:
                 # Registration succeeds regardless, so the view needs the cause.
-                self._mount_errors[key] = _reason(exc)
+                self._mount_errors[key] = _reason(exc, _secret_values(record.spec))
                 await self._unmount_locked(record.name)
                 if source is not None:
                     await self._close(source, record.name)
