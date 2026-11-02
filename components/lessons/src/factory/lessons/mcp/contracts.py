@@ -16,6 +16,7 @@ class EnvelopeInput(DTO):
     tenant_id: str | None = None
     principal_id: str | None = None
     session_id: str | None = None
+    thread_id: str | None = None
 
 
 class AddLessonInput(DTO):

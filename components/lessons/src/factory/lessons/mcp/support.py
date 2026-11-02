@@ -5,7 +5,7 @@ import asyncio
 from typing import Any
 from uuid import uuid4
 
-from factory.mcp_utils.interface import get_envelope, get_service
+from factory.mcp_utils.interface import TypedToolFailure, get_envelope, get_service
 
 
 def owner_authority(explicit: dict[str, Any] | None) -> tuple[str, str, dict[str, Any]]:
@@ -19,7 +19,7 @@ def owner_authority(explicit: dict[str, Any] | None) -> tuple[str, str, dict[str
         context = supplied
     tenant, owner = context.get("tenant_id"), context.get("principal_id")
     if not all(isinstance(item, str) and item for item in (tenant, owner)):
-        raise ValueError("lesson_owner_context_required")
+        raise TypedToolFailure("lesson_owner_context_required")
     return tenant, owner, context
 
 
@@ -30,7 +30,7 @@ def authority(explicit: dict[str, Any] | None) -> tuple[str, str, str, dict[str,
     # so a caller sending both must be resolved by its thread.
     thread = context.get("thread_id") or context.get("session_id")
     if not isinstance(thread, str) or not thread:
-        raise ValueError("lesson_owner_context_required")
+        raise TypedToolFailure("lesson_owner_context_required")
     return tenant, owner, thread, context
 
 
@@ -38,7 +38,7 @@ async def verify_session(thread_id: str, context: dict[str, Any]) -> None:
     factory = get_service("tool_invoker_for_caller")
     invoke = factory("lessons") if callable(factory) else None
     if not callable(invoke):
-        raise ValueError("lesson_session_unavailable")
+        raise TypedToolFailure("lesson_session_unavailable")
     raw = await asyncio.to_thread(
         invoke, {"brick_name": "session", "tool_name": "resolve_thread"},
         arguments={"thread_id": thread_id, "envelope": context},
@@ -50,10 +50,10 @@ async def verify_session(thread_id: str, context: dict[str, Any]) -> None:
     data = structured.get("data") if isinstance(structured, dict) and structured.get("ok") else None
     session = data.get("session") if isinstance(data, dict) else None
     if not isinstance(session, dict):
-        raise ValueError("lesson_session_not_found")
+        raise TypedToolFailure("lesson_session_not_found")
     # SessionRecord has no state field; an archived session is the restricted one.
     if session.get("archived_at") is not None:
-        raise ValueError("lesson_session_restricted")
+        raise TypedToolFailure("lesson_session_restricted")
 
 
 __all__ = ["authority", "owner_authority", "verify_session"]
