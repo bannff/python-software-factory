@@ -6,6 +6,9 @@ import { parseAllowedRoots } from "@/lib/project-roots";
 
 type Caller = typeof callTool;
 
+const CREW_NOT_FOUND = "crew_not_found";
+const CREW_GONE = "Crew no longer exists";
+
 export interface StartedCrewSession {
   crew: ResolvedCrew;
   session: SessionSummary;
@@ -37,8 +40,9 @@ export async function startCrewSession(
     crew = parseResolvedCrew(await caller("agent_resolve_crew", {
       crew_id: crewId,
     }));
-  } catch {
-    throw new Error("Crew unavailable");
+  } catch (error) {
+    throw new Error(error instanceof Error && error.message === CREW_NOT_FOUND
+      ? CREW_GONE : "Crew unavailable");
   }
   const create = (project: string) => caller("session_create", {
     title: "New session", agent_id: crew.persona_id, model: crew.model_id,
@@ -50,8 +54,8 @@ export async function startCrewSession(
     return { crew, session };
   } catch (error) {
     // The crew was deleted between resolve and create; retrying cannot help.
-    if (error instanceof Error && error.message === "crew_not_found") {
-      throw new Error("Crew no longer exists");
+    if (error instanceof Error && error.message === CREW_NOT_FOUND) {
+      throw new Error(CREW_GONE);
     }
     if (!(error instanceof Error) || error.message !== "session_project_path_refused") {
       throw new Error("Crew session could not be created");
