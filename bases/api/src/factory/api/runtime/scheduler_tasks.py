@@ -3,9 +3,12 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import logging
 from typing import Any, Awaitable, Callable
 
 from factory.mcp_utils.interface import get_service
+
+logger = logging.getLogger(__name__)
 
 
 async def activate_scheduler(owner: Any) -> bool:
@@ -32,8 +35,8 @@ async def scheduler_loop(
         except asyncio.CancelledError:
             raise
         except Exception:
-            # Claimed fires remain durable and retry on the next tick.
-            pass
+            # The next tick retries; never swallow silently.
+            logger.exception("scheduler tick failed")
         await asyncio.sleep(poll_seconds)
 
 
