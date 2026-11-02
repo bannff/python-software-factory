@@ -6,10 +6,11 @@ import { PanelRight as PanelRightIcon } from "lucide-react";
 import { CopilotChat } from "@copilotkit/react-core/v2";
 import { useAgent } from "@copilotkit/react-core/v2";
 import type { Message } from "@ag-ui/core";
-import { useLiveToolStream } from "@/lib/hooks/use-live-tool-stream";
 import { cn } from "@/lib/utils";
+import { useLiveToolStream } from "@/lib/hooks/use-live-tool-stream";
 import { useSendPromptHandler } from "@/lib/chat/send-prompt";
 import { ChatResizeHandle } from "./chat-resize-handle";
+import { ChatHeaderTitle } from "./chat-header-title";
 import { makeCollapsibleComposerInput } from "./composer-collapse";
 import { PinnedPromptBanner, latestUserPrompt } from "./pinned-prompt-banner";
 import { TurnMinimap, turnsFromMessages } from "./turn-minimap";
@@ -165,30 +166,8 @@ export function CopilotChatSidebar({ onToggle, activeView, width, onResize }: Co
 
       {/* Header */}
       <div className="flex h-10 items-center justify-between border-b border-border/50 px-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase shrink-0">Chat</span>
-          {activeView && (
-            <>
-              <span className="text-border/50 shrink-0">·</span>
-              <span className="text-[10px] text-muted-foreground/70 truncate">{VIEW_LABELS[activeView]}</span>
-            </>
-          )}
-          {headerTool && (
-            <>
-              <span className="text-border/50 shrink-0">·</span>
-              <span className={cn(
-                "h-1.5 w-1.5 rounded-full shrink-0",
-                connected ? "bg-emerald-400 animate-pulse" : "bg-muted-foreground/40",
-              )} />
-              <span
-                className="text-[10px] text-muted-foreground/70 truncate max-w-[120px]"
-                title={headerTool.entry.title}
-              >
-                {headerTool.meta.label}
-              </span>
-            </>
-          )}
-        </div>
+        <ChatHeaderTitle viewLabel={activeView && VIEW_LABELS[activeView]}
+          tool={headerTool ? { label: headerTool.meta.label, title: headerTool.entry.title, connected } : undefined} />
         <div className="flex shrink-0 items-center gap-0.5">
           <button onClick={() => setPanelOpen((o) => !o)} aria-label="Toggle side panel"
             aria-pressed={panelOpen}
