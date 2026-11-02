@@ -28,7 +28,7 @@ from .langchain_thread_history import (
     capture_branch_id, checkpoint_before_message, fork_thread, history,
 )
 from .langchain_tools import bind_invocation, reset_invocation
-_REQUIRED = (("langchain", "1.3.17"), ("langgraph", "1.2.11"))
+_REQUIRED = (("langchain", "1.3.17"), ("langgraph", "1.2.14"))
 class LangChainAgentRuntime:
     """Attempt-local LangChain agent using only pre-scoped capabilities."""
 
