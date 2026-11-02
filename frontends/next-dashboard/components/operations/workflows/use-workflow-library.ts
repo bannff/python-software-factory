@@ -1,8 +1,8 @@
 "use client";
 
-import { errorReason, withReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { callTool, listTools } from "@/lib/api";
+import { errorReason, withReason } from "@/lib/error-reason";
 import {
   parseDefinitions, parseOk, parseRuns, parseStartRun,
   type WorkflowDefinitionSummary, type WorkflowRun,
@@ -68,36 +68,38 @@ export function useWorkflowLibrary() {
     }
   }, [refresh]);
 
-  const deleteDefinition = useCallback(async (id: string): Promise<boolean> => {
+  /** Each action resolves to the failure text to show where the user acted, or null on success. */
+  const deleteDefinition = useCallback(async (id: string): Promise<string | null> => {
     try {
       const result = await callTool("workflow.authoring.delete_workflow_definition", { id });
-      const ok = parseOk(result);
-      if (ok) await refresh();
-      return ok;
-    } catch {
-      return false;
+      if (!parseOk(result)) return "The workflow definition was not deleted.";
+      await refresh();
+      return null;
+    } catch (cause) {
+      return withReason("Couldn't delete the workflow definition.", errorReason(cause));
     }
   }, [refresh]);
 
   const startRun = useCallback(async (workflowNameOrId: string): Promise<string | null> => {
     try {
-      const result = parseStartRun(await callTool("workflow.start_run", {
+      const started = parseStartRun(await callTool("workflow.start_run", {
         workflow_name_or_id: workflowNameOrId, input: {},
       }));
-      if (result) await refresh();
-      return result?.runId ?? null;
-    } catch {
+      if (!started) return "The workflow did not start: no run was created.";
+      await refresh();
       return null;
+    } catch (cause) {
+      return withReason("Couldn't start the workflow.", errorReason(cause));
     }
   }, [refresh]);
 
-  const cancelRun = useCallback(async (runId: string): Promise<boolean> => {
+  const cancelRun = useCallback(async (runId: string): Promise<string | null> => {
     try {
       await callTool("workflow.cancel_run", { run_id: runId });
       await refresh();
-      return true;
-    } catch {
-      return false;
+      return null;
+    } catch (cause) {
+      return withReason("Couldn't cancel the run.", errorReason(cause));
     }
   }, [refresh]);
 
