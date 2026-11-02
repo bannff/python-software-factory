@@ -83,6 +83,8 @@ describe("SteeringView", () => {
     mocks.caps.mockResolvedValue(capabilities({ update: true, delete: true }));
     render(<SteeringView />); fireEvent.click(await screen.findByRole("button", { name: /Quality/ }));
     fireEvent.click(await screen.findByRole("button", { name: "Delete steering document" }));
+    expect(mocks.remove).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete steering document" }));
     await waitFor(() => expect(mocks.remove).toHaveBeenCalledWith("quality", "a".repeat(64)));
   });
 

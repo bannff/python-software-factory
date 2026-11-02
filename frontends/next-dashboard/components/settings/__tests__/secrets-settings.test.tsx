@@ -69,6 +69,8 @@ describe("Secrets Settings", () => {
     render(<SecretsSettingsPanel />);
     await screen.findByText("TO_DELETE");
     fireEvent.click(screen.getByLabelText("Delete TO_DELETE"));
+    expect(mocks.call).not.toHaveBeenCalledWith("storage.owner_secret_delete", expect.anything());
+    fireEvent.click(screen.getByLabelText("Confirm delete TO_DELETE"));
     await waitFor(() => expect(screen.queryByText("TO_DELETE")).toBeNull());
     expect(await screen.findByText("No secrets stored yet.")).toBeTruthy();
   });

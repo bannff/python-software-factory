@@ -3,6 +3,7 @@
 import { errorReason, withReason } from "@/lib/error-reason";
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Save, Trash2, GitFork, RotateCcw } from "lucide-react";
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
 import { usePersonas } from "@/lib/hooks/use-personas";
 import type { Persona } from "@/lib/types";
@@ -157,10 +158,10 @@ export default function AgentTemplatesView() {
             <Field label="System prompt"><textarea value={form.system_prompt} onChange={set("system_prompt")} rows={6} disabled={!canCreate} /></Field>
             <div className="flex gap-2">{canCreate && <button type="button" onClick={() => void save()} disabled={busy || !form.id || !form.name || !form.system_prompt}
               className="inline-flex items-center gap-1.5 rounded-md bg-violet-500 px-3 py-2 text-xs text-white disabled:opacity-40"><Save className="h-3.5 w-3.5" /> Save</button>}
-              {selected && canReset && <button type="button" onClick={() => void reset()} disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-3 py-2 text-xs text-muted-foreground hover:bg-accent/30 hover:text-foreground"><RotateCcw className="h-3.5 w-3.5" /> Reset</button>}
-              {selected && canDelete && <button type="button" onClick={() => void remove()} disabled={busy}
-                className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 px-3 py-2 text-xs text-destructive"><Trash2 className="h-3.5 w-3.5" /> Delete</button>}</div>
+              {selected && canReset && <ConfirmDelete label="Reset" onConfirm={() => void reset()} disabled={busy}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-3 py-2 text-xs text-muted-foreground hover:bg-accent/30 hover:text-foreground"><RotateCcw className="h-3.5 w-3.5" /> Reset</ConfirmDelete>}
+              {selected && canDelete && <ConfirmDelete label="Delete" onConfirm={() => void remove()} disabled={busy}
+                className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 px-3 py-2 text-xs text-destructive"><Trash2 className="h-3.5 w-3.5" /> Delete</ConfirmDelete>}</div>
             {selected && caps && !canReset && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "agent_templates", "reset")}</p>}
             {selected && caps && !canDelete && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "agent_templates", "delete")}</p>}
           </div>}

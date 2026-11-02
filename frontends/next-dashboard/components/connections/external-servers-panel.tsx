@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { AddServerDialog } from "./add-server-dialog";
 import { reloadCapabilities } from "./connections-api";
 import {
@@ -69,10 +70,10 @@ export function ExternalServersPanel({ ready, onChanged }: ExternalServersPanelP
             aria-label={`Enable ${server.name}`} disabled={busy !== null}
             onChange={(event) => void run(server.name, () => updateExternalServer(
               server.name, specFrom(server, event.target.checked), server.revision))} /> on</label>
-          <button type="button" aria-label={`Remove ${server.name}`} disabled={busy !== null}
-            onClick={() => void run(server.name, () => removeExternalServer(server.name, server.revision))}
+          <ConfirmDelete label={`Remove ${server.name}`} disabled={busy !== null}
+            onConfirm={() => void run(server.name, () => removeExternalServer(server.name, server.revision))}
             className="rounded p-1 text-muted-foreground hover:text-destructive disabled:opacity-40">
-            {busy === server.name ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}</button>
+            {busy === server.name ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}</ConfirmDelete>
         </li>)}</ul>}
       {adding && <AddServerDialog onClose={() => setAdding(false)}
         onAdd={async (name, spec) => { await addExternalServer(name, spec); await refresh(); onChanged(); }}
