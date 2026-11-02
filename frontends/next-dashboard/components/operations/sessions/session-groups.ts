@@ -6,14 +6,20 @@ export interface SessionGroup {
   sessions: SessionSummary[];
 }
 
-const DAY = 86_400_000;
+/** Local midnight `daysAgo` calendar days before `now`; setDate keeps 23/25-hour clock-change days exact. */
+function startOfDay(now: number, daysAgo: number): number {
+  const day = new Date(now);
+  day.setHours(0, 0, 0, 0);
+  day.setDate(day.getDate() - daysAgo);
+  return day.getTime();
+}
 
 export function groupSessions(
   sessions: readonly SessionSummary[], now = Date.now(),
 ): SessionGroup[] {
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  const today = start.getTime();
+  const today = startOfDay(now, 0);
+  const yesterday = startOfDay(now, 1);
+  const weekStart = startOfDay(now, 7);
   const groups: SessionGroup[] = [
     { id: "pinned", label: "Pinned", sessions: [] },
     { id: "today", label: "Today", sessions: [] },
@@ -27,8 +33,8 @@ export function groupSessions(
       continue;
     }
     const updated = Date.parse(session.updated_at);
-    const age = Number.isFinite(updated) ? today - updated : Number.POSITIVE_INFINITY;
-    const index = updated >= today ? 1 : age < DAY ? 2 : age < DAY * 7 ? 3 : 4;
+    const index = !Number.isFinite(updated) ? 4
+      : updated >= today ? 1 : updated >= yesterday ? 2 : updated >= weekStart ? 3 : 4;
     groups[index].sessions.push(session);
   }
   return groups.filter((group) => group.sessions.length > 0);
