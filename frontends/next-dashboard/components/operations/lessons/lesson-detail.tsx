@@ -2,11 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ban, Check, Loader2, Trash2 } from "lucide-react";
+import { errorReason, withReason } from "@/lib/error-reason";
 import {
   acceptLesson,
   fetchLesson,
   LESSON_CONFLICT_MESSAGE,
   rejectLesson,
+  LESSON_ACTION_FAILED,
   removeLesson,
 } from "./lesson-actions";
 import {
@@ -58,11 +60,16 @@ export function LessonDetail({
     setNotice(null);
     try {
       await action();
-    } catch {
+    } catch (error) {
       try {
-        await fetchLesson(lesson.lessonId);
-        setNotice(LESSON_CONFLICT_MESSAGE);
-        onChanged();
+        const current = await fetchLesson(lesson.lessonId);
+        // Only a lesson that actually moved on is a conflict; otherwise the action itself failed.
+        if (current.revision !== lesson.revision || current.status !== lesson.status) {
+          setNotice(LESSON_CONFLICT_MESSAGE);
+          onChanged();
+        } else {
+          setNotice(withReason(LESSON_ACTION_FAILED, errorReason(error)));
+        }
       } catch {
         onRemoved(lesson.lessonId);
       }

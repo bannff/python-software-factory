@@ -1,4 +1,5 @@
 import { callTool } from "@/lib/api";
+import { unwrapToolData } from "@/lib/tool-result-data";
 import { parseLesson, type Lesson } from "./lesson-types";
 
 /**
@@ -17,6 +18,7 @@ export const LESSON_CONFLICT_MESSAGE =
   "This lesson changed since you opened it. We refreshed it to the latest — take another look.";
 export const LESSON_REMOVED_MESSAGE =
   "This lesson is no longer here — it was already removed.";
+export const LESSON_ACTION_FAILED = "That action didn't go through. Try again.";
 export const LESSON_LIST_ERROR = "Lessons unavailable";
 
 export async function fetchLesson(lessonId: string): Promise<Lesson> {
@@ -42,8 +44,9 @@ export async function rejectLesson(lesson: Lesson, sessionId: string): Promise<L
 }
 
 export async function removeLesson(lesson: Lesson, sessionId: string): Promise<void> {
-  await callTool("lessons_remove", {
+  // callTool resolves on a domain ok:false; unwrap so a refused delete throws instead of reading as removed.
+  unwrapToolData(await callTool("lessons_remove", {
     lesson_id: lesson.lessonId,
     expected_revision: lesson.revision, envelope: { session_id: sessionId },
-  });
+  }));
 }
