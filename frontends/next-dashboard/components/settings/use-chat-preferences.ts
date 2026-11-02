@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { getChatPreferences, type ChatPreferences } from "./chat-preferences-api";
+import { errorReason, withReason } from "@/lib/error-reason";
 
 const EVENT = "companion-x-chat-preferences";
 const DEFAULTS: ChatPreferences = {
@@ -19,7 +20,7 @@ export function useChatPreferences() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try { setPreferences(await getChatPreferences()); setError(null); }
-    catch { setError("Chat preferences unavailable"); }
+    catch (cause) { setError(withReason("Chat preferences unavailable", errorReason(cause))); }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);
