@@ -81,8 +81,8 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
       await callTool("agent_set_default_crew", { crew_id: crew.id, expected_revision: crew.revision });
       onSaved();
       onClose();
-    } catch {
-      setError("Couldn’t set default — this crew may have changed. Reopen it and retry.");
+    } catch (cause) {
+      setError(withReason("Couldn’t set default — this crew may have changed. Reopen it and retry.", errorReason(cause)));
     } finally {
       setSaving(false);
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useState } from "react";
 import type { SessionSummary } from "@/lib/hooks/use-session-list";
 import { loadSessionHistory } from "@/lib/hooks/use-session-history";
@@ -32,7 +33,7 @@ export function useSessionDetailActions(
     try {
       onChanged(await call());
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Try again.");
+      setError(withReason("Something went wrong. Try again.", errorReason(err)));
     } finally {
       setBusy(null);
     }
@@ -45,7 +46,7 @@ export function useSessionDetailActions(
     try {
       await onResume(session);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn’t resume this session.");
+      setError(withReason("Couldn’t resume this session.", errorReason(err)));
     } finally {
       setBusy(null);
     }
@@ -58,7 +59,7 @@ export function useSessionDetailActions(
       await deleteSession(session.session_id, session.revision);
       onDeleted?.(session.session_id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn’t delete this session.");
+      setError(withReason("Couldn’t delete this session.", errorReason(err)));
       onCancelConfirm();
     } finally {
       setBusy(null);
@@ -71,7 +72,7 @@ export function useSessionDetailActions(
     try {
       onForked?.(await forkSession(session.session_id));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn’t fork this session.");
+      setError(withReason("Couldn’t fork this session.", errorReason(err)));
     } finally {
       setBusy(null);
     }
@@ -98,7 +99,7 @@ export function useSessionDetailActions(
       }
       onChanged(await generateSessionSummary(session.session_id, excerpt, session.revision));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn’t summarize this session.");
+      setError(withReason("Couldn’t summarize this session.", errorReason(err)));
     } finally {
       setBusy(null);
     }
