@@ -1,5 +1,6 @@
 "use client";
 
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Pause, Play, Trash2 } from "lucide-react";
 import type { ActionResult } from "@/lib/hooks/use-schedules";
@@ -120,10 +121,14 @@ export function ScheduleDetail({
             onClick={() => run("pause", () => actions.pause(schedule))} icon={Pause}
           />
         )}
-        <ActionButton
-          label="Delete" busy={pending === "remove"} disabled={pending !== null} tone="danger"
-          onClick={() => run("remove", () => actions.remove(schedule))} icon={Trash2}
-        />
+        <ConfirmDelete
+          label="Delete schedule" disabled={pending !== null}
+          onConfirm={() => void run("remove", () => actions.remove(schedule))}
+          className="flex items-center gap-1.5 rounded-md border border-destructive/40 px-3 py-1.5 text-xs text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
+        >
+          {pending === "remove" ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+          Delete
+        </ConfirmDelete>
       </div>
     </article>
   );

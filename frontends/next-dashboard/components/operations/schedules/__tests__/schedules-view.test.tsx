@@ -76,6 +76,26 @@ describe("SchedulesView", () => {
     ));
   });
 
+  it("asks to confirm before deleting, then closes quietly without a 'gone' banner", async () => {
+    let removed = false;
+    mocks.callTool.mockImplementation((name: string) => {
+      if (name === "scheduler_remove") { removed = true; return Promise.resolve({ ok: true, data: {} }); }
+      if (name === "scheduler_list") return Promise.resolve(listOk(removed ? [cronRow] : [intervalRow, cronRow]));
+      return defaultImpl(name);
+    });
+    render(<SchedulesView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Open schedule sch_daily" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Delete schedule" }));
+    expect(mocks.callTool).not.toHaveBeenCalledWith("scheduler_remove", expect.anything());
+
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete schedule" }));
+    await waitFor(() => expect(mocks.callTool).toHaveBeenCalledWith(
+      "scheduler_remove", { schedule_id: "sch_daily", expected_revision: 2 },
+    ));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Open schedule sch_daily" })).toBeNull());
+    expect(screen.queryByText(/no longer exists/i)).toBeNull();
+  });
+
   it("triggers a run-now with the record revision", async () => {
     render(<SchedulesView />);
     fireEvent.click(await screen.findByRole("button", { name: "Open schedule sch_daily" }));
