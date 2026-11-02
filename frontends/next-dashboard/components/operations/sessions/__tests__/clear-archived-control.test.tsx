@@ -60,4 +60,14 @@ describe("ClearArchivedControl", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
     expect(await screen.findByRole("alert")).toBeTruthy();
   });
+
+  it("recounts when the session list changes, so a stale count never lingers", async () => {
+    mocks.countClearableSessions.mockResolvedValue(1);
+    const { rerender } = render(<ClearArchivedControl visible listVersion={1} onCleared={vi.fn()} />);
+    await screen.findByRole("button", { name: "Delete all (1)" });
+
+    mocks.countClearableSessions.mockResolvedValue(0);
+    rerender(<ClearArchivedControl visible listVersion={0} onCleared={vi.fn()} />);
+    await waitFor(() => expect(screen.queryByRole("button", { name: /Delete all/ })).toBeNull());
+  });
 });

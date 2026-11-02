@@ -13,8 +13,10 @@ import { clearArchivedSessions, countClearableSessions } from "./session-actions
  * owner commits (upstream's ``clearable/count``), and only offers the
  * button at all when that count is genuinely non-zero — no dead button.
  */
-export function ClearArchivedControl({ visible, onCleared }: {
+export function ClearArchivedControl({ visible, listVersion = 0, onCleared }: {
   visible: boolean;
+  /** Changes whenever the session list does, so the count is never stale. */
+  listVersion?: number;
   onCleared: () => void;
 }) {
   const [count, setCount] = useState<number | null>(null);
@@ -27,7 +29,7 @@ export function ClearArchivedControl({ visible, onCleared }: {
     let cancelled = false;
     void countClearableSessions().then((value) => { if (!cancelled) setCount(value); });
     return () => { cancelled = true; };
-  }, [visible]);
+  }, [visible, listVersion]);
 
   if (!visible || count === null || count === 0) return null;
 
