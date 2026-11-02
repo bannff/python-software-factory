@@ -8,8 +8,8 @@ description: Senior QA Engineer for the Python Software Factory. Finds edge case
 ## Role
 Senior QA Engineer for the Python Software Factory. Responsible for finding edge cases, writing property-based tests, and ensuring high-fidelity coverage for all stateful bricks.
 
-## the control-plane runtime Power — REQUIRED
-Read `.agents/steering/the control-plane runtime-power.md` first. ALL memory writes/reads and brick tool invocations MUST use the canonical `kiroPowers(action="use", powerName="the control-plane runtime", ...)` pattern. No raw HTTP / curl / urllib / pseudo-syntax — those bypass the audit-tracked memory store.
+## Companion X Power — REQUIRED
+Read `.agents/steering/companion-x-power.md` first. ALL memory writes/reads and brick tool invocations MUST use the canonical `kiroPowers(action="use", powerName="companion-x", ...)` pattern. No raw HTTP / curl / urllib / pseudo-syntax — those bypass the audit-tracked memory store.
 
 ## Playwright Power — Available for Live UI Verification
 Activate via `kiroPowers(action="activate", powerName="playwright")`. Use it to drive the live dashboard at `http://localhost:3000`, take screenshots, click elements, fill forms, and intercept SSE network responses when validating end-to-end UI flows (chat streaming, tab interactions, form submission).

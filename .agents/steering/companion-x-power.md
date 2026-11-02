@@ -2,24 +2,24 @@
 inclusion: auto
 ---
 
-# the control-plane runtime Power — Canonical Usage for Sub-Agents
+# Companion X Power — Canonical Usage for Sub-Agents
 
 All sub-agents (implementer, meta-architect, qa-tester, doc-writer, security-engineer,
-strands-expert, ux-designer) MUST use the **`the control-plane runtime` Kiro power** to interact
-with the running the control-plane runtime MCP server. Do not use raw HTTP, `urllib`, `curl`,
+strands-expert, ux-designer) MUST use the **`companion-x` Kiro power** to interact
+with the running Companion X MCP server. Do not use raw HTTP, `urllib`, `curl`,
 or fabricated `call_brick_tool(...)` pseudo-syntax. Those approaches do not log
 to the company memory store and break the consultation audit trail.
 
 This file is auto-included for ALL agents. The canonical invocation pattern below
-is the only supported way to call the control-plane runtime bricks from a sub-agent.
+is the only supported way to call Companion X bricks from a sub-agent.
 
 ## Canonical Invocation
 
 ```python
 kiroPowers(
   action="use",
-  powerName="the control-plane runtime",
-  serverName="the control-plane runtime",
+  powerName="companion-x",
+  serverName="companion-x",
   toolName="call_brick_tool",
   arguments={
     "brick_name": "<brick>",          # e.g. "memory", "graph", "kb"
@@ -31,22 +31,22 @@ kiroPowers(
 
 Note: `arguments` is itself a JSON-encoded string. Do not pass a dict.
 
-`serverName` equals `powerName` for `the control-plane runtime` (the power exposes one MCP
+`serverName` equals `powerName` for `companion-x` (the power exposes one MCP
 server with the same name). Some powers expose multiple servers — for those,
 look up the right `serverName` via `kiroPowers(action="activate", powerName=...)`
 and read the `toolsByServer` map.
 
 ## Memory Store (consultation logging — MANDATORY)
 
-Every consult MUST be logged via this exact pattern. The the control-plane runtime memory brick
+Every consult MUST be logged via this exact pattern. The Companion X memory brick
 backs the audit trail; entries logged via other channels will not surface in
 `memory_retrieve` queries by the audit hooks.
 
 ```python
 kiroPowers(
   action="use",
-  powerName="the control-plane runtime",
-  serverName="the control-plane runtime",
+  powerName="companion-x",
+  serverName="companion-x",
   toolName="call_brick_tool",
   arguments={
     "brick_name": "memory",
@@ -75,8 +75,8 @@ locate it deterministically.
 ```python
 kiroPowers(
   action="use",
-  powerName="the control-plane runtime",
-  serverName="the control-plane runtime",
+  powerName="companion-x",
+  serverName="companion-x",
   toolName="call_brick_tool",
   arguments={
     "brick_name": "memory",
@@ -94,11 +94,11 @@ kiroPowers(
 
 ```python
 # List all bricks (tools_count: -1 means lazy-loaded)
-kiroPowers(action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+kiroPowers(action="use", powerName="companion-x", serverName="companion-x",
            toolName="list_bricks", arguments={})
 
 # Trigger lazy-load + get tool schemas
-kiroPowers(action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+kiroPowers(action="use", powerName="companion-x", serverName="companion-x",
            toolName="get_brick_tools", arguments={"brick_name": "memory"})
 ```
 
@@ -111,7 +111,7 @@ kiroPowers(action="use", powerName="the control-plane runtime", serverName="the 
 
 ## When the Power Is Unreachable
 
-If `kiroPowers(action="use", powerName="the control-plane runtime", ...)` fails (the control-plane runtime server
+If `kiroPowers(action="use", powerName="companion-x", ...)` fails (Companion X server
 down, Dolt offline, AWS creds stale), state so plainly in the verdict and skip
 the memory write. Do NOT fabricate the entry or use a fallback channel that will
 not surface in audit retrievals.

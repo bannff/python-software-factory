@@ -1,7 +1,7 @@
 # Kiro SAST Workflow — Full Pipeline Recipe
 
 Kiro orchestrates a SAST code scan by dispatching sub-agents sequentially.
-Each sub-agent writes findings to the Neo4j graph via the control-plane runtime power.
+Each sub-agent writes findings to the Neo4j graph via Companion X power.
 Post-workflow pipeline triggers automatically via `games_process_workflow_rl`.
 
 ## Context Variables (set before starting)
@@ -95,6 +95,6 @@ Else: STOP and write final report
 
 ## Report
 
-Write JSON report to `projects/the control-plane project/challenges/experiments/{run_id}.json`
+Write JSON report to `projects/companion_x/challenges/experiments/{run_id}.json`
 using the same schema as Strands run reports (see sast-warehouse-005.json).
 Set `workflow_type: "kiro"`.

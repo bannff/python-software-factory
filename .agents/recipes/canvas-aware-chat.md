@@ -1,8 +1,8 @@
 # Recipe: Canvas-Aware Chat (FE Tool Round-Trip)
 
-End-to-end walkthrough of the `fe_navigate_canvas` round-trip — the chat agent drives the the control-plane runtime workbench via a CopilotKit v2 `useFrontendTool` registration, while pushed canvas state via `useAgentContext` keeps it situationally aware. The goal here is to leverage **CopilotKit + Strands as designed, with no bespoke transport layer**. Three SDK gaps had to be filled (all cited below with their upstream issue); everything else is the SDKs doing their jobs. Closes the loop on top of bd-eyuj / bd-47sl / bd-tpfk (thinking trio) and bd-vw04 / bd-115z / bd-ioyz / bd-n368 / bd-3hkqx (canvas + FE-tool wire shape). Memory: implementer landing `96a217dc-3f3a-43aa-b74d-85c10142f273`; bd-3hkqx UX-fix round 2 `aca2e1d6-3662-41dd-b54b-676475d032da`.
+End-to-end walkthrough of the `fe_navigate_canvas` round-trip — the chat agent drives the Companion X workbench via a CopilotKit v2 `useFrontendTool` registration, while pushed canvas state via `useAgentContext` keeps it situationally aware. The goal here is to leverage **CopilotKit + Strands as designed, with no bespoke transport layer**. Three SDK gaps had to be filled (all cited below with their upstream issue); everything else is the SDKs doing their jobs. Closes the loop on top of bd-eyuj / bd-47sl / bd-tpfk (thinking trio) and bd-vw04 / bd-115z / bd-ioyz / bd-n368 / bd-3hkqx (canvas + FE-tool wire shape). Memory: implementer landing `96a217dc-3f3a-43aa-b74d-85c10142f273`; bd-3hkqx UX-fix round 2 `aca2e1d6-3662-41dd-b54b-676475d032da`.
 
-> **Persona note (bd:python-factory-hadbi.1).** The chat agent is now an `AgentConfig` registration (`the control-plane runtime-default`, `defaults_companion_x.py`) resolved via the `COMPANION_X_CHAT_AGENT_ID` env var. Cache key + `Agent.name` + `FileSessionManager.session_id` all use `f"{agent_id}-{thread_id}"` so swapping the env yields a clean session boundary. The FE-tool round-trip described here is persona-agnostic — a future wine or workout chat agent inherits the same `fe_navigate_canvas` + `state_delta` plumbing without code changes. End-to-end walkthrough: `.agents/recipes/domain-agnostic-substrate.md`.
+> **Persona note (bd:python-factory-hadbi.1).** The chat agent is now an `AgentConfig` registration (`companion-x-default`, `defaults_companion_x.py`) resolved via the `COMPANION_X_CHAT_AGENT_ID` env var. Cache key + `Agent.name` + `FileSessionManager.session_id` all use `f"{agent_id}-{thread_id}"` so swapping the env yields a clean session boundary. The FE-tool round-trip described here is persona-agnostic — a future wine or workout chat agent inherits the same `fe_navigate_canvas` + `state_delta` plumbing without code changes. End-to-end walkthrough: `.agents/recipes/domain-agnostic-substrate.md`.
 
 ## Bricks Used
 - `agent` — `ChatAgentPort.stream(fe_tools=..., messages=...)`, `FrontendToolPlugin`, `_StubAgentTool`, `FrontendToolSpec`, `maybe_apply_resume`
@@ -12,7 +12,7 @@ End-to-end walkthrough of the `fe_navigate_canvas` round-trip — the chat agent
 Plus the FE side: `frontends/next-dashboard/lib/{copilotkit,workbench-context}`.
 
 ## Prerequisites
-- the control-plane runtime API running on `http://localhost:8001` and Next dashboard on `http://localhost:3000`.
+- Companion X API running on `http://localhost:8001` and Next dashboard on `http://localhost:3000`.
 - `COMPANION_X_CHAT_MODEL` set to any chat-capable model.
 - No AWS, Docker, or Neo4j required.
 
@@ -74,7 +74,7 @@ export function FrontendTools() {
   const workbench = useWorkbenchContext();
   useFrontendTool({
     name: "fe_navigate_canvas",                 // fe_ prefix is mandatory
-    description: "Switch the the control-plane runtime canvas to a different view.",
+    description: "Switch the Companion X canvas to a different view.",
     parameters: z.object({ view: z.enum(["welcome", "graph", "findings", /* … */]) }),
     handler: async ({ view }) => {
       workbench.switchView(view);
@@ -106,7 +106,7 @@ That's it. **No `TOOL_CALL_RESULT` for FE tools.** CopilotKit's dispatcher fires
 | FE — push context | `frontends/next-dashboard/lib/copilotkit/canvas-context.tsx` | `<CanvasContextBridge />` calls `useAgentContext` (bd-vw04) |
 | FE — register tool | `frontends/next-dashboard/lib/copilotkit/frontend-tools.tsx` | `<FrontendTools />` calls `useFrontendTool` (bd-115z) |
 | FE — agent identity | `frontends/next-dashboard/lib/copilotkit/companion-agent.ts` | Exports `COMPANION_X_AGENT_ID` + `createCompanionXAgent()` factory; single source of truth shared by FE provider and BE runtime route (bd:python-factory-sopw) |
-| FE — wiring | `frontends/next-dashboard/lib/copilotkit/provider.tsx` | Mounts both bridges inside the CopilotKit provider. Registers `the control-plane project` via `selfManagedAgents` (NOT `runtimeUrl`) so `core.agents` is populated synchronously and inspector + chat share one `HttpAgent` instance (bd:python-factory-sopw) |
+| FE — wiring | `frontends/next-dashboard/lib/copilotkit/provider.tsx` | Mounts both bridges inside the CopilotKit provider. Registers `companion_x` via `selfManagedAgents` (NOT `runtimeUrl`) so `core.agents` is populated synchronously and inspector + chat share one `HttpAgent` instance (bd:python-factory-sopw) |
 | FE — inspector workaround | `frontends/next-dashboard/lib/copilotkit/inspector-attach-workaround.tsx` | Idempotent post-mount toggle of `<cpk-web-inspector>.core` to fire `attachToCore` — bridges upstream `@copilotkitnext/[email protected]` gap where the inspector's `set core(value)` setter doesn't wire subscriptions on initial React-driven assignment (bd:python-factory-sopw). Removable when upstream patches. |
 | FE — runtime route | `frontends/next-dashboard/app/api/copilotkit/[[...path]]/route.ts` | Hono catch-all that proxies CopilotKit v2 traffic to the Python `/ag-ui/run` endpoint. Imports `COMPANION_X_AGENT_ID` from `companion-agent.ts` so FE/BE registration never drifts (bd:python-factory-sopw). |
 | API — endpoint | `bases/api/runtime/ag_ui_routes.py` | `POST /ag-ui/run` calls `parse_fe_tools` + `prefix_context`, threads `fe_tools` and full `messages[]` through |
@@ -139,7 +139,7 @@ The api base validates the new entry as a `FrontendToolSpec` (any object schema)
 
 1. Start the API:
    ```bash
-   set -a; source projects/the control-plane project/.env; set +a
+   set -a; source projects/companion_x/.env; set +a
    PYTHONPATH="$(find "$PWD/bases" "$PWD/components" -type d -path '*/src' | paste -sd: -)" \
      uv run python -m factory.api.main
    ```

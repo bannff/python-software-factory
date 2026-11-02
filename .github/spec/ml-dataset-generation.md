@@ -119,7 +119,7 @@ adapter translates typed artifact contracts and captures outputs and evidence;
 it does not choose stages, alter objectives, revise prompts after results, or
 make acceptance and promotion decisions.
 
-The Agent brick authors or selects an immutable blueprint through a bounded registered Graph; the control-plane runtime invokes that Agent surface and submits the result. The Dataset brick validates allowlisted references and materializes the blueprint as the durable job owner. It persists immutable outputs, applies quality gates, emits lifecycle events, and resumes only through bounded idempotent replay over frozen checkpoints. Workflow owns cross-brick attempts, global budgets, retries, and stopping; Evals freezes policy before execution and returns immutable evidence-bound reports and typed deficiencies to the next Agent revision attempt.
+The Agent brick authors or selects an immutable blueprint through a bounded registered Graph; Companion X invokes that Agent surface and submits the result. The Dataset brick validates allowlisted references and materializes the blueprint as the durable job owner. It persists immutable outputs, applies quality gates, emits lifecycle events, and resumes only through bounded idempotent replay over frozen checkpoints. Workflow owns cross-brick attempts, global budgets, retries, and stopping; Evals freezes policy before execution and returns immutable evidence-bound reports and typed deficiencies to the next Agent revision attempt.
 
 Keep an internal `AgenticDatasetsPipelinePort` only for a pinned upstream-native
 pipeline contract that provides required semantics not safely represented as
@@ -305,13 +305,13 @@ The following status records implementation state for this spec. Work begins fro
 | Quality, provenance, fallback, and tool-schema policy | — | Complete | 6 quality checks, fail-closed enforcement, fallback authorization, manifest records all digests/provenance/fallback. |
 | Dataset-to-ML end-to-end handoff | — | Complete | The resolver boundary exists, the worker emits a verified backend-usable `training_uri`, and `machine_learning` validates the selected view against the manifest before training. |
 | Dataset MCP tools callable | — | Complete | All 5 tools (submit, get_job, cancel, get_artifact, resolve_artifact) verified end-to-end through fastmcp. Pydantic deserialization fix applied. |
-| the control-plane runtime control-plane workflow | `python-factory-dim.5` | Complete | End-to-end dataset→ML handoff validated with real dataset resolver integration. Tests: `test_dim5_e2e_handoff.py`. |
+| Companion X control-plane workflow | `python-factory-dim.5` | Complete | End-to-end dataset→ML handoff validated with real dataset resolver integration. Tests: `test_dim5_e2e_handoff.py`. |
 | MLX and AI-Fine-Tuning adapters | `python-factory-dim.7` | Complete | MLX backend routing (`mlx_lora` → `"mlx"`), LoRA config forwarding to subprocess, real metric parsing from stdout. Tests: `test_mlx_backend_routing.py`. |
 | Production experiment tracker | `python-factory-dim.6` | Complete | MLflow selected as production tracker. Adapter bugs fixed (run context leak, wrong run end). 11 tests added. Config schema updated. |
 | CAN failure-prediction recipe | `python-factory-dim.8` | Complete | Implemented as Rando (`.github/spec/Rando.md`). 7 epics closed: MF4 ingest, profiling, SDV synthesis, LightGBM training, inference bridge, agentic skills, pipeline wiring. |
 | Dataset stage LLM routing | `python-factory-vw6` | Complete | Dataset stage recipes declare `backend` + optional `model`; `DatasetLLMConfigPort` resolves them through `llm_gateway` into an upstream `llm_config`; `llm_config` blobs are rejected in recipes. |
 | Minimal Ollama e2e recipe fixture | `python-factory-2sq` | Complete | End-to-end recipe fixture validating full submit → poll → artifact → manifest lifecycle. Tests: `test_ollama_e2e.py`. |
-| Dataset AgentSkills in `agent` brick | `python-factory-1y6` | Complete | `skills/dataset-generation/SKILL.md` with MCP tool guidance, chained examples, LLM routing docs. Wired into `the control-plane runtime-default`. |
+| Dataset AgentSkills in `agent` brick | `python-factory-1y6` | Complete | `skills/dataset-generation/SKILL.md` with MCP tool guidance, chained examples, LLM routing docs. Wired into `companion-x-default`. |
 
 ### 4.2 Session Stop — 2026-07-15 (updated 2026-07-16)
 

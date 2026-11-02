@@ -6,11 +6,11 @@ Validate the first non-security frozen blueprint through named Dataset MCP, exac
 - `dataset` — Validates registered blueprint references and materializes immutable artifacts through the existing job pipeline
 
 ## Prerequisites
-- the control-plane runtime running from the current checkout so the `dataset` brick and new named tools are registered
+- Companion X running from the current checkout so the `dataset` brick and new named tools are registered
 - Writable caller-owned storage root, such as `./.dataset_store`
 - A valid ScenarioPack draft for the initial `scenario-generate` fixture
 - Opaque quality-policy and exact human-approval records configured in the Dataset process environment
-- The `the control-plane runtime` Kiro power activated for audited MCP calls
+- The `companion-x` Kiro power activated for audited MCP calls
 
 ## Steps
 
@@ -18,16 +18,16 @@ Validate the first non-security frozen blueprint through named Dataset MCP, exac
 
 ```python
 kiroPowers(
-    action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+    action="use", powerName="companion-x", serverName="companion-x",
     toolName="get_brick_tools", arguments={"brick_name": "dataset"},
 )
 kiroPowers(
-    action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+    action="use", powerName="companion-x", serverName="companion-x",
     toolName="get_brick_resources", arguments={"brick_name": "dataset"},
 )
 ```
 
-Confirm `dataset_validate_blueprint`, `dataset_materialize_blueprint`, and `dataset://schemas/blueprint` are present. If a long-lived the control-plane runtime process reports `Unknown brick: dataset` or lacks these names, restart it from the current checkout; do not substitute raw HTTP or direct imports.
+Confirm `dataset_validate_blueprint`, `dataset_materialize_blueprint`, and `dataset://schemas/blueprint` are present. If a long-lived Companion X process reports `Unknown brick: dataset` or lacks these names, restart it from the current checkout; do not substitute raw HTTP or direct imports.
 
 ### Step 2: Publish the source ScenarioPack
 
@@ -35,7 +35,7 @@ Call `dataset_publish_scenario_pack` with the non-security ScenarioPack draft an
 
 ```python
 pack = kiroPowers(
-    action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+    action="use", powerName="companion-x", serverName="companion-x",
     toolName="call_brick_tool",
     arguments={
         "brick_name": "dataset",
@@ -69,7 +69,7 @@ The initial registry accepts only this reference set; substitute the published S
 }
 ```
 
-Canonicalize with compact key-sorted UTF-8 JSON (`separators=(",", ":")`, `ensure_ascii=false`, `allow_nan=false`) and SHA-256 it. Configure the the control-plane runtime/Dataset process with JSON arrays:
+Canonicalize with compact key-sorted UTF-8 JSON (`separators=(",", ":")`, `ensure_ascii=false`, `allow_nan=false`) and SHA-256 it. Configure the Companion X/Dataset process with JSON arrays:
 
 ```bash
 export DATASET_QUALITY_POLICY_REFS_JSON='[{"id":"scenario-quality","revision":"1","digest":"4c35d476c4a1fc8535b88f4b105ce1cc48777bd6d006a9f89c224d0d03ee956a"}]'
@@ -82,7 +82,7 @@ The MCP `approval_digest` argument is the SHA-256 of the canonical approval reco
 
 ```python
 validated = kiroPowers(
-    action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+    action="use", powerName="companion-x", serverName="companion-x",
     toolName="call_brick_tool",
     arguments={
         "brick_name": "dataset", "tool_name": "dataset_validate_blueprint",
@@ -90,7 +90,7 @@ validated = kiroPowers(
     },
 )
 submitted = kiroPowers(
-    action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+    action="use", powerName="companion-x", serverName="companion-x",
     toolName="call_brick_tool",
     arguments={
         "brick_name": "dataset", "tool_name": "dataset_materialize_blueprint",

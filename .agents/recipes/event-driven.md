@@ -13,7 +13,7 @@ An event fires, triggers a workflow, and sends a notification on completion.
 
 ## Events MCP Boundary
 
-The Events brick exposes **20 strict FastMCP tools**: 9 deterministic, 7 operational, and 4 authoring. All retain their flat public arguments, validate them with same-brick Pydantic v2 DTOs (`strict=True`, `extra="forbid"`), and return `ToolResult[OutputDTO]`. Invoke them through the control-plane runtime; read successful payloads from `result.data` only after checking `result.ok`.
+The Events brick exposes **20 strict FastMCP tools**: 9 deterministic, 7 operational, and 4 authoring. All retain their flat public arguments, validate them with same-brick Pydantic v2 DTOs (`strict=True`, `extra="forbid"`), and return `ToolResult[OutputDTO]`. Invoke them through Companion X; read successful payloads from `result.data` only after checking `result.ok`.
 
 A missing event (`events_get_event`) or absent replay target (`events_replay`) is a normal successful typed result: inspect `result.data.found` or `result.data.ok` and its `error`. Do not treat those domain outcomes as transport failures. The complete tool sets are deterministic: `events_get_capabilities`, `events_health_check`, `events_describe_config_schema`, `events_get_subscription_registry`, `events_query_events`, `events_get_dashboard_summary`, `events_get_event_history_entry`, `events_get_event_graph_context`, `events_get_views`; operational: `events_publish`, `events_get_event`, `events_list_events`, `events_replay`, `events_list_history`, `events_query_history`, `events_prune_history`; authoring: `events_authoring_get_status`, `events_authoring_validate_subscriptions`, `events_authoring_upsert_subscription`, `events_authoring_delete_subscription`.
 

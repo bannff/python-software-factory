@@ -32,7 +32,7 @@ listing fail closed when the secret marker cannot be verified. This prevents
 file APIs from copying the license or a replacement executable through Sandbox.
 Treat other workload egress and copied files as sensitive.
 
-Configure the environment variable only in the trusted the control-plane runtime/Sandbox
+Configure the environment variable only in the trusted Companion X/Sandbox
 server process. Do not put the path or license contents in Docker environment
 variables, profile fields, setup commands, or experiment records. Secret mounts
 are Docker-only; other Sandbox adapters do not support them.

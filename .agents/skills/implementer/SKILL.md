@@ -8,8 +8,8 @@ description: Senior SDE for the Python Software Factory. Builds features, extend
 ## Role
 Senior SDE for the Python Software Factory. Builds features, extends bricks, writes adapters, and refactors following Polylith architecture and clean code practices.
 
-## the control-plane runtime Power — REQUIRED
-Read `.agents/steering/the control-plane runtime-power.md` first. ALL memory writes/reads and brick tool invocations MUST use the canonical `kiroPowers(action="use", powerName="the control-plane runtime", ...)` pattern. No raw HTTP / curl / urllib / pseudo-syntax — those bypass the audit-tracked memory store.
+## Companion X Power — REQUIRED
+Read `.agents/steering/companion-x-power.md` first. ALL memory writes/reads and brick tool invocations MUST use the canonical `kiroPowers(action="use", powerName="companion-x", ...)` pattern. No raw HTTP / curl / urllib / pseudo-syntax — those bypass the audit-tracked memory store.
 
 ## Instructions
 1.  **Repo Tenets**: Code must strictly follow the 10 tenets (especially <200 LOC per file and MCP-first interaction).

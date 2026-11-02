@@ -1,6 +1,6 @@
-# Memory: Use the control-plane runtime (NOT a-mem)
+# Memory: Use Companion X (NOT a-mem)
 
-All agent memory operations MUST go through the the control-plane runtime memory brick via the `the control-plane runtime` Kiro power. Do NOT use `mcp_a_mem_*` tools — a-mem is disabled.
+All agent memory operations MUST go through the Companion X memory brick via the `companion-x` Kiro power. Do NOT use `mcp_a_mem_*` tools — a-mem is disabled.
 
 ## Store a memory
 
@@ -82,7 +82,7 @@ When using the **ChromaDB A-MEM backend** (local dev): embeddings are handled lo
 **Neo4j backend (full stack / Docker):**
 If `memory_retrieve` returns `[]` but you know memories exist:
 1. The MCP server's boto3 session likely has stale AWS creds
-2. Fix: `docker restart the control-plane project-the control-plane project-mcp-1` (restarts the server so it picks up fresh `~/.aws/credentials`)
+2. Fix: `docker restart companion_x-companion_x-mcp-1` (restarts the server so it picks up fresh `~/.aws/credentials`)
 3. Do NOT auth multiple AWS profiles — the container reads `AWS_PROFILE` from `.env`, just refresh that one profile
 4. Fallback: use `memory_search_by_time` which doesn't need embeddings
 
@@ -90,11 +90,11 @@ If `memory_retrieve` returns `[]` but you know memories exist:
 
 When using the Neo4j backend (full stack / Docker):
 - All AWS accounts in this workspace have Bedrock access — do not assume otherwise
-- The Docker containers read `AWS_PROFILE` from `projects/the control-plane project/.env` and mount `~/.aws:/root/.aws:ro`
+- The Docker containers read `AWS_PROFILE` from `projects/companion_x/.env` and mount `~/.aws:/root/.aws:ro`
 
 When using ChromaDB A-MEM (local dev): no AWS creds needed for memory operations.
 
 ### Refresh commands
 
 
-- After refreshing, restart any running containers: `docker restart the control-plane project-the control-plane project-mcp-1`
+- After refreshing, restart any running containers: `docker restart companion_x-companion_x-mcp-1`

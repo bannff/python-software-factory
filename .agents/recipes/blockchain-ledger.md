@@ -6,7 +6,7 @@ Use the Blockchain brick’s strict 24-tool MCP boundary to inspect or operate a
 - `blockchain` — Wallets, transfers, bounties, hash-chain verification, and the ledger view.
 
 ## Prerequisites
-- The Blockchain brick is available through the control-plane runtime progressive discovery.
+- The Blockchain brick is available through Companion X progressive discovery.
 - The default `mock_ledger` adapter requires no AWS services.
 - Set `BLOCKCHAIN_ENABLE_AUTHORING_TOOLS=1` only when deliberately seeding a local development economy.
 
@@ -22,7 +22,7 @@ The two authoring tools are always discoverable, but `blockchain_authoring_seed_
 
 ```python
 kiroPowers(
-    action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+    action="use", powerName="companion-x", serverName="companion-x",
     toolName="get_brick_tools", arguments={"brick_name": "blockchain"},
 )
 # Expect 24 tools: 13 deterministic, 9 operational, and 2 authoring.
@@ -32,7 +32,7 @@ kiroPowers(
 
 ```python
 kiroPowers(
-    action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+    action="use", powerName="companion-x", serverName="companion-x",
     toolName="call_brick_tool",
     arguments={
         "brick_name": "blockchain",

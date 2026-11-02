@@ -4,7 +4,7 @@
 
 ## Problem Statement
 
-the control-plane runtime has 6 hardcoded canvas panels (`metrics-panel.tsx`, `evals-view.tsx`,
+Companion X has 6 hardcoded canvas panels (`metrics-panel.tsx`, `evals-view.tsx`,
 `findings-view.tsx`, `evals-detail.tsx`, `metrics-detail.tsx`, `ml-view.tsx`) that
 call MCP tools directly via `callTool()` and contain bespoke layout, filtering,
 expand/collapse, status dots, trend arrows, and sparklines. This violates two
@@ -28,7 +28,7 @@ types. Bricks can declare a `table` or a single `metric`, but not a
 
 ## Visual Design Constraints
 
-Owner feedback from screenshot review of the current the control-plane runtime MetricsPanel.
+Owner feedback from screenshot review of the current Companion X MetricsPanel.
 These constraints are non-negotiable — every frame component must satisfy them.
 
 ### No nesting — flat frames only
@@ -568,7 +568,7 @@ The renderer batches these calls and updates state progressively.
 
 ```
 Agent emits:     STATE_DELTA {op: "replace", path: "/metrics/0/snapshot/current_value", value: 92}
-SSE stream:      → the control-plane runtime chat sidebar → canvas state
+SSE stream:      → Companion X chat sidebar → canvas state
 Renderer reads:  useCopilotCanvasState() provides live state
 ```
 

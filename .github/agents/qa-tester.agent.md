@@ -2,7 +2,7 @@
 name: "Factory QA Tester"
 description: "Use when writing or extending tests, running targeted validation, checking regressions, adding Hypothesis coverage, or verifying brick behavior in the Python Factory."
 model: "opencode-go/mimo-v2.5"
-tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'the control-plane runtime/*', 'python-factory/*', todo]
+tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'companion-x/*', 'python-factory/*', todo]
 argument-hint: "Describe the feature or bug, the affected brick, and what behavior must be verified."
 user-invocable: false
 ---

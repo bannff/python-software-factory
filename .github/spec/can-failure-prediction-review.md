@@ -318,7 +318,7 @@ seriously: feeding self-generated (model-flagged) labels back into training
 degradation over successive retrain cycles — the model can drift into
 confirming its own biases.
 
-**Options given what you already have in the control-plane runtime:**
+**Options given what you already have in Companion X:**
 
 | Component | Already exists | What it'd take to close the loop |
 |---|---|---|
@@ -497,11 +497,11 @@ experiment.
    — no public substitute found; needs real Toyota/Kia/Hyundai service
    records from the team.
 
-   Artifacts: `projects/the control-plane project/data/real_failure_validation/`
+   Artifacts: `projects/companion_x/data/real_failure_validation/`
    (downloaded dataset, safety-verified — HTTPS from `archive.ics.uci.edu`,
    valid TLS cert, archive contents inspected before extraction, all
    files confirmed plain-text CSV via `file`, SHA256 checksums recorded).
-   Script: `projects/the control-plane project/validate_real_failure_labels.py`.
+   Script: `projects/companion_x/validate_real_failure_labels.py`.
    Enabling adapter change (additive, backward-compatible
    `scale_pos_weight`/`class_weight` support via
    `TimeSeriesTrainingConfig.extra`):
@@ -518,7 +518,7 @@ experiment.
    tables in `.agents/steering/can-failure-prediction.md` ("Training
    Results" section) could not be independently re-verified from this
    workspace — no raw training-run artifacts (result JSON, MLflow
-   records) for CAN-specific runs exist in `projects/the control-plane project/runs/`
+   records) for CAN-specific runs exist in `projects/companion_x/runs/`
    or `experiments/`, and no MF4/Kia raw data files exist on this
    machine. Those numbers are real per-run results (there IS a
    per-CAN-ID breakdown table, not a single made-up figure), but the
