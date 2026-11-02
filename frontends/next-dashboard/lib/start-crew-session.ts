@@ -49,6 +49,10 @@ export async function startCrewSession(
     const session = parseSession(await create(crew.project));
     return { crew, session };
   } catch (error) {
+    // The crew was deleted between resolve and create; retrying cannot help.
+    if (error instanceof Error && error.message === "crew_not_found") {
+      throw new Error("Crew no longer exists");
+    }
     if (!(error instanceof Error) || error.message !== "session_project_path_refused") {
       throw new Error("Crew session could not be created");
     }
