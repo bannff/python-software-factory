@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Pause, Play, Trash2 } from "lucide-react";
+import { withReason } from "@/lib/error-reason";
 import type { ActionResult } from "@/lib/hooks/use-schedules";
 import { fetchLastFire } from "@/lib/hooks/use-schedules";
 import type { LastFire, Schedule } from "./schedule-types";
@@ -59,7 +60,7 @@ export function ScheduleDetail({
     setPending(null);
     if (result.status === "conflict") setNotice("This schedule changed elsewhere — refreshed to the latest.");
     else if (result.status === "deleted") setNotice("This schedule no longer exists.");
-    else if (result.status === "error") setNotice("That action didn't go through. Try again.");
+    else if (result.status === "error") setNotice(withReason("That action didn't go through. Try again.", result.reason));
     else if (kind === "remove") setNotice(null);
   };
 
