@@ -11,7 +11,7 @@ import { CrewDelete } from "./crew-delete";
 import { CREW_FORM_HINT } from "./crew-field-hints";
 import { Field, InfoHint, FIELD } from "./crew-field";
 import { CrewProjectField } from "./crew-project-field";
-import { validateCrewForm, type CrewFormErrors } from "./crew-validation";
+import { serverFieldError, validateCrewForm, type CrewFormErrors } from "./crew-validation";
 import type { Crew } from "./crew-types";
 
 /**
@@ -65,6 +65,12 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
       onSaved();
       onClose();
     } catch (cause) {
+      const refused = serverFieldError(errorReason(cause));
+      if (refused) {
+        setFieldErrors(refused);
+        setError("Fix the highlighted fields to continue.");
+        return;
+      }
       setError(withReason(creating
         ? "Couldn’t create this crew. Check the fields and try again."
         : "Couldn’t save — this crew may have changed. Reopen it and retry.", errorReason(cause)));
