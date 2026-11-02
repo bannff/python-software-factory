@@ -8,11 +8,14 @@ reference stays opaque, as before.
 """
 from __future__ import annotations
 
+import logging
 from uuid import uuid4
 
 from factory.mcp_utils.interface import get_service
 
 from ..runtime.errors import SessionCrewNotFoundError
+
+logger = logging.getLogger(__name__)
 
 
 def verify_crew(tenant_id: str, owner_id: str, crew_id: str) -> None:
@@ -22,13 +25,17 @@ def verify_crew(tenant_id: str, owner_id: str, crew_id: str) -> None:
     invoke = factory("session") if callable(factory) else None
     if not callable(invoke):
         return
-    raw = invoke(
-        {"brick_name": "agent", "tool_name": "agent_get_crew"},
-        arguments={"crew_id": crew_id},
-        # Fresh key: a replayed "not found" must not outlive the crew's creation.
-        idempotency_key=f"session-crew:{crew_id}:{uuid4().hex}",
-        envelope={"tenant_id": tenant_id, "principal_id": owner_id},
-    )
+    try:
+        raw = invoke(
+            {"brick_name": "agent", "tool_name": "agent_get_crew"},
+            arguments={"crew_id": crew_id},
+            # Fresh key: a replayed "not found" must not outlive the crew's creation.
+            idempotency_key=f"session-crew:{crew_id}:{uuid4().hex}",
+            envelope={"tenant_id": tenant_id, "principal_id": owner_id},
+        )
+    except Exception:  # noqa: BLE001 - only an explicit crew_not_found may reject
+        logger.warning("session crew check unavailable crew=%s", crew_id, exc_info=True)
+        return
     structured = raw.get("result", {}).get("structured_content") if isinstance(raw, dict) else None
     if isinstance(structured, dict) and structured.get("error") == "crew_not_found":
         raise SessionCrewNotFoundError(crew_id)

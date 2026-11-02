@@ -74,3 +74,17 @@ def test_without_an_agent_brick_the_reference_stays_opaque(tmp_path) -> None:
         assert _create(_tools(tmp_path), "anything").ok is True
     finally:
         set_service("tool_invoker_for_caller", previous)
+
+
+def test_an_unreachable_agent_brick_does_not_block_session_creation(tmp_path) -> None:
+    def broken(_caller):
+        def invoke(*_a, **_k):
+            raise RuntimeError("agent brick down")
+        return invoke
+
+    previous = get_service("tool_invoker_for_caller")
+    set_service("tool_invoker_for_caller", broken)
+    try:
+        assert _create(_tools(tmp_path), "real-crew").ok is True
+    finally:
+        set_service("tool_invoker_for_caller", previous)
