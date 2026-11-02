@@ -4,16 +4,12 @@ import { useMemo, useEffect, useState } from "react";
 import { callTool } from "@/lib/api";
 import type { Finding, FindingSeverity, ActiveToolCall } from "@/lib/types";
 
-const SECURITY_PATTERNS = [
-  /^security_/,
-  /posture/i,
-  /threat/i,
-  /vulnerability/i,
-  /scan/i,
-];
-
-function isSecurityTool(name: string): boolean {
-  return SECURITY_PATTERNS.some((p) => p.test(name));
+/** Any tool may report findings; only the security brick returns a bare list. */
+function findingItems(name: string, result: unknown): unknown[] {
+  const r = result as { findings?: unknown; issues?: unknown } | unknown[] | null;
+  if (Array.isArray(r)) return /^security_/.test(name) ? r : [];
+  const items = r?.findings ?? r?.issues;
+  return Array.isArray(items) ? items : [];
 }
 
 function parseSeverity(raw: unknown): FindingSeverity {
@@ -32,7 +28,7 @@ function parseFindings(items: unknown[], sourceId: string, sourceName: string): 
       severity: parseSeverity(f.severity ?? f.level),
       title: (f.title ?? f.name ?? f.message ?? "Finding") as string,
       resource: (f.resource ?? f.target ?? f.location ?? sourceName) as string,
-      type: (f.type ?? f.category ?? "vulnerability") as string,
+      type: (f.type ?? f.category ?? "other") as string,
       description: (f.description ?? f.detail ?? "") as string,
       evidence: (f.evidence ?? f.snippet ?? undefined) as string | undefined,
       remediation: (f.remediation ?? f.fix ?? undefined) as string | undefined,
@@ -63,7 +59,7 @@ function rowToFinding(r: Record<string, unknown>, idx: number): Finding {
     title: r.title ? String(r.title).slice(0, 80) : "Finding",
     resource: arn ?? "unknown",
     affected_resource_arn: arn,
-    type: r.finding_type ? String(r.finding_type) : "vulnerability",
+    type: r.finding_type ? String(r.finding_type) : "other",
     description: (r.description ?? "") as string,
     cwe,
     category: r.category ? String(r.category) : undefined,
@@ -74,7 +70,7 @@ function rowToFinding(r: Record<string, unknown>, idx: number): Finding {
 }
 
 /**
- * Extract security findings from:
+ * Extract findings (security or otherwise) from:
  * 1. Completed tool call results in the chat (reactive)
  * 2. The graph brick's typed graph_get_recent_findings tool (on mount).
  *    Rows are flat dicts with CWE/OCSF taxonomy already joined.
@@ -98,12 +94,10 @@ export function useFindings(toolCalls: ActiveToolCall[]): Finding[] {
     const findings: Finding[] = [];
     for (const tc of toolCalls) {
       if (tc.active || !tc.result || !tc.name) continue;
-      if (!isSecurityTool(tc.name)) continue;
 
       try {
         const result = typeof tc.result === "string" ? JSON.parse(tc.result) : tc.result;
-        const items = result?.findings ?? result?.issues ?? (Array.isArray(result) ? result : []);
-        findings.push(...parseFindings(items, tc.id, tc.name));
+        findings.push(...parseFindings(findingItems(tc.name, result), tc.id, tc.name));
       } catch {
         // Non-JSON result — skip
       }

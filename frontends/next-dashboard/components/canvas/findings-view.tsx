@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, ChevronRight, Play } from "lucide-react";
+import { ListChecks, ChevronRight, Play } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { useFindings } from "@/lib/hooks/use-findings";
@@ -180,7 +180,7 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
 
 function EmptyFindings() {
   return (
-    <EmptyState icon={Shield} title="No findings yet"
-      action={{ icon: Play, label: "Run a security scan", prompt: "Run a security scan" }} />
+    <EmptyState icon={ListChecks} title="No findings yet"
+      action={{ icon: Play, label: "Run an analysis", prompt: "Analyze the system and report any findings" }} />
   );
 }
