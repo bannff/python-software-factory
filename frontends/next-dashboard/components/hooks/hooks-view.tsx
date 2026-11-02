@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Plus, RefreshCw, Trash2, Webhook } from "lucide-react";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
+import { eventHistoryLabel, hasEventHistory } from "./event-history";
 import { AGENT_LIFECYCLE_EVENTS, deleteHook, hookAuthoringAvailable, listHooks,
   listInvocableTools, listRecentFirings, saveHook,
   type Hook, type HookFiring } from "./hooks-api";
@@ -34,6 +35,7 @@ export default function HooksView() {
   useEffect(() => { void refresh(); }, [refresh]);
 
   const loadFirings = async (hook: Hook) => {
+    if (!hasEventHistory(hook)) return;
     try {
       const rows = await listRecentFirings(hook.eventType);
       setFirings((value) => ({ ...value, [hook.id]: rows }));
@@ -101,7 +103,7 @@ export default function HooksView() {
         <Webhook className="mx-auto mb-3 h-8 w-8 text-violet-400" /><p>No hooks configured.</p></div>
       : <div className="grid gap-3 md:grid-cols-2">{hooks.map((hook) => {
         const event = AGENT_LIFECYCLE_EVENTS.find((option) => option.value === hook.eventType);
-        const recent = firings[hook.id] ?? [];
+        const history = eventHistoryLabel(hook, firings[hook.id] ?? []);
         return <article key={hook.id} className="rounded-xl border border-border/60 bg-card/20 p-4">
           <div className="flex items-start justify-between gap-3">
             <div><h3 className="font-medium">{hook.id}</h3>
@@ -116,9 +118,7 @@ export default function HooksView() {
           </div>
           <p className="mt-3 font-mono text-xs">Runs: {hook.tool}</p>
           {hook.description && <p className="mt-2 text-xs text-muted-foreground">{hook.description}</p>}
-          <p className="mt-3 text-[11px] text-muted-foreground">
-            {recent.length === 0 ? "No recent firings." : `Last fired ${new Date(recent[0].timestamp).toLocaleString()} (${recent.length} recent)`}
-          </p>
+          {history && <p className="mt-3 text-[11px] text-muted-foreground">{history}</p>}
         </article>;
       })}</div>}
     {!canWrite && ready && !loading && <p className="mt-3 text-[11px] text-muted-foreground">Hook changes are disabled by the Events authoring gate.</p>}

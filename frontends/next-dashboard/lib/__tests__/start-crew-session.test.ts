@@ -89,4 +89,17 @@ describe("startCrewSession", () => {
       .rejects.toThrow("Crew session could not be created");
     expect(getQuestionSnapshot()).toBeNull();
   });
+
+  it("says the crew is gone when session_create reports crew_not_found", async () => {
+    const caller = vi.fn()
+      .mockResolvedValueOnce({ schema_version: "v1", ok: true, data: {
+        crew_id: "redteam-crew", persona_id: "reviewer",
+        model_id: "ollama/llama3", project: "/work/project",
+        workspace: "main", memory_scope: "redteam",
+      } })
+      .mockResolvedValueOnce({ schema_version: "v1", ok: false, error: "crew_not_found" });
+
+    await expect(startCrewSession("redteam-crew", caller)).rejects.toThrow("Crew no longer exists");
+    expect(caller).toHaveBeenCalledTimes(2);
+  });
 });
