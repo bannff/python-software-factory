@@ -9,32 +9,29 @@ import DisplayPreferencesPanel from "@/components/settings/display-preferences-p
 import NotificationSettingsPanel from "@/components/settings/notification-settings-panel";
 import ShortcutsPanel from "@/components/settings/shortcuts-panel";
 import SkillsSettingsPanel from "@/components/settings/skills-settings-panel";
-import ChannelsSettingsPanel from "@/components/settings/channels-settings-panel";
 import BrowserSettingsPanel from "@/components/settings/browser-settings-panel";
-import ComputerUseSettingsPanel from "@/components/settings/computer-use-settings-panel";
-import RemoteCrewSettingsPanel from "@/components/settings/remote-crew-settings-panel";
 import PrivacySettingsPanel from "@/components/settings/privacy-settings-panel";
 import SecuritySettingsPanel from "@/components/settings/security-settings-panel";
 import SecretsSettingsPanel from "@/components/settings/secrets-settings-panel";
 import DeveloperSettingsPanel from "@/components/settings/developer-settings-panel";
 import AboutSettingsPanel from "@/components/settings/about-settings-panel";
-import ReleasesSettingsPanel from "@/components/settings/releases-settings-panel";
-import VoiceSettingsPanel from "@/components/settings/voice-settings-panel";
 import OverviewPanel from "@/components/settings/overview-panel";
 import UsageSettingsPanel from "@/components/settings/usage-settings-panel";
 
-/** One Settings destination with the complete M7.5 section inventory. */
+/**
+ * One Settings destination. Sections with no controls (voice, channels,
+ * remote crew, computer use, releases) are not listed: a tab must offer at
+ * least one control, and version info lives in About.
+ */
 const TABS = [
   { id: "overview", label: "Overview" }, { id: "imports", label: "Import & Export" },
   { id: "chat", label: "Chat" }, { id: "display", label: "Display" },
-  { id: "voice", label: "Voice" }, { id: "notifications", label: "Notifications" },
+  { id: "notifications", label: "Notifications" },
   { id: "shortcuts", label: "Shortcuts" }, { id: "skills", label: "Skills" },
-  { id: "channels", label: "Channels" }, { id: "browser", label: "Browser" },
-  { id: "computer-use", label: "Computer Use" }, { id: "remote-crew", label: "Remote Crew" },
+  { id: "browser", label: "Browser" },
   { id: "privacy", label: "Privacy" }, { id: "security", label: "Security" },
   { id: "secrets", label: "Secrets" }, { id: "usage", label: "Usage" },
   { id: "developer", label: "Developer" }, { id: "about", label: "About" },
-  { id: "releases", label: "Releases" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -125,21 +122,16 @@ export default function SettingsView() {
         {active === "imports" && <ImportPanel />}
         {active === "chat" && <ChatPreferencesPanel />}
         {active === "display" && <DisplayPreferencesPanel />}
-        {active === "voice" && <VoiceSettingsPanel />}
         {active === "notifications" && <NotificationSettingsPanel />}
         {active === "shortcuts" && <ShortcutsPanel />}
         {active === "skills" && <SkillsSettingsPanel />}
-        {active === "channels" && <ChannelsSettingsPanel />}
         {active === "browser" && <BrowserSettingsPanel />}
-        {active === "computer-use" && <ComputerUseSettingsPanel />}
-        {active === "remote-crew" && <RemoteCrewSettingsPanel />}
         {active === "privacy" && <PrivacySettingsPanel />}
         {active === "security" && <SecuritySettingsPanel />}
         {active === "secrets" && <SecretsSettingsPanel />}
         {active === "usage" && <UsageSettingsPanel />}
         {active === "developer" && <DeveloperSettingsPanel />}
         {active === "about" && <AboutSettingsPanel />}
-        {active === "releases" && <ReleasesSettingsPanel />}
       </div>
     </section>
   );
