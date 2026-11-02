@@ -108,6 +108,9 @@ def _register_tools(registry: Any, agent: "SuperAgent") -> None:
     from .mcp.crew_tools import register as register_crew
 
     register_crew(registry, agent)
+    from .mcp.prompt_tools import register as register_prompts
+
+    register_prompts(registry, agent)
     from .mcp.model_catalog_tools import register as register_model_catalog
 
     register_model_catalog(registry, agent)
