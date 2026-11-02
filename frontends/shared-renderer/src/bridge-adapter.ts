@@ -13,4 +13,6 @@
  */
 export interface BridgeAdapter {
   callTool(name: string, args: Record<string, unknown>): Promise<unknown>;
+  /** Ask the host's chat agent `text`; absent when the host has no chat. */
+  sendPrompt?(text: string): void;
 }
