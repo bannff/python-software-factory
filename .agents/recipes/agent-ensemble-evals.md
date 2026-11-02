@@ -6,7 +6,7 @@ Freeze evaluation policy before execution. Evals owns immutable evidence-bound r
 
 ## Context
 
-This specialized recipe evaluates a current legacy IDOR catalog spanning Recon → Sandbox Setup → SAST → DAST. The listed groups are candidates under evaluation, not evidence-promoted templates or permanent team ownership; the control-plane runtime may assemble the smallest bounded objective team through Agent surfaces. The catalog demonstrates:
+This specialized recipe evaluates a current legacy IDOR catalog spanning Recon → Sandbox Setup → SAST → DAST. The listed groups are candidates under evaluation, not evidence-promoted templates or permanent team ownership; Companion X may assemble the smallest bounded objective team through Agent surfaces. The catalog demonstrates:
 - Ensemble Diversity (different models per role)
 - Disagreement Resolution (2/3 voting consensus)
 - Execution Grounding (agents must cite sources)
@@ -84,7 +84,7 @@ Without Step 8, you might have a correct but unusable agent.
 
 ## Current Security Catalog (Specialized, Not Team Ownership)
 
-These entries record one current legacy security catalog under evaluation. the control-plane runtime may assemble a smaller objective-specific team dynamically; this table neither assigns static team ownership nor claims evidence-based promotion.
+These entries record one current legacy security catalog under evaluation. Companion X may assemble a smaller objective-specific team dynamically; this table neither assigns static team ownership nor claims evidence-based promotion.
 
 | Stage | Workflow | Agent | Model | Role |
 |-------|----------|-------|-------|------|
@@ -214,7 +214,7 @@ path. Full runs use immutable `eval-{run_id}` documents; P/R/F1 projections use
 isolated `eval-score-{run_id}` documents. Equal retry payloads match, divergent
 ones conflict without mutation, and Graph/events receive only a post-commit
 pointer plus scalar summary. Full per-agent JSON may also be written to
-`projects/the control-plane project/challenges/experiments/agents/<agent_id>.json`.
+`projects/companion_x/challenges/experiments/agents/<agent_id>.json`.
 
 ### Report Structure (capture EVERYTHING from MCP tool responses)
 
@@ -300,7 +300,7 @@ pointer plus scalar summary. Full per-agent JSON may also be written to
 ## V1 Archive
 
 First-pass reports (snapshot without iteration loop) archived at:
-`projects/the control-plane project/challenges/experiments/agents/archive-v1/`
+`projects/companion_x/challenges/experiments/agents/archive-v1/`
 
 These used a 6-phase approach (SOP + Experiment + Simulation without the improve/re-run loop).
 Key findings from V1 that inform V2 iteration targets:

@@ -10,7 +10,7 @@
 
 **Goal:** Predict vehicle failures by analyzing CAN bus telemetry data
 
-**Approach:** Agent-driven pipeline using the control-plane runtime substrate with multiple model architectures and synthetic data generation
+**Approach:** Agent-driven pipeline using Companion X substrate with multiple model architectures and synthetic data generation
 
 **Key Insight:** CAN data is high-frequency binary time-series, not conversational text — needs parallel "Signal Pipeline"
 
@@ -181,7 +181,7 @@ MF4 (7.5GB) → DBC decode → JSONL (131GB) → Windowing → NPY (360MB) → T
 1. ✅ SCANIA pattern extraction (done)
 2. ✅ Conditional TimeGAN (done)
 3. ✅ Hybrid failure injection (done)
-4. **Test full pipeline** — use the control-plane runtime MCP tools
+4. **Test full pipeline** — use Companion X MCP tools
 5. **Run comprehensive experiments** — compare all approaches
 
 ### Short-term (Next 2 Weeks)

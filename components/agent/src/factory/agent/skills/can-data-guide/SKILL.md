@@ -13,7 +13,7 @@ description: Critical knowledge about CAN data location, size, and utilization �
 | **Decoded CAN frames** | `/Volumes/Crucial X9/can_data/decoded_data/` | **131 GB** | **100M+** | **UNUSED — THIS IS YOUR PRIMARY TRAINING SOURCE** |
 | Per-CAN-ID windows | `/Volumes/Crucial X9/can_data/per_can_id/` | 360 MB | 20,500 | ⚠️ Tiny subset (500 per ID) |
 | MF4 raw captures | `/Volumes/Crucial X9/can_data/mf4_files/` | 7.5 GB | ~100 files | Source data |
-| Realistic synthetic | `projects/the control-plane project/data/realistic_synthetic/` | ~50 MB | 5 CAN IDs | SCANIA-pattern failures |
+| Realistic synthetic | `projects/companion_x/data/realistic_synthetic/` | ~50 MB | 5 CAN IDs | SCANIA-pattern failures |
 
 ## What NOT To Do
 
@@ -46,7 +46,7 @@ dataset_submit_generation(
 ✅ **Use realistic failure patterns:**
 ```python
 # Generate failures based on real SCANIA patterns
-python projects/the control-plane project/scripts/generate_realistic_failures.py
+python projects/companion_x/scripts/generate_realistic_failures.py
 ```
 
 ✅ **Use recursive GAN loop (not from scratch):**
@@ -62,7 +62,7 @@ job = ml_continue_timeseries(model_id=..., classifier_feedback={"auroc": 0.8})
 
 | File | Purpose |
 |------|---------|
-| `projects/the control-plane project/scripts/generate_realistic_failures.py` | SCANIA-pattern failure injection |
+| `projects/companion_x/scripts/generate_realistic_failures.py` | SCANIA-pattern failure injection |
 | `scripts/run_gan_loop_recursive.py` | Recursive GAN loop with feedback |
 | `components/machine_learning/.../timegan_loss.py` | Dual-objective loss |
 | `.agents/steering/can-failure-prediction.md` | Steering doc with honest assessment |

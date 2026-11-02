@@ -9,7 +9,7 @@ They are NOT Polylith bricks — no BRICK.yaml, no MCP server, no `interface.py`
 ## Available Frontends
 
 - `next-dashboard/` — Next.js 15 + shadcn/ui + Magic UI dashboard
-- `shared-renderer/` — TypeScript package (`@the control-plane runtime/shared-renderer`) the
+- `shared-renderer/` — TypeScript package (`@companion-x/shared-renderer`) the
   dashboard links with `file:../shared-renderer`; no app entrypoint of its own
 
 ## Building

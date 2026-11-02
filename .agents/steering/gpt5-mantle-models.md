@@ -1,6 +1,6 @@
 # GPT-5.x on Bedrock Mantle (OpenAI Responses API)
 
-How the control-plane runtime runs OpenAI **GPT-5.5 / GPT-5.4** as Strands agents on Amazon
+How Companion X runs OpenAI **GPT-5.5 / GPT-5.4** as Strands agents on Amazon
 Bedrock, and the gotchas that come with the Responses-API path. Added in
 bd:python-factory-e2610. strands-expert verdicts `3057b5fd` + `56ff6d6d`.
 
@@ -67,7 +67,7 @@ constructor surface.
 The `developer` persona has no `tools` allowlist, so `_build_specialist` gives it
 the full chat MCP toolset plus `shell` + `python_repl`. It reads/edits the repo
 by running shell/python (e.g. `ls`, `cat`, `grep`, `git`) in the API process's
-working directory — i.e. wherever the control-plane runtime was started. Every shell/python
+working directory — i.e. wherever Companion X was started. Every shell/python
 execution is gated by `ShellApprovalPlugin` (the Approve/Deny card in chat), so
 the agent cannot touch the repo without an explicit approval per command. If you
 want frictionless read-only browsing, consider adding `file_read` to the agent's
@@ -78,5 +78,5 @@ chat toolset.
 
 `strands-agents[openai]==1.50.2` is a core runtime dependency and brings
 `openai>=2.0.0` plus `aws-bedrock-token-generator`. It is exact-pinned in the
-workspace, Agent brick, and the control-plane runtime manifests; no separate OpenAI optional
+workspace, Agent brick, and Companion X manifests; no separate OpenAI optional
 extra or standalone token-generator declaration is needed.

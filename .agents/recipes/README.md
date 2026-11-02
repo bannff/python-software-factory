@@ -86,7 +86,7 @@ aws bedrock list-foundation-models --region us-east-1 --query 'modelSummaries[?c
 |--------|--------|------------|
 | `cdk-generation.md` | blueprint (+ AWS adapter specs from any brick) | No (generates files only) |
 
-### UI Flow Recipes (the control-plane runtime Dashboard)
+### UI Flow Recipes (Companion X Dashboard)
 | Recipe | Bricks | Requires AWS |
 |--------|--------|------------|
 | `ui-metrics-flow.md` | metrics | No |

@@ -1,15 +1,15 @@
 # Python Software Factory
 
-**Composable, MCP-native building blocks for agentic software — and the control-plane runtime, the assistant cockpit built from them.**
+**Composable, MCP-native building blocks for agentic software — and Companion X, the assistant cockpit built from them.**
 
 Every capability in this repo is a *brick*: a self-contained Python package with a typed public interface and a full [MCP](https://modelcontextprotocol.io) tool surface. Agents drive bricks through MCP, never through imports. Pick the bricks you need, compose them into a project, and an agent can operate the whole thing.
 
 - **50 components · 5 bases · 3 projects**, organised as a [Polylith](https://polylith.gitbook.io/polylith) monorepo (counts derive from `BRICKS_INDEX.yaml`).
-- **the control-plane runtime** — the flagship project: a local-first AI cockpit with chat, sub-agents, autonomous goal loops, unified graph memory, a real terminal, schedules, skills, and artifacts. One Next.js frontend, one FastAPI backend, no containers required.
+- **Companion X** — the flagship project: a local-first AI cockpit with chat, sub-agents, autonomous goal loops, unified graph memory, a real terminal, schedules, skills, and artifacts. One Next.js frontend, one FastAPI backend, no containers required.
 - **Agent runtime**: Strands Agents SDK over MCP v2 (LangChain/LangGraph dormant behind `AGENT_RUNTIME_ADAPTER=langchain` + the `langgraph-legacy` group), streamed to the UI through CopilotKit / AG-UI.
 - **Built to be run by agents.** The repo ships its own governance MCP server (`foreman`), steering docs, and an execution ledger so an autonomous loop can build the next feature unattended.
 
-> **Status.** the control-plane runtime is mid-way through absorbing the feature set of [KiroCrew](https://github.com/kirodotdev) as its acceptance list — 56 of 100 in-scope features live, 29 more scaffolded and awaiting live proof. Progress is tracked row-by-row in [`.kiro/specs/python-factory-bp34j-companion-crew-features/kirocrew-feature-map.md`](.kiro/specs/python-factory-bp34j-companion-crew-features/kirocrew-feature-map.md).
+> **Status.** Companion X is mid-way through absorbing the feature set of [KiroCrew](https://github.com/kirodotdev) as its acceptance list — 56 of 100 in-scope features live, 29 more scaffolded and awaiting live proof. Progress is tracked row-by-row in [`.kiro/specs/python-factory-bp34j-companion-crew-features/kirocrew-feature-map.md`](.kiro/specs/python-factory-bp34j-companion-crew-features/kirocrew-feature-map.md).
 
 ---
 
@@ -17,7 +17,7 @@ Every capability in this repo is a *brick*: a self-contained Python package with
 
 - [Quickstart](#quickstart)
 - [Architecture](#architecture)
-- [the control-plane runtime](#the control-plane runtime)
+- [Companion X](#Companion X)
 - [MCP everywhere](#mcp-everywhere)
 - [Working in the repo](#working-in-the-repo)
 - [For agents](#for-agents)
@@ -34,10 +34,10 @@ Every capability in this repo is a *brick*: a self-contained Python package with
 git clone https://github.com/bannff/python-factory.git
 cd python-factory
 uv sync                                          # every brick lands on the path (editable)
-cp projects/the control-plane project/.env.example projects/the control-plane project/.env
+cp projects/companion_x/.env.example projects/companion_x/.env
 #   -> set OPENROUTER_API_KEY and OPENROUTER_MODEL in that file
 (cd frontends/next-dashboard && npm install)
-scripts/the control-plane runtime-ui.sh                        # API on :8000, UI on :3000
+scripts/companion-x-ui.sh                        # API on :8000, UI on :3000
 ```
 
 Open <http://localhost:3000>. The chat sidebar drives the whole app — ask it to create a persona, spawn sub-agents, schedule a job, or open the terminal.
@@ -49,7 +49,7 @@ and any other origin leaves a page that looks rendered but never connects
 
 Default local storage is container-free: SQLite for documents and checkpoints, a networkx graph for memory + knowledge, files under `.storage/`. Docker (`docker-compose.yml`) is optional and only needed for the heavier adapters (Postgres, Redis, Neo4j, Keycloak).
 
-Full configuration reference: [`projects/the control-plane project/README.md`](projects/the control-plane project/README.md).
+Full configuration reference: [`projects/companion_x/README.md`](projects/companion_x/README.md).
 
 ---
 
@@ -60,9 +60,9 @@ python-factory/
 ├── components/       50 bricks — one capability each (agent, memory, graph, workflow, evals,
 │                     games, sandbox, terminal, scheduler, session, ui, …)
 ├── bases/            5 transport shells — api (REST+MCP), mcp_server, worker, blueprint, openarcade
-├── projects/         deployable compositions — the control-plane project, openarcade, circuitron
+├── projects/         deployable compositions — companion_x, openarcade, circuitron
 ├── frontends/
-│   └── next-dashboard/   the control-plane runtime cockpit (Next.js 15 · React 19 · shadcn/ui · CopilotKit)
+│   └── next-dashboard/   Companion X cockpit (Next.js 15 · React 19 · shadcn/ui · CopilotKit)
 ├── BRICKS_INDEX.yaml the registry: every brick, its adapters, its dependencies
 └── .kiro/ .agents/   steering, specs, skills, and the execution ledger agents read every cycle
 ```
@@ -94,7 +94,7 @@ Agents decide and compose; bricks execute and guarantee; Evals challenge; Workfl
 
 ---
 
-## the control-plane runtime
+## Companion X
 
 The reference product, and the thing the factory exists to build. Everything the user can do, the assistant can do too.
 
@@ -102,7 +102,7 @@ The reference product, and the thing the factory exists to build. Everything the
 |---|---|
 | **Chat & sessions** | Multi-thread chat with persona selection per thread, fork, rewind, regenerate, pinned messages, session folders and summaries, side chat, a registry-driven right-side panel |
 | **Agent capabilities** | Personas (built-in + user-created, no restart), skills, steering, hooks, MCP connections, sub-agent spawn / swarm / graph pipelines |
-| **Goal loops** | the control-plane runtime runs its own autonomous build loop through the Workflow brick — admit a goal, fire cycles, checkpoint, score, retry |
+| **Goal loops** | Companion X runs its own autonomous build loop through the Workflow brick — admit a goal, fire cycles, checkpoint, score, retry |
 | **Memory** | Memory and Knowledge Base share **one networkx graph** with a local embedder; browse, correct, inspect *why* something was recalled, export/import |
 | **Terminal** | A real PTY in a bottom dock — arbitrary commands, no allowlist theatre; a single owner-editable approval list is the only gate |
 | **Schedules & task runner** | Cron and one-shot jobs, spec-driven autonomous task runs |
@@ -120,7 +120,7 @@ The MCP surface *is* the API. Two servers ship in the repo:
 | Server | Command | Purpose |
 |---|---|---|
 | **foreman** | `uv run python -m factory.foreman.server` | Governance and scaffolding: create bricks, run compliance, manage the index |
-| **the control-plane runtime** | `uv run python -m factory.mcp_server.core` | Every composed brick's tools, with progressive discovery |
+| **Companion X** | `uv run python -m factory.mcp_server.core` | Every composed brick's tools, with progressive discovery |
 
 Progressive discovery keeps the surface small: the server exposes nine meta-tools until you ask for more.
 
@@ -131,7 +131,7 @@ call_brick_tool("memory", "memory_retrieve", '{"query": "...", "user_id": "..."}
 read_brick_resource("graph://schemas/taxonomy/security")
 ```
 
-Scope the surface with `MCP_INCLUDE_BRICKS=agent,memory,workflow` — you get exactly those bricks' tools, nothing else. The running the control-plane runtime API also serves the same surface at `http://127.0.0.1:8000/mcp/` (bearer token from `.env`), so any MCP client can drive the live product.
+Scope the surface with `MCP_INCLUDE_BRICKS=agent,memory,workflow` — you get exactly those bricks' tools, nothing else. The running Companion X API also serves the same surface at `http://127.0.0.1:8000/mcp/` (bearer token from `.env`), so any MCP client can drive the live product.
 
 Ready-made [Kiro](https://kiro.dev) power definitions for both servers are in [`.kiro/powers/`](.kiro/powers/).
 
@@ -147,7 +147,7 @@ Ready-made [Kiro](https://kiro.dev) power definitions for both servers are in [`
 | Compliance gate | `foreman_guardian_check` (MCP) or `uv run python -c "from factory.foreman.guardian import run_all_checks; print(run_all_checks())"` |
 | Workspace overview | `uvx --from polylith-cli poly info` |
 | New brick | `foreman_create_component` (MCP) — never by hand |
-| Launch the control-plane runtime | `scripts/the control-plane runtime-ui.sh` (owner stack, :8000/:3000) · `API_PORT=18000 NEXT_PORT=13000 scripts/the control-plane runtime-ui.sh` (agent smoke stack) |
+| Launch Companion X | `scripts/companion-x-ui.sh` (owner stack, :8000/:3000) · `API_PORT=18000 NEXT_PORT=13000 scripts/companion-x-ui.sh` (agent smoke stack) |
 
 **Conventions**
 
@@ -179,7 +179,7 @@ Memory for agents lives in the `memory` brick (`memory_store` / `memory_retrieve
 ## Docs and governance
 
 - **Handbook:** the [GitHub Wiki](https://github.com/bannff/python-factory/wiki) is canonical **only at the exact revision pinned in [`AGENTS.md`](AGENTS.md)**. A floating wiki page is navigation, not authority. Precedence: system/user instructions → executable repo state (code, CI, schemas) → the pinned handbook → host-specific compatibility files.
-- **Specs:** `.kiro/specs/<name>/` — `requirements.md`, `design.md`, `tasks.md` per feature. The active one is the the control-plane runtime KiroCrew port.
+- **Specs:** `.kiro/specs/<name>/` — `requirements.md`, `design.md`, `tasks.md` per feature. The active one is the Companion X KiroCrew port.
 - **Steering:** `.kiro/steering/` (auto-loaded) and `.agents/steering/` (deep references: brick anatomy, MCP tool taxonomy, testing, memory, UI protocol).
 - **Templates:** start any new doc, issue, wiki page, or discussion from [`docs/templates/`](docs/templates/).
 - **Deployment infra** (CDK stacks, pipelines) lives in a separate repo; this repo keeps only the CDK *generation* capability in the `blueprint` base.

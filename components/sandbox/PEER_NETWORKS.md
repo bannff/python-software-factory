@@ -68,7 +68,7 @@ lab host and summarized in the internal tracker.
 
 This was a network transport check using local Python HTTP listeners. It did
 not run the Ditto SDK or prove application-level peer sync. The running
-the control-plane runtime MCP process still advertises the prior Sandbox provision schema;
+Companion X MCP process still advertises the prior Sandbox provision schema;
 the live check called the current Sandbox runtime directly. Restart that MCP
 process and verify its `device_preset`/`peer_network` tool fields before using
 the new provisioning contract through MCP.

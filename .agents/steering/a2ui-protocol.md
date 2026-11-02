@@ -12,7 +12,7 @@ AG-UI v0.0.47 is the typed-event SSE wire. The
 [`mcp-ui`](https://mcpui.dev/) protocol/SDK is now adopted alongside as
 carrier #5 — A2UI keeps the typed catalog, mcp-ui handles arbitrary
 HTML/SVG/RemoteDOM/external apps. Five carriers move payloads (or A2UI-shaped
-state) from agents to the the control-plane runtime frontend; each carrier has exactly one
+state) from agents to the Companion X frontend; each carrier has exactly one
 producer-side hop and one consumer-side hook.
 
 > **Naming — two layers, no collision.** The historical squat is closed:
@@ -77,7 +77,7 @@ as transport failures.
 > `ui_ui_paint_canvas`, `ui_ui_get_views`) exists only on the **aggregator
 > path** used by the dashboard HTTP gateway. When citing a tool name in
 > docs, match the path you're describing — chat allowlists and the
-> the control-plane runtime prompt use single-prefix; aggregator HTTP traces use
+> Companion X prompt use single-prefix; aggregator HTTP traces use
 > double-prefix.
 
 **Why CUSTOM is not a carrier.** `CUSTOM` was historically advertised as a
@@ -497,7 +497,7 @@ fast.
 
 ## Canvas-Aware Chat (bd-vw04 + bd-115z)
 
-The the control-plane runtime chat sidebar is a two-way bridge with the workbench
+The Companion X chat sidebar is a two-way bridge with the workbench
 canvas. The agent SEES what the user is looking at (bd-vw04) and can
 DRIVE the canvas through CopilotKit v2 frontend tools (bd-115z). This
 is FE-tool round-trip — orthogonal to canvas paint (carrier #2).

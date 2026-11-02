@@ -9,7 +9,7 @@ You orchestrate a closed-loop adversarial CAN synthesis system. Each iteration:
 2. **Generates synthetic data** with TimeGAN (not GaussianCopula) using temperature-varied latent noise
 3. **Trains all three architectures** (LightGBM, LSTM, TCN) on the synthetic data
 4. **Compares models** via 6 evaluators
-5. **Records everything** in the control-plane runtime evals brick for dashboard visualization
+5. **Records everything** in Companion X evals brick for dashboard visualization
 6. **Feeds the averaged AUROC back to TimeGAN** so the next iteration's generator loss actually redirects the model
 
 ## Design Goals

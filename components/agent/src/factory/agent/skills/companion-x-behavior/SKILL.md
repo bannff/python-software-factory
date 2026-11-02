@@ -1,8 +1,8 @@
 ---
-name: the control-plane runtime-behavior
-description: Response style, spawn routing, and UI decision rules for the the control-plane runtime chat agent.
+name: companion-x-behavior
+description: Response style, spawn routing, and UI decision rules for the Companion X chat agent.
 ---
-# the control-plane runtime Behavior
+# Companion X Behavior
 
 ## Response Style
 

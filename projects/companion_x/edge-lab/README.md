@@ -12,7 +12,7 @@ docker build -t python-factory/edge-lab:local .
 ```
 
 Set `SANDBOX_ADAPTER=docker` and point `SANDBOX_PROFILES_DIR` at the absolute
-`projects/the control-plane project/sandbox-profiles` directory in the MCP server's
+`projects/companion_x/sandbox-profiles` directory in the MCP server's
 environment. Until this branch's Sandbox code is installed in the server's
 Python environment, also put this worktree's `components/sandbox/src` first
 on `PYTHONPATH` so the device-preset tools and profile fields are recognized.
@@ -39,8 +39,8 @@ settings. Record the requested preset and `docker inspect` image, platform,
 CPU quota, and memory limit in each run's evidence. A physical-device run is
 required before claiming device performance or mesh-radio behavior.
 
-These instructions target the the control-plane runtime MCP server running directly on the
-host. The separate the control-plane runtime Compose security overlay selects LocalStack
+These instructions target the Companion X MCP server running directly on the
+host. The separate Companion X Compose security overlay selects LocalStack
 and does not mount this profile directory; it does not use this setup.
 
 The first Ditto flow protocol launches N independent processes inside one

@@ -311,7 +311,7 @@ Any brick can add views by creating `mcp/views.py` and registering it in `server
 
 ## Agent Registration and Evidence-Promoted Templates
 
-Agent registrations are JSON-serializable data: persona, skills, scoped model/capability access, structured-output contract, and bounded execution policy. At runtime, the control-plane runtime asks the Agent brick to compose the smallest objective-specific LangChain agent or bounded LangGraph from those registrations. This adaptive within-attempt composition does not transfer durable lifecycle ownership from Workflow.
+Agent registrations are JSON-serializable data: persona, skills, scoped model/capability access, structured-output contract, and bounded execution policy. At runtime, Companion X asks the Agent brick to compose the smallest objective-specific LangChain agent or bounded LangGraph from those registrations. This adaptive within-attempt composition does not transfer durable lifecycle ownership from Workflow.
 
 Keep the permanent template catalog small. Promote a Graph topology only when repeated evaluation evidence shows that it is stable, reusable, and safer than runtime composition; otherwise retain the learned behavior in persona/skill/SOP data. Registrations contain no embedded callables or import-time side effects.
 

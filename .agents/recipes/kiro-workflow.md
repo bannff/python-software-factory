@@ -1,7 +1,7 @@
 # Kiro-Orchestrated Workflow — Master Recipe
 
 Kiro acts as the deterministic orchestrator, dispatching sub-agents for each phase.
-Each sub-agent has access to the control-plane runtime power for all 38 bricks via MCP.
+Each sub-agent has access to Companion X power for all 38 bricks via MCP.
 
 ## Architecture
 
@@ -71,4 +71,4 @@ After the domain-specific phases complete, trigger:
 
 ## Report Format
 Same JSON schema as Strands runs. Workflow type: `kiro`.
-Output: `projects/the control-plane project/challenges/experiments/{run_id}.json`
+Output: `projects/companion_x/challenges/experiments/{run_id}.json`

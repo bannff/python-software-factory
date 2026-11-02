@@ -81,7 +81,7 @@ The orchestrator MUST consult the listed specialist before code matching the tri
 
 **Grandfather clause** — pre-existing code that violates SDK-First or any other principle is tracked under `python-factory-sd72` (Strands modernization epic). New code MUST comply. Remediation of existing violations proceeds per that epic. The audit does not block work on legacy files.
 
-### Logging team decisions to the control-plane runtime memory
+### Logging team decisions to Companion X memory
 
 Every specialist consultation gets one memory entry via the existing memory brick. Future sessions and audit hooks search by content prefix.
 

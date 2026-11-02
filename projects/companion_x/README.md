@@ -1,6 +1,6 @@
-# Project: the control-plane project
+# Project: companion_x
 
-the control-plane runtime is the domain-neutral runtime control plane and Next.js cockpit; security is domain pack #1, not the engine. It dynamically assembles bounded objective teams through Agent brick surfaces and invokes capability bricks through MCP—it is not another agent runtime. See the normative ownership doctrine in [`.agents/steering/factory-protocol.md`](../../.agents/steering/factory-protocol.md).
+Companion X is the domain-neutral runtime control plane and Next.js cockpit; security is domain pack #1, not the engine. It dynamically assembles bounded objective teams through Agent brick surfaces and invokes capability bricks through MCP—it is not another agent runtime. See the normative ownership doctrine in [`.agents/steering/factory-protocol.md`](../../.agents/steering/factory-protocol.md).
 
 ## Brick Wiring
 
@@ -11,7 +11,7 @@ configuration for the exact deployable set.
 
 ## Local Dev (No Containers)
 
-The fastest way to run the control-plane runtime locally — zero Docker, zero infrastructure.
+The fastest way to run Companion X locally — zero Docker, zero infrastructure.
 All bricks use lightweight file-based or in-memory adapters.
 
 ### Adapter Stack
@@ -36,12 +36,12 @@ KB and Memory both use ChromaDB's built-in `all-MiniLM-L6-v2` sentence-transform
 The recommended launcher generates one ephemeral local MCP credential when the
 `.env` leaves it blank, shares it only with the API and Next server processes,
 and stops both on Ctrl-C. It also persists that token to a `0600` file at
-`projects/the control-plane project/.storage/local-mcp-token` (removed when the launcher
+`projects/companion_x/.storage/local-mcp-token` (removed when the launcher
 stops), so a second process — a hand-started `npm run dev`, a smoke stack — can
 join the running API without this shell's environment:
 
 ```bash
-./scripts/the control-plane runtime-ui.sh
+./scripts/companion-x-ui.sh
 ```
 
 For manual two-terminal startup, generate one URL-safe token and export the
@@ -53,13 +53,13 @@ export MCP_LOCAL_AUTH_TOKEN="<same-generated-token>"
 
 # Terminal 1 — API
 set -a
-source projects/the control-plane project/.env
+source projects/companion_x/.env
 set +a
-uv run python projects/the control-plane project/main.py
+uv run python projects/companion_x/main.py
 
 # Terminal 2 — Next.js frontend (same server-only local auth env)
 set -a
-source projects/the control-plane project/.env
+source projects/companion_x/.env
 set +a
 cd frontends/next-dashboard && npm run dev
 ```
@@ -69,13 +69,13 @@ cd frontends/next-dashboard && npm run dev
 - Dashboard: [http://localhost:3000](http://localhost:3000)
 - API: [http://localhost:8000](http://localhost:8000)
 
-The `.env` in `projects/the control-plane project/` now matches the lightweight local stack:
+The `.env` in `projects/companion_x/` now matches the lightweight local stack:
 
 - `persistent_networkx` graph (integrity-checked snapshots in the local blob store) and telemetry isolated in its own `.storage/telemetry.db` with a Scheduler-owned daily retention job, so Timeline stays live and the general document store stays small
 - `chromadb` KB and `amem` memory persisted locally on disk
 - `openrouter` as the default chat provider (`COMPANION_X_CHAT_MODEL=openrouter`, `OPENROUTER_MODEL=<vendor>/<model>`); `ollama/<model>` and bare Bedrock ids remain selectable
 - `FACTORY_API_PORT=8000`, matching the default local API port
-- the control-plane runtime chat runs on the Strands Agents SDK over MCP v2 (route-flipped back from LangGraph in #89 — Strands regained MCP v2 support); the LangChain/LangGraph runtime is dormant, selectable via `AGENT_RUNTIME_ADAPTER=langchain` with deps in the `langgraph-legacy` group, and reaches MCP through the platform tool invoker with a curated tool set
+- Companion X chat runs on the Strands Agents SDK over MCP v2 (route-flipped back from LangGraph in #89 — Strands regained MCP v2 support); the LangChain/LangGraph runtime is dormant, selectable via `AGENT_RUNTIME_ADAPTER=langchain` with deps in the `langgraph-legacy` group, and reaches MCP through the platform tool invoker with a curated tool set
 - Chat conversations persist across API restarts via the strands `SessionManager` over the `SqlSessionRepository` (storage-brick `SQLStore` port; backend-swappable to Postgres/Aurora) keyed by `agent_id-thread_id`; storage defaults to `./.storage/strands-sessions.db`, and durable session metadata lives in the `session` brick at `./.storage/sessions.db`
 
 Before starting the API, make sure Ollama is running and the local chat model is present:
@@ -116,9 +116,9 @@ Default `docker-compose.yml` starts these services:
 | redis | `redis:7-alpine` | 16379 | Cache / pub-sub |
 | localstack | `localstack/localstack:latest` | 4566 | AWS emulation (`ENFORCE_IAM=1`) |
 | awscli | `amazon/aws-cli:latest` | — | Sidecar for CFN deploys into LocalStack |
-| the control-plane project-api | (built) | 8001→8000 | Unified MCP+API, `SANDBOX_ADAPTER=localstack` |
-| the control-plane project-next | (built) | 3001 | Next.js dashboard |
-| the control-plane project-seed | `curlimages/curl` | — | One-shot seed job |
+| companion_x-api | (built) | 8001→8000 | Unified MCP+API, `SANDBOX_ADAPTER=localstack` |
+| companion_x-next | (built) | 3001 | Next.js dashboard |
+| companion_x-seed | `curlimages/curl` | — | One-shot seed job |
 
 `SANDBOX_ADAPTER=localstack` is the default for both API and MCP containers. Security challenges (IDOR warehouse, IAM privesc, SSRF Lambda) run as Lambda functions inside LocalStack, deployed via CloudFormation templates in `challenges/`.
 
@@ -140,7 +140,7 @@ See `pyproject.toml` for the full brick map and dependencies.
 
 ## Chronos-2 CAN Classification Probe
 
-the control-plane runtime and the `machine_learning` brick use the same immutable native identity: public class `chronos.Chronos2Pipeline`, model `amazon/chronos-2`, revision `29ec3766d36d6f73f0696f85560a422f50e8498c`, with exact pins `chronos-forecasting==2.3.1` and `peft==0.19.1`.
+Companion X and the `machine_learning` brick use the same immutable native identity: public class `chronos.Chronos2Pipeline`, model `amazon/chronos-2`, revision `29ec3766d36d6f73f0696f85560a422f50e8498c`, with exact pins `chronos-forecasting==2.3.1` and `peft==0.19.1`.
 
 Training/authoring is the only phase allowed to acquire that Hub revision. It persists the complete backbone with native `save_pretrained(..., safe_serialization=True)`. Frozen-backbone probe training is the default; optional LoRA uses only PEFT `save_pretrained`/`from_pretrained` with fixed `q`/`k`/`v`/`o` attention targets. The probe is strict Torch weights-only data; no custom raw adapter state dict is supported.
 
@@ -186,7 +186,7 @@ NO_PROXY=127.0.0.1,localhost \
 HF_HUB_OFFLINE=1 \
 TRANSFORMERS_OFFLINE=1 \
 uv run --offline pytest \
-  projects/the control-plane project/test/test_lnn_chronos_api_restart.py -q
+  projects/companion_x/test/test_lnn_chronos_api_restart.py -q
 ```
 
 The test uses localhost `/mcp/` by design, starts different API PIDs against the
@@ -196,7 +196,7 @@ keeping the MCP server healthy.
 
 ## Native MLX Time-Series Models
 
-MLX-native LSTM and TCN jobs run only on Darwin arm64 and bind the frozen lifecycle identity `mlx / 0.31.1 / mlx.nn.Module.load_weights / mlx-safetensors / local-mlx-isolated-v1`. the control-plane runtime uses the exact conditional direct pin `mlx==0.31.1; platform_system == "Darwin" and platform_machine == "arm64"`.
+MLX-native LSTM and TCN jobs run only on Darwin arm64 and bind the frozen lifecycle identity `mlx / 0.31.1 / mlx.nn.Module.load_weights / mlx-safetensors / local-mlx-isolated-v1`. Companion X uses the exact conditional direct pin `mlx==0.31.1; platform_system == "Darwin" and platform_machine == "arm64"`.
 
 Native artifacts are immutable under `${ML_MODEL_PASSPORT_ROOT}/models/mlx/<digest>/` and contain exactly `model.safetensors` and canonical `factory_model.json`. Promotion is revision-1 candidate → isolated conformance → revision-2 promotable. Generic `ml_predict_timeseries` rejects durable MLX inference; production must call `ml_predict_neural_passport` with the exact promoted revision-2 passport reference.
 
@@ -210,7 +210,7 @@ uvx --from uv==0.12.0 uv sync --group ml --config-settings-package lightgbm:cmak
 
 This fail-closed command resolves exact `lightgbm==4.7.0` from its official PyPI sdist (SHA256 `f8e20f682c9aabd000bcf4a7ed8aa6f473c1adfecccae34ec24e823d156f4af0`) and builds it without OpenMP. The build setting is intentionally command-scoped: non-Darwin platforms continue using normal LightGBM 4.7.0 registry artifacts with native OpenMP support, and unsupported source fallbacks do not silently inherit the Darwin policy. The project metadata also declares `uv==0.12.0`; invoking it through `uvx` is required because older uv versions can ignore unknown project settings before evaluating that declaration.
 
-Torch and scikit-learn retain their pinned package-contained OpenMP images. LightGBM introduces no third runtime, and the Darwin contract test allowlists exactly those two package-owned images while rejecting Homebrew `libomp`/`libgomp`. Production modules do not set `KMP_DUPLICATE_LIB_OK` or mutate thread-count environment variables at import time; standalone experiments may set explicit thread caps only as resource policy. A standalone `pip install` of the the control-plane runtime wheel does not consume this source/build contract and is therefore not claimed as a safe Darwin arm64 installation path.
+Torch and scikit-learn retain their pinned package-contained OpenMP images. LightGBM introduces no third runtime, and the Darwin contract test allowlists exactly those two package-owned images while rejecting Homebrew `libomp`/`libgomp`. Production modules do not set `KMP_DUPLICATE_LIB_OK` or mutate thread-count environment variables at import time; standalone experiments may set explicit thread caps only as resource policy. A standalone `pip install` of the Companion X wheel does not consume this source/build contract and is therefore not claimed as a safe Darwin arm64 installation path.
 
 ## Optional Containers
 

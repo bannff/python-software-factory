@@ -1,6 +1,6 @@
 # Recipe: Domain-Agnostic Substrate
 
-End-to-end walkthrough for adding a new domain agent (wine, workout, anything non-security) on top of the the control-plane runtime substrate. Adding a persona is a register-and-config exercise — no engine code change. Two epics built this substrate. **`python-factory-hadbi`** made the chat persona, graph typed-reads, games RL loop, and memory recall domain-agnostic — `domain_class` / `count_labels` / `taxonomy_edges` threaded through the MCP boundary, the events `LearningEventPayload`, cross-brick correlation, and per-node skills; P3 burndown then added the graph taxonomy registry + `graph://schemas/taxonomy/{domain}` resource and the `memory_retrieve` `tags`/`metadata` filters; wave-3 `ziwqs` made `agent.agent_id` the per-agent recall namespace, retracting the short-lived `AgentConfig.domain_class` field. **`python-factory-d4roe` (this branch)** makes persona authoring a runtime operation and adds per-thread persona selection — see the d4roe note below. **`python-factory-czpw` (this branch, uncommitted)** makes the chat agent manage a team of sub-agents conversationally — CREATE (`agent_create_agent`, now chat-callable) / SPAWN (`spawn_subagent`) / DELETE (`agent_delete_agent`) / SKILLS (`agent_list_skills`); see Step 1c. Per-bd landing detail lives in the Phase landings table at the foot of this recipe; security defaults remain byte-identical throughout.
+End-to-end walkthrough for adding a new domain agent (wine, workout, anything non-security) on top of the Companion X substrate. Adding a persona is a register-and-config exercise — no engine code change. Two epics built this substrate. **`python-factory-hadbi`** made the chat persona, graph typed-reads, games RL loop, and memory recall domain-agnostic — `domain_class` / `count_labels` / `taxonomy_edges` threaded through the MCP boundary, the events `LearningEventPayload`, cross-brick correlation, and per-node skills; P3 burndown then added the graph taxonomy registry + `graph://schemas/taxonomy/{domain}` resource and the `memory_retrieve` `tags`/`metadata` filters; wave-3 `ziwqs` made `agent.agent_id` the per-agent recall namespace, retracting the short-lived `AgentConfig.domain_class` field. **`python-factory-d4roe` (this branch)** makes persona authoring a runtime operation and adds per-thread persona selection — see the d4roe note below. **`python-factory-czpw` (this branch, uncommitted)** makes the chat agent manage a team of sub-agents conversationally — CREATE (`agent_create_agent`, now chat-callable) / SPAWN (`spawn_subagent`) / DELETE (`agent_delete_agent`) / SKILLS (`agent_list_skills`); see Step 1c. Per-bd landing detail lives in the Phase landings table at the foot of this recipe; security defaults remain byte-identical throughout.
 
 > **Epic `python-factory-d4roe` — runtime authoring + per-thread persona.** Personas now have TWO sources behind ONE read path. Built-ins stay in CODE (`AGENTS_TYPED`); user personas are DATA behind a `RegistryStore` port (`DiskRegistryStore` locally; an AgentCore-backed adapter slots in later behind the same Protocol). `registry/unified.py::unified_personas` is the single read path — built-ins seeded first, store overlaid, built-ins WIN on id collision. The `agent_create_agent` `@authoring` tool (Step 1b) writes a persona and reloads the registry so it resolves for chat AND discovery with NO restart. The `/` persona palette (Step 4b) selects a persona per-thread via `RunAgentInput.forwardedProps.companion_x_agent_id`. `AgentConfig.id` is charset-locked `^[a-z0-9][a-z0-9_-]{0,127}$` — REJECT not coerce (bd:python-factory-67qvz: closes a case-fold data-loss between the disk/in-memory stores on case-insensitive filesystems AND a `FileSessionManager` session-id path-traversal vector).
 
@@ -18,7 +18,7 @@ End-to-end walkthrough for adding a new domain agent (wine, workout, anything no
 
 ## Prerequisites
 
-- the control-plane runtime API on `http://localhost:8001`, Next dashboard on `http://localhost:3000`. `COMPANION_X_CHAT_MODEL` set to any chat-capable model.
+- Companion X API on `http://localhost:8001`, Next dashboard on `http://localhost:3000`. `COMPANION_X_CHAT_MODEL` set to any chat-capable model.
 - Optional: `skills/<your-skill>/SKILL.md` for extra workflow context via Strands `AgentSkills`. No AWS, Docker, or Neo4j required (memory adapters carry the load).
 
 ## Design verdicts (key references)
@@ -49,7 +49,7 @@ WINE_PAIRING_AGENT = AgentConfig(
 bd:python-factory-d4roe.2. Call `agent_create_agent` instead of editing code — thin facade over `write_yaml_config("agent", config)` + `agent_registry.load()`, persisted to `DiskRegistryStore`, immediately resolvable with NO restart.
 
 ```python
-kiroPowers(action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+kiroPowers(action="use", powerName="companion-x", serverName="companion-x",
   toolName="call_brick_tool",
   arguments={"brick_name": "agent", "tool_name": "agent_create_agent",
              "arguments": json.dumps({"config": {
@@ -79,20 +79,20 @@ bd:python-factory-czpw (children czpw.1 + czpw.2, this branch — orchestrator c
 
 ```python
 # 1. discover skills  2. compose  3. spawn a swarm  4. spawn a graph  5. delete when done
-kiroPowers(action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+kiroPowers(action="use", powerName="companion-x", serverName="companion-x",
   toolName="call_brick_tool",
   arguments={"brick_name": "agent", "tool_name": "agent_list_skills",
              "arguments": json.dumps({})})
 # → {"skills": [{"id": "sast-open-scan", ...}, ...], "count": 13}
 
 # spawn_swarm — free multi-agent collaboration
-kiroPowers(action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+kiroPowers(action="use", powerName="companion-x", serverName="companion-x",
   toolName="call_brick_tool",
   arguments={"brick_name": "agent", "tool_name": "spawn_swarm",
              "arguments": json.dumps({"agent_ids": ["researcher", "writer"], "task": "..."})})
 
 # spawn_graph — fixed pipeline: researcher feeds writer
-kiroPowers(action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+kiroPowers(action="use", powerName="companion-x", serverName="companion-x",
   toolName="call_brick_tool",
   arguments={"brick_name": "agent", "tool_name": "spawn_graph",
              "arguments": json.dumps({
@@ -113,7 +113,7 @@ All three spawn tools stream via the existing `tool_stream` rail. `spawn_subagen
 Pass `taxonomy_edges` to `graph_get_findings_for_run` or `graph_get_recent_findings`. Each dict matches `TaxonomyEdgeSpec` (`components/graph/src/factory/graph/runtime/models.py`).
 
 ```python
-kiroPowers(action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+kiroPowers(action="use", powerName="companion-x", serverName="companion-x",
   toolName="call_brick_tool",
   arguments={"brick_name": "graph", "tool_name": "graph_get_findings_for_run",
              "arguments": json.dumps({"run_id": "wine-r-1", "taxonomy_edges": [
@@ -129,7 +129,7 @@ Pass `config={"domain_class": "<your_domain>", ...}` to `games_create`. `_store_
 
 ```python
 # Direct MCP arg — drive the RL loop from outside games_create
-kiroPowers(action="use", powerName="the control-plane runtime", serverName="the control-plane runtime",
+kiroPowers(action="use", powerName="companion-x", serverName="companion-x",
   toolName="call_brick_tool",
   arguments={"brick_name": "games", "tool_name": "games_process_workflow_rl",
              "arguments": json.dumps({
@@ -152,7 +152,7 @@ export COMPANION_X_CHAT_AGENT_ID=wine-pairing
 uv run python -m factory.api.main
 ```
 
-Cache key + `Agent.name` + `FileSessionManager.session_id` all use `f"{agent_id}-{thread_id}"`, so swapping the env yields a clean session boundary — no history bleed across personas. A typo in the env triggers LOUD-FAIL at chat boot per strands-expert verdict `9b6d46cd`; do not silently fall back to `the control-plane runtime-default`.
+Cache key + `Agent.name` + `FileSessionManager.session_id` all use `f"{agent_id}-{thread_id}"`, so swapping the env yields a clean session boundary — no history bleed across personas. A typo in the env triggers LOUD-FAIL at chat boot per strands-expert verdict `9b6d46cd`; do not silently fall back to `companion-x-default`.
 
 The env is the **default** persona (used when the FE sends no selector). It is byte-identical to pre-d4roe behavior when `forwardedProps` is absent (`a19ef414` Q4).
 
@@ -270,7 +270,7 @@ Cypher property names cannot be parameterized. The substrate enforces `^[a-zA-Z_
 
 ## Tested invariants (key canaries)
 
-- `the control-plane runtime-default.system_prompt == COMPANION_X_PROMPT` byte-for-byte (`test_chat_persona_registry.py`).
+- `companion-x-default.system_prompt == COMPANION_X_PROMPT` byte-for-byte (`test_chat_persona_registry.py`).
 - Cache slots differentiate two threads with the same `thread_id` + different `agent_id` (`test_chat_persona_cache_key.py`).
 - `taxonomy_edges=None` → legacy CWE/OCSF Cypher shape; `taxonomy_edges=[]` → no OPTIONAL MATCH (`test_neo4j_taxonomy_edges.py`).
 - `DEFAULT_COUNT_LABELS == ("Finding", "ProvenExploit")` (`test_count_labels_substrate.py`).

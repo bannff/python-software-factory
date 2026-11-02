@@ -1,6 +1,6 @@
 # Recipe: Findings Page — UI Data Flow (Gold Standard)
 
-End-to-end data flow from security brick tool calls through the `findings-view.tsx` renderer to the the control-plane runtime dashboard. This page is the visual standard for the dashboard.
+End-to-end data flow from security brick tool calls through the `findings-view.tsx` renderer to the Companion X dashboard. This page is the visual standard for the dashboard.
 
 ## Bricks Used
 - `security` — Via tool call results from agent sessions (not direct MCP queries)
@@ -11,7 +11,7 @@ An agent runs a security scan during a live session. Tool call results flow thro
 
 ## Prerequisites
 
-- the control-plane runtime gateway running with CopilotKit AG-UI bridge
+- Companion X gateway running with CopilotKit AG-UI bridge
 - Active agent session (findings only populate during live sessions)
 - Security brick available in MCP aggregator
 

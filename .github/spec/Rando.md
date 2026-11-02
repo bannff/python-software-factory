@@ -37,7 +37,7 @@ Initial analysis of the first MF4 file shows:
 - Not an LLM. The prediction model is a dedicated time-series classifier.
 - Not a text pipeline. No tokenization, no conversational data.
 - Not real-time bus actuation. Read-only monitoring and prediction.
-- Not a standalone project. Lives inside the control-plane runtime using existing bricks.
+- Not a standalone project. Lives inside Companion X using existing bricks.
 
 ## 2. Architecture Decisions
 
@@ -100,9 +100,9 @@ Initial analysis of the first MF4 file shows:
 |---|---|---|---|---|
 | **New `can_analytics` brick** | Dedicated brick for CAN-specific logic | Clean separation, CAN-specific MCP surface | 200+ LOC budget pressure, new brick maintenance, may duplicate existing capabilities | Reject — over-engineering |
 | **Recipe stages in `dataset` brick** | CAN-specific logic as `DatasetStagePort` adapters | Fits existing architecture, leverages async job system, checkpoint/resume | Domain logic lives inside dataset brick | **Recommended** — this is what the recipe system is for |
-| **Skills + sub-agents** | CAN analyst persona with domain skills | Reusable, composable, agent-driven, no new brick surface | Requires agent orchestration | **Recommended** — the control-plane runtime drives the pipeline |
+| **Skills + sub-agents** | CAN analyst persona with domain skills | Reusable, composable, agent-driven, no new brick surface | Requires agent orchestration | **Recommended** — Companion X drives the pipeline |
 
-**Decision: No new brick.** CAN-specific logic lives as recipe stages inside the `dataset` brick (Noise Injector, Temporal Windowing, Failure Labeler). the control-plane runtime orchestrates via skills and sub-agents. The `machine_learning` brick handles training.
+**Decision: No new brick.** CAN-specific logic lives as recipe stages inside the `dataset` brick (Noise Injector, Temporal Windowing, Failure Labeler). Companion X orchestrates via skills and sub-agents. The `machine_learning` brick handles training.
 
 ## 3. Data Pipeline Architecture
 
@@ -270,7 +270,7 @@ Initial analysis of the first MF4 file shows:
 - Rolling context buffer (last N seconds of decoded signals)
 - Prediction engine (sub-millisecond inference on windowed input)
 - Alert threshold system (anomaly score → alert levels)
-- LLM context bridge (alert state fed to the control-plane runtime for conversational queries)
+- LLM context bridge (alert state fed to Companion X for conversational queries)
 - Visualization (real-time signal plots, prediction overlays)
 
 **Acceptance criteria:**
@@ -282,32 +282,32 @@ Initial analysis of the first MF4 file shows:
 **Dependencies:** Epic 4 (trained model), `machine_learning` brick (inference)
 
 ### Epic 6: Agentic Dataset Skills
-**Goal:** Teach the control-plane runtime to orchestrate the full CAN pipeline via MCP.
+**Goal:** Teach Companion X to orchestrate the full CAN pipeline via MCP.
 
 **Work:**
 - CAN analyst skill (`skills/can-analyst/SKILL.md`) — MF4 analysis, DBC matching, signal profiling
 - Recipe authoring skill — compose CAN-specific dataset recipes
 - Model evaluation skill — run eval harness, compare results, recommend model
-- Wire skills into the control-plane runtime agent registry
+- Wire skills into Companion X agent registry
 - Update `compx-platform` skill with CAN-specific tools
 
 **Acceptance criteria:**
-- the control-plane runtime can submit CAN dataset jobs via chat
-- the control-plane runtime can profile signal data and report findings
-- the control-plane runtime can run model comparisons and recommend best architecture
+- Companion X can submit CAN dataset jobs via chat
+- Companion X can profile signal data and report findings
+- Companion X can run model comparisons and recommend best architecture
 - All skills discoverable via `agent_list_skills()`
 
 **Dependencies:** Epic 1-5 (full pipeline working)
 
 ### Epic 7: Pipeline Wiring & Integration
-**Goal:** Wire all CAN adapters into the dataset brick's executor and agent system so the control-plane runtime can drive the pipeline end-to-end via chat.
+**Goal:** Wire all CAN adapters into the dataset brick's executor and agent system so Companion X can drive the pipeline end-to-end via chat.
 
 **Work:**
 - Register CAN stage adapters (`can_ingest`, `can_profile`, `can_synthesize`) in the dataset brick's local executor stage registry
 - Add `recipe://local/can-ingest@1`, `recipe://local/can-profile@1`, `recipe://local/can-synthesize@1` to the recipe resolver
 - Register `CAN_AGENTS` and `CAN_PIPELINE_GRAPH` in the agent system's `defaults.py`
 - Verify `agent_list_skills()` returns `can-analyst`, `can-recipe-author`, `can-evaluator`
-- End-to-end test: the control-plane runtime chat agent receives "analyze my CAN captures", dispatches the pipeline, returns results
+- End-to-end test: Companion X chat agent receives "analyze my CAN captures", dispatches the pipeline, returns results
 
 **Acceptance criteria:**
 - `dataset_submit_generation` with a CAN recipe URI resolves to the correct stage adapters
@@ -506,7 +506,7 @@ Each node is an `AgentConfig` with CAN-specific skills and scoped MCP tools.
 **Dispatch flow:**
 ```
 User: "Analyze my 67 CAN captures"
-  → the control-plane runtime chat agent
+  → Companion X chat agent
     → invoke_graph(graph_id="can-pipeline", task="Analyze 67 MF4 files")
       → GraphExecutor runs 6 nodes sequentially
         → Each node calls dataset_submit_generation for its stage
@@ -588,7 +588,7 @@ CAN_AGENTS = [
 ]
 ```
 
-The `can-analyst` skill is also added to the `the control-plane runtime-default` chat agent so users can trigger CAN analysis directly from chat.
+The `can-analyst` skill is also added to the `companion-x-default` chat agent so users can trigger CAN analysis directly from chat.
 
 ### 10.4 Taxonomy Registration
 
@@ -675,7 +675,7 @@ def can_get_live_state() -> dict:
     }
 ```
 
-Added to the the control-plane runtime chat agent's tool list so it can answer "What's going to happen?" by reading the live inference state.
+Added to the Companion X chat agent's tool list so it can answer "What's going to happen?" by reading the live inference state.
 
 ---
 

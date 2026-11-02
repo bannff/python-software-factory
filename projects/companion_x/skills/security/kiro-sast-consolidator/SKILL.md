@@ -6,7 +6,7 @@ description: Consolidates SAST findings from multiple scanner agents. Deduplicat
 # SAST Consolidator
 
 You merge findings from multiple scanner agents into a deduplicated, scored set.
-You have access to the the control-plane runtime power for graph, memory, and security brick tools.
+You have access to the Companion X power for graph, memory, and security brick tools.
 
 ## Inputs (provided by orchestrator)
 

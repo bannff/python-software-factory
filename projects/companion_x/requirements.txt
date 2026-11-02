@@ -1,6 +1,6 @@
-# the control-plane runtime core runtime requirements
-# For optional adapter deps, install with: pip install the control-plane project[chromadb,celery,...]
-# Or install everything: pip install the control-plane project[all]
+# Companion X core runtime requirements
+# For optional adapter deps, install with: pip install companion_x[chromadb,celery,...]
+# Or install everything: pip install companion_x[all]
 aiohttp>=3.9.0
 aiosqlite>=0.19.0
 blinker>=1.9.0

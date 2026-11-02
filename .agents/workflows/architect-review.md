@@ -16,11 +16,11 @@ description: Perform a formal architectural review of a proposed change or desig
     Verify the proposal against the 10 core repository tenets (MCP-first, <200 LOC, No cross-imports, etc.).
 
 5.  **Check Memory**
-    Query the `the control-plane runtime` memory brick for any prior architectural decisions related to this component.
+    Query the `companion-x` memory brick for any prior architectural decisions related to this component.
 
 6.  **Provide Verdict**
     Issue a verdict: APPROVE, APPROVE WITH NOTES, or BLOCK.
 
 7.  **Log Decision**
     // turbo
-    Store the review outcome in the `the control-plane runtime` memory brick for future reference.
+    Store the review outcome in the `companion-x` memory brick for future reference.

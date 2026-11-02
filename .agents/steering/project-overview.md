@@ -2,9 +2,9 @@
 
 A Polylith monorepo built FOR AI agents. Every brick exposes a full MCP interface.
 
-The normative Agent/the control-plane runtime/Workflow/Dataset/Evals ownership split is defined only in [`.agents/steering/factory-protocol.md`](../../.agents/steering/factory-protocol.md). This file describes current implementation state.
+The normative Agent/Companion X/Workflow/Dataset/Evals ownership split is defined only in [`.agents/steering/factory-protocol.md`](../../.agents/steering/factory-protocol.md). This file describes current implementation state.
 
-GitHub is the development work-tracking plane: Issues for work, Discussions for clarification, Wiki for high-level docs, and the Project board for tracking. the control-plane runtime is the runtime control plane; it composes through Agent surfaces rather than owning another agent runtime.
+GitHub is the development work-tracking plane: Issues for work, Discussions for clarification, Wiki for high-level docs, and the Project board for tracking. Companion X is the runtime control plane; it composes through Agent surfaces rather than owning another agent runtime.
 
 ## Architecture
 
@@ -12,7 +12,7 @@ GitHub is the development work-tracking plane: Issues for work, Discussions for 
 python-factory/
 ├── components/     # Reusable logic bricks (polymorphic, adapter-based)
 ├── bases/          # Entry points — pure transport shells (api, worker, mcp_server, blueprint)
-├── projects/       # Deployable artifacts (the control-plane project)
+├── projects/       # Deployable artifacts (companion_x)
 └── BRICKS_INDEX.yaml
 ```
 
@@ -88,7 +88,7 @@ The `mcp_utils` service registry (`set_service`/`get_service`) bridges the gap b
 
 ## Canvas-Aware Chat (bd-vw04 + bd-115z)
 
-The the control-plane runtime chat sidebar is now a two-way bridge with the workbench canvas. The agent SEES what the user is looking at (bd-vw04) and can DRIVE the canvas through CopilotKit v2 frontend tools (bd-115z). Together with the bd-eyuj / bd-47sl / bd-tpfk thinking trio, these close the canvas-aware chat loop. Canvas paint (agent → page) is the next milestone — see EPIC `python-factory-iet5` "Agent Driven UI" (children bds A/G/C/I/D/E/F/B/H/J).
+The Companion X chat sidebar is now a two-way bridge with the workbench canvas. The agent SEES what the user is looking at (bd-vw04) and can DRIVE the canvas through CopilotKit v2 frontend tools (bd-115z). Together with the bd-eyuj / bd-47sl / bd-tpfk thinking trio, these close the canvas-aware chat loop. Canvas paint (agent → page) is the next milestone — see EPIC `python-factory-iet5` "Agent Driven UI" (children bds A/G/C/I/D/E/F/B/H/J).
 
 ### Push: canvas → agent context (bd-vw04, FE-only)
 
@@ -98,7 +98,7 @@ CopilotKit forwards the published value as `RunAgentInput.context[]`. The api ba
 
 ```
 Canvas context (system-supplied, FE-pushed):
-- the control-plane runtime canvas state: …: {"activeView": "graph", "activeTabId": "...", ...}
+- Companion X canvas state: …: {"activeView": "graph", "activeTabId": "...", ...}
 
 <original user message>
 ```
@@ -166,11 +166,11 @@ Two FE-side fixes landed in the same session as the canvas-aware chat work to ma
 
 #### `selfManagedAgents` over `runtimeUrl` (the anti-shadow rationale)
 
-`<CopilotKitProvider>` (`frontends/next-dashboard/lib/copilotkit/provider.tsx`) registers `the control-plane project` locally via `selfManagedAgents={{ [COMPANION_X_AGENT_ID]: agent }}` and **does NOT pass `runtimeUrl`**. That combination is deliberate.
+`<CopilotKitProvider>` (`frontends/next-dashboard/lib/copilotkit/provider.tsx`) registers `companion_x` locally via `selfManagedAgents={{ [COMPANION_X_AGENT_ID]: agent }}` and **does NOT pass `runtimeUrl`**. That combination is deliberate.
 
-The shared agent identity lives in a single module — `frontends/next-dashboard/lib/copilotkit/companion-agent.ts` — which exports `COMPANION_X_AGENT_ID = "the control-plane project"` and a `createCompanionXAgent()` factory that returns a fresh `HttpAgent` bound to `/api/copilotkit/agent/the control-plane project/run` (the Hono runtime route). The BE runtime registration in `app/api/copilotkit/[[...path]]/route.ts` imports the same constant, so FE provider and BE runtime can never drift.
+The shared agent identity lives in a single module — `frontends/next-dashboard/lib/copilotkit/companion-agent.ts` — which exports `COMPANION_X_AGENT_ID = "companion_x"` and a `createCompanionXAgent()` factory that returns a fresh `HttpAgent` bound to `/api/copilotkit/agent/companion_x/run` (the Hono runtime route). The BE runtime registration in `app/api/copilotkit/[[...path]]/route.ts` imports the same constant, so FE provider and BE runtime can never drift.
 
-Why we don't pass `runtimeUrl` alongside `selfManagedAgents`: setting `runtimeUrl` triggers the async `/info` handshake which builds a `ProxiedCopilotRuntimeAgent` for `the control-plane project` and shadows the locally-registered `HttpAgent` via the merge order in `@copilotkitnext/core` `index.mjs::updateRuntimeConnection` — the spread `{...localAgents, ...remoteAgents}` lets the remote entry win. With both props set, `<CopilotChat>`'s `useAgent` and the dev inspector's `core.agents.the control-plane project` subscription end up bound to **different `HttpAgent` instances**, RxJS multicast can't fan events between them, and the inspector tabs stay empty after a successful chat run. Dropping `runtimeUrl` collapses both subscribers onto one `HttpAgent`. The runtime-status badge stays at "Disconnected" — that's cosmetic; there's no remote runtime to be connected to.
+Why we don't pass `runtimeUrl` alongside `selfManagedAgents`: setting `runtimeUrl` triggers the async `/info` handshake which builds a `ProxiedCopilotRuntimeAgent` for `companion_x` and shadows the locally-registered `HttpAgent` via the merge order in `@copilotkitnext/core` `index.mjs::updateRuntimeConnection` — the spread `{...localAgents, ...remoteAgents}` lets the remote entry win. With both props set, `<CopilotChat>`'s `useAgent` and the dev inspector's `core.agents.companion_x` subscription end up bound to **different `HttpAgent` instances**, RxJS multicast can't fan events between them, and the inspector tabs stay empty after a successful chat run. Dropping `runtimeUrl` collapses both subscribers onto one `HttpAgent`. The runtime-status badge stays at "Disconnected" — that's cosmetic; there's no remote runtime to be connected to.
 
 #### `<InspectorAttachWorkaround />` (upstream-gap workaround)
 
@@ -178,7 +178,7 @@ Why we don't pass `runtimeUrl` alongside `selfManagedAgents`: setting `runtimeUr
 
 #### Thinking-panel env (Strands → AG-UI → CopilotKit)
 
-The `<CopilotChatReasoningMessage>` Thinking panel only renders when the API process is configured for extended thinking. Two env vars in `projects/the control-plane project/.env` gate the entire chain:
+The `<CopilotChatReasoningMessage>` Thinking panel only renders when the API process is configured for extended thinking. Two env vars in `projects/companion_x/.env` gate the entire chain:
 
 | Var | Purpose |
 |-----|---------|
@@ -196,7 +196,7 @@ Model capability matrix (chat works on all of these; the Thinking panel only lig
 | Z.AI GLM 5 | ❌ no-op |
 | OpenAI GPT-OSS via Bedrock | ❌ no-op |
 
-Both vars now have sane defaults in `projects/the control-plane project/.env` and `.env.example` so a fresh clone doesn't regress to an empty Thinking panel.
+Both vars now have sane defaults in `projects/companion_x/.env` and `.env.example` so a fresh clone doesn't regress to an empty Thinking panel.
 
 ## Gateway Architecture
 
@@ -231,11 +231,11 @@ workbench layout (ActivityBar | Canvas with tabbed views | collapsible ChatSideb
 AG-UI SSE streams agent work into the chat sidebar; A2UI pushes rich views into the canvas.
 Uses Next.js Route Handlers to proxy API requests, eliminating CORS without Python changes.
 
-**Local dev runs with zero containers.** Bricks use lightweight adapters: ChromaDB for KB and memory (persists to disk), networkx for graph (ephemeral, CWE/OCSF taxonomy auto-seeds), SQLite for events, and in-memory adapters for cache/worker/storage. See `projects/the control-plane project/README.md` → "Local Dev (No Containers)" for the full adapter table.
+**Local dev runs with zero containers.** Bricks use lightweight adapters: ChromaDB for KB and memory (persists to disk), networkx for graph (ephemeral, CWE/OCSF taxonomy auto-seeds), SQLite for events, and in-memory adapters for cache/worker/storage. See `projects/companion_x/README.md` → "Local Dev (No Containers)" for the full adapter table.
 
-### the control-plane runtime Local Boot Notes
+### Companion X Local Boot Notes
 
-For the lightweight local the control-plane runtime flow, source the project environment and
+For the lightweight local Companion X flow, source the project environment and
 run the module through the editable workspace install. Hatchling exposes the
 source roots explicitly listed in the root `[tool.hatch.build].dev-mode-dirs`
 configuration; do not add a custom `PYTHONPATH`.
@@ -243,7 +243,7 @@ configuration; do not add a custom `PYTHONPATH`.
 ```bash
 # Terminal 1 — API (from the repository root)
 set -a
-source projects/the control-plane project/.env
+source projects/companion_x/.env
 set +a
 uv run python -m factory.api.main
 
@@ -254,12 +254,12 @@ npm run dev
 
 Local footguns verified on this machine:
 
-- `projects/the control-plane project/.env` expects the API on `8000`, so the Next dashboard should use `API_URL=http://127.0.0.1:8000` in `frontends/next-dashboard/.env.local`.
-- the control-plane runtime chat uses the Strands chat adapter and requires `COMPANION_X_CHAT_MODEL` plus the Python `ollama` package to construct `strands.models.ollama.OllamaModel`. If `ollama` is missing, chat can silently fall back to an AWS-style provider path and return credential errors even when Ollama is running.
+- `projects/companion_x/.env` expects the API on `8000`, so the Next dashboard should use `API_URL=http://127.0.0.1:8000` in `frontends/next-dashboard/.env.local`.
+- Companion X chat uses the Strands chat adapter and requires `COMPANION_X_CHAT_MODEL` plus the Python `ollama` package to construct `strands.models.ollama.OllamaModel`. If `ollama` is missing, chat can silently fall back to an AWS-style provider path and return credential errors even when Ollama is running.
 - Local durable document storage now uses SQLite via `STORAGE_DOC_BACKEND=sqlite`, so telemetry/document persistence lands in `./.storage/docs.db` through `SQLiteDocumentStore`.
-- Old TinyDB `JSONDecodeError` traces can still appear from stale shells or older processes that were started before the SQLite switch. For the current local the control-plane runtime env, the authoritative document store is SQLite, not `config/data/db.json`.
+- Old TinyDB `JSONDecodeError` traces can still appear from stale shells or older processes that were started before the SQLite switch. For the current local Companion X env, the authoritative document store is SQLite, not `config/data/db.json`.
 
-the control-plane runtime can also be deployed as an **AgentCore Runtime** (`RUN_MODE=agentcore`), where the MCP aggregator runs as a Streamable HTTP server on port 8000 using FastMCP's `stateless_http=True` mode. The AgentCore/cloud deployment uses persistent backends (Neo4j, DynamoDB, etc.) configured via env vars, so state lives in the database — not in process memory. AgentCore manages the container lifecycle and routes MCP protocol traffic to the server.
+Companion X can also be deployed as an **AgentCore Runtime** (`RUN_MODE=agentcore`), where the MCP aggregator runs as a Streamable HTTP server on port 8000 using FastMCP's `stateless_http=True` mode. The AgentCore/cloud deployment uses persistent backends (Neo4j, DynamoDB, etc.) configured via env vars, so state lives in the database — not in process memory. AgentCore manages the container lifecycle and routes MCP protocol traffic to the server.
 
 This means:
 - Add a brick to BRICKS_INDEX → it instantly has backend, frontend, and worker capabilities
@@ -308,7 +308,7 @@ pipeline is:
 
 1. **Bricks declare** — `*_get_views()` tool returns component trees as plain dicts (using the `page` component type for standardized 3-zone layout)
 2. **ui brick renders** — ViewManager + polymorphic adapters (HTMX, React, JSON, Flet, etc.)
-3. **Dashboard serves** — wraps rendered HTML in the page shell, handles routing (GET + POST at `/api/tools/{tool_name}`, POST at `/api/chat/{tool_name}` for chat components). Companion X (`frontends/next-dashboard/`) renders shadcn/ui React components from the same ReactAdapter JSON in an IDE-like workbench layout — ActivityBar (icon rail), Canvas (tabbed views: Welcome, Graph, Timeline, Findings, Evals, ML), and a collapsible, user-resizable ChatSidebar (440px default; drag the left edge to resize, clamped between 440px and 70% of viewport width, persisted in `localStorage` under `the control-plane runtime:chat-width`). The chat sidebar is built on **CopilotKit v2** (`<CopilotChat agentId="the control-plane project">`); `CopilotChatReasoningMessage` auto-renders the canonical AG-UI `REASONING_MESSAGE_*` trio as the Thinking panel, and `useRenderTool` / `useDefaultRenderTool` route through a shared `<ToolCallCard>` for uniform Kiro / VS Code-style status pills across instrumented and uninstrumented tools (bd:python-factory-47sl). AG-UI SSE streams agent work into the chat; A2UI pushes rich views into the canvas. Uses Magic UI animations and React Force Graph 3D visualization.
+3. **Dashboard serves** — wraps rendered HTML in the page shell, handles routing (GET + POST at `/api/tools/{tool_name}`, POST at `/api/chat/{tool_name}` for chat components). Companion X (`frontends/next-dashboard/`) renders shadcn/ui React components from the same ReactAdapter JSON in an IDE-like workbench layout — ActivityBar (icon rail), Canvas (tabbed views: Welcome, Graph, Timeline, Findings, Evals, ML), and a collapsible, user-resizable ChatSidebar (440px default; drag the left edge to resize, clamped between 440px and 70% of viewport width, persisted in `localStorage` under `companion-x:chat-width`). The chat sidebar is built on **CopilotKit v2** (`<CopilotChat agentId="companion_x">`); `CopilotChatReasoningMessage` auto-renders the canonical AG-UI `REASONING_MESSAGE_*` trio as the Thinking panel, and `useRenderTool` / `useDefaultRenderTool` route through a shared `<ToolCallCard>` for uniform Kiro / VS Code-style status pills across instrumented and uninstrumented tools (bd:python-factory-47sl). AG-UI SSE streams agent work into the chat; A2UI pushes rich views into the canvas. Uses Magic UI animations and React Force Graph 3D visualization.
 
 > **Chat-surface UI rendering.** The pipeline above is the dashboard's HTMX/React render path. For the **chat surface** (CopilotKit v2 sidebar + canvas tabs) the canonical mental model is "A2UI = schema, AG-UI = wire, four carriers" — see `.agents/steering/a2ui-protocol.md` for the carrier table, `state.canvas.<slot>` shape contract, and JSON Patch (RFC 6902) discipline for `STATE_DELTA`-driven canvas paint.
 
@@ -372,7 +372,7 @@ or any future adapter. Bricks don't know or care about the transport layer.
 
 Beyond static view declarations, the ui brick also supports live session-driven rendering.
 `SessionBridge` subscribes to agent events (via the events brick) and translates them into
-`ViewUpdate` objects pushed through `PushChannel` in real time. This powers the the control-plane runtime
+`ViewUpdate` objects pushed through `PushChannel` in real time. This powers the Companion X
 live agent UI — agents emit events during execution, and the UI updates incrementally without
 polling. Session tools (`ui_start_session`, `ui_end_session`, etc.) manage the lifecycle.
 

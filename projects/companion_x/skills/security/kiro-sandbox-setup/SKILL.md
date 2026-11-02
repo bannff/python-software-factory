@@ -6,7 +6,7 @@ description: Provisions sandbox environments using profile-based Docker containe
 # Sandbox Setup
 
 You provision and configure sandbox environments for downstream DAST workflows.
-You have access to the control-plane runtime power for sandbox, graph, memory, and KB brick tools.
+You have access to Companion X power for sandbox, graph, memory, and KB brick tools.
 
 ## Inputs (provided by orchestrator)
 

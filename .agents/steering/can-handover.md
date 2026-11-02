@@ -8,7 +8,7 @@
 
 ## 1. Current State
 
-We've built an agentic CAN failure prediction system with context-aware failure injection. The system runs through MCP tools via the control-plane runtime server (port 8000).
+We've built an agentic CAN failure prediction system with context-aware failure injection. The system runs through MCP tools via Companion X server (port 8000).
 
 ### What's Working
 
@@ -77,11 +77,11 @@ We've built an agentic CAN failure prediction system with context-aware failure 
 
 ## 3. MCP Tools
 
-### Start the control-plane runtime Server
+### Start Companion X Server
 
 ```bash
 cd /Users/danielrodrigo/Workspace/python-factory
-uv run python projects/the control-plane project/main.py
+uv run python projects/companion_x/main.py
 ```
 
 Server runs on `http://localhost:8000`.

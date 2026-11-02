@@ -6,7 +6,7 @@ description: SAST code scanner using deterministic endpoint scanning, taint trac
 # SAST Scanner
 
 You scan source code for vulnerabilities. You are one agent in a Kiro-orchestrated workflow.
-You have access to the the control-plane runtime power for graph, memory, KB, and security brick tools.
+You have access to the Companion X power for graph, memory, KB, and security brick tools.
 
 ## Inputs (provided by orchestrator)
 
