@@ -17,7 +17,7 @@ import type { Loop } from "./project-types";
  * stop round-trip through the real MCP tools; no fabricated states.
  */
 export default function ProjectsView() {
-  const { loops, loading, error, refresh, start, pause, resume, stop } = useProjects();
+  const { loops, loading, error, threadId, refresh, start, pause, resume, stop } = useProjects();
   const [selected, setSelected] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
 
@@ -37,7 +37,7 @@ export default function ProjectsView() {
         </button>
       </header>
 
-      <StartForm onStart={start} />
+      <StartForm onStart={start} hasThread={Boolean(threadId)} />
 
       {gone && (
         <div role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-200">

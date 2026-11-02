@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-const mocks = vi.hoisted(() => ({ callTool: vi.fn(), listPersonas: vi.fn() }));
+const mocks = vi.hoisted(() => ({ callTool: vi.fn(), listPersonas: vi.fn(), threadId: "thr_1" as string | undefined }));
+vi.mock("@copilotkit/react-core/v2", () => ({ useAgent: () => ({ agent: { threadId: mocks.threadId } }) }));
 vi.mock("@/lib/api", () => ({
   callTool: (...args: unknown[]) => mocks.callTool(...args),
   listPersonas: () => mocks.listPersonas(),
@@ -19,19 +20,14 @@ const loopRow = {
 const listOk = (rows: unknown[]) => ({ ok: true, data: { loops: rows } });
 const cycleOk = { ok: true, data: { cycle: { cycle: 2, state: "settled", disposition: "continue", summary: "Flipped row 92." } } };
 
-const sessionRow = {
-  session_id: "ses_1", thread_id: "thr_1", title: "Main", agent_id: "researcher",
-  model: "m", updated_at: "2026-09-15T00:00:00Z", revision: 1,
-};
-
 function defaultImpl(name: string) {
-  if (name === "session_list") return Promise.resolve({ ok: true, data: { sessions: [sessionRow] } });
   if (name === "workflow.list_loops") return Promise.resolve(listOk([loopRow]));
   if (name === "workflow.get_loop_cycle") return Promise.resolve(cycleOk);
   return Promise.resolve({ ok: true, data: { loop: loopRow } });
 }
 
 beforeEach(() => {
+  mocks.threadId = "thr_1";
   mocks.callTool.mockReset().mockImplementation((name: string) => defaultImpl(name));
   mocks.listPersonas.mockReset().mockResolvedValue({
     count: 2,
@@ -73,7 +69,7 @@ describe("ProjectsView", () => {
     await waitFor(() => expect((screen.getByLabelText("Agent") as HTMLSelectElement).options.length).toBe(2));
   }
 
-  it("starts a project from the chosen persona and an explicit origin session", async () => {
+  it("starts a project from the chosen persona and the active chat thread", async () => {
     render(<ProjectsView />);
     await fillForm();
     fireEvent.change(screen.getByLabelText("Agent"), { target: { value: "researcher" } });
@@ -84,6 +80,14 @@ describe("ProjectsView", () => {
       envelope: { session_id: "thr_1" },
     }));
     await waitFor(() => expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe(""));
+  });
+
+  it("asks for a chat first and cannot start when there is no active thread", async () => {
+    mocks.threadId = undefined;
+    render(<ProjectsView />);
+    await fillForm();
+    expect(screen.getByText(/Open or start a chat first/)).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Start project" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("keeps the form and shows the server reason when starting fails", async () => {
