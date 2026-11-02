@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
 import { clearArchivedSessions, countClearableSessions } from "./session-actions";
@@ -39,7 +40,7 @@ export function ClearArchivedControl({ visible, onCleared }: {
       setCount(0);
       onCleared();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn’t clear archived sessions.");
+      setError(withReason("Couldn’t clear archived sessions.", errorReason(err)));
     } finally {
       setBusy(false);
     }

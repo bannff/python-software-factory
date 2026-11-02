@@ -1,20 +1,14 @@
 import { callTool } from "@/lib/api";
 import { parseResolvedCrew, type ResolvedCrew } from "@/components/crews/crew-types";
 import { parseSession, type SessionSummary } from "@/lib/hooks/use-session-list";
-import { unwrapToolData } from "@/lib/tool-result-data";
 import { requestQuestion } from "@/lib/mcp-question";
+import { parseAllowedRoots } from "@/lib/project-roots";
 
 type Caller = typeof callTool;
 
 export interface StartedCrewSession {
   crew: ResolvedCrew;
   session: SessionSummary;
-}
-
-function parseAllowedRoots(raw: unknown): string[] {
-  const data = unwrapToolData(raw) as { roots?: unknown };
-  if (!data || !Array.isArray(data.roots)) return [];
-  return data.roots.filter((root): root is string => typeof root === "string" && root.length > 0);
 }
 
 /**

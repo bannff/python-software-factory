@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useEffect, useMemo, useState } from "react";
 import { Archive, Loader2, Plus, RefreshCw, Search } from "lucide-react";
 import { useSessionList, type SessionSummary } from "@/lib/hooks/use-session-list";
@@ -52,7 +53,7 @@ export default function SessionsView({
     try {
       await onCreateSession();
     } catch (err) {
-      setRuntimeError(err instanceof Error ? err.message : "Couldn’t start a new session.");
+      setRuntimeError(withReason("Couldn’t start a new session.", errorReason(err)));
     } finally {
       setStarting(false);
     }
