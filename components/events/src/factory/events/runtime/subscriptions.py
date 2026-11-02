@@ -42,15 +42,21 @@ class SubscriptionRegistry:
 
     def __init__(self) -> None:
         self._subscriptions: dict[str, SubscriptionDefinition] = {}
+        self._origins: dict[str, str] = {}
 
-    def register(self, subscription: SubscriptionDefinition) -> None:
-        """Register a subscription."""
+    def register(self, subscription: SubscriptionDefinition, origin: str = "system") -> None:
+        """Register a subscription; ``origin`` is ``system`` (shipped) or ``authored``."""
         self._subscriptions[subscription.id] = subscription
+        self._origins[subscription.id] = origin
+
+    def origin_of(self, subscription_id: str) -> str:
+        return self._origins.get(subscription_id, "system")
 
     def unregister(self, subscription_id: str) -> bool:
         """Unregister a subscription by ID."""
         if subscription_id in self._subscriptions:
             del self._subscriptions[subscription_id]
+            self._origins.pop(subscription_id, None)
             return True
         return False
 

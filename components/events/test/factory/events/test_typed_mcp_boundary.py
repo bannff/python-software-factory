@@ -19,7 +19,7 @@ EXPECTED = {
     "events_get_event", "events_list_events", "events_replay", "events_list_history",
     "events_query_history", "events_prune_history", "events_authoring_get_status",
     "events_authoring_validate_subscriptions", "events_authoring_upsert_subscription",
-    "events_authoring_delete_subscription", "events_get_dashboard_summary",
+    "events_authoring_delete_subscription", "events_authoring_set_enabled", "events_get_dashboard_summary",
     "events_get_event_history_entry", "events_get_event_graph_context", "events_get_views",
 }
 
