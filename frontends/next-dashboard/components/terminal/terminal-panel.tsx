@@ -13,6 +13,7 @@ import {
 } from "@/lib/terminal-connection-registry";
 import { useTerminalMount } from "@/lib/hooks/use-terminal-session";
 import { TerminalCompletion } from "./terminal-completion";
+import { errorReason, withReason } from "@/lib/error-reason";
 
 let automaticOpen: ReturnType<typeof openTerminalSession> | null = null;
 
@@ -91,7 +92,7 @@ export function TerminalPanel({ onClose }: { onClose?: () => void }) {
       const { session } = await openTerminalSession(spec);
       scope.upsert(session);
       scope.setActive(session.session_id);
-    } catch { setError("Terminal is unavailable."); }
+    } catch (cause) { setError(withReason("Terminal is unavailable.", errorReason(cause))); }
   };
 
   const closeSession = async (sessionId: string) => {
