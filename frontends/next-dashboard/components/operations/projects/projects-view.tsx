@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ListTodo, Loader2, Play, RefreshCw } from "lucide-react";
+import { ListTodo, Loader2, RefreshCw } from "lucide-react";
 import { useProjects } from "@/lib/hooks/use-projects";
 import { ProjectCard } from "./project-card";
 import { ProjectDetail } from "./project-detail";
+import { StartForm } from "./start-form";
 import type { Loop } from "./project-types";
-
-const DEFAULT_AGENT = "companion-x-default";
 
 /**
  * Task Runner (feature-map rows 77-78, Agent Capabilities → Projects).
@@ -18,7 +17,7 @@ const DEFAULT_AGENT = "companion-x-default";
  * stop round-trip through the real MCP tools; no fabricated states.
  */
 export default function ProjectsView() {
-  const { loops, loading, error, refresh, start, pause, resume, stop } = useProjects();
+  const { loops, loading, error, threadId, refresh, start, pause, resume, stop } = useProjects();
   const [selected, setSelected] = useState<string | null>(null);
   const [gone, setGone] = useState(false);
 
@@ -38,10 +37,7 @@ export default function ProjectsView() {
         </button>
       </header>
 
-      <StartForm onStart={async (input) => {
-        const result = await start(input);
-        if (result.status !== "ok") setGone(false);
-      }} />
+      <StartForm onStart={start} hasThread={Boolean(threadId)} />
 
       {gone && (
         <div role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-sm text-amber-200">
@@ -93,60 +89,4 @@ export default function ProjectsView() {
       )}
     </section>
   );
-}
-
-function StartForm({ onStart }: { onStart: (input: {
-  title: string; spec: string; agentId: string; intervalSeconds: number; maxCycles: number;
-}) => Promise<void> }) {
-  const [title, setTitle] = useState("");
-  const [spec, setSpec] = useState("");
-  const [agentId, setAgentId] = useState(DEFAULT_AGENT);
-  const [interval, setInterval_] = useState(300);
-  const [maxCycles, setMaxCycles] = useState(24);
-  const [busy, setBusy] = useState(false);
-  const canStart = title.trim().length > 0 && spec.trim().length > 0 && !busy;
-
-  return (
-    <form className="rounded-xl border border-border/50 bg-card/30 p-4" onSubmit={async (e) => {
-      e.preventDefault();
-      if (!canStart) return;
-      setBusy(true);
-      await onStart({ title, spec, agentId, intervalSeconds: interval, maxCycles });
-      setBusy(false);
-      setTitle(""); setSpec("");
-    }}>
-      <label className="block text-xs font-medium text-muted-foreground" htmlFor="project-title">Title</label>
-      <input id="project-title" value={title} onChange={(e) => setTitle(e.target.value)}
-        placeholder="What is this project trying to achieve?"
-        className="mt-1 w-full rounded-md border border-border/60 bg-background px-3 py-2 text-sm" />
-      <label className="mt-3 block text-xs font-medium text-muted-foreground" htmlFor="project-spec">Spec</label>
-      <textarea id="project-spec" value={spec} onChange={(e) => setSpec(e.target.value)} rows={4}
-        placeholder="Describe the multi-step work each cycle should advance."
-        className="mt-1 w-full rounded-md border border-border/60 bg-background px-3 py-2 text-sm" />
-      <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        <Field label="Agent" htmlFor="project-agent">
-          <input id="project-agent" value={agentId} onChange={(e) => setAgentId(e.target.value)}
-            className="w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm" />
-        </Field>
-        <Field label="Interval (seconds)" htmlFor="project-interval">
-          <input id="project-interval" type="number" min={15} max={86400} value={interval}
-            onChange={(e) => setInterval_(Number(e.target.value) || 300)}
-            className="w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm" />
-        </Field>
-        <Field label="Max cycles" htmlFor="project-max-cycles">
-          <input id="project-max-cycles" type="number" min={0} max={10000} value={maxCycles}
-            onChange={(e) => setMaxCycles(Number(e.target.value) || 24)}
-            className="w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm" />
-        </Field>
-      </div>
-      <button type="submit" disabled={!canStart}
-        className="mt-3 flex items-center gap-1.5 rounded-md bg-violet-500 px-3 py-2 text-xs font-medium text-white disabled:opacity-50">
-        {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />} Start project
-      </button>
-    </form>
-  );
-}
-
-function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
-  return <div><label className="block text-[11px] text-muted-foreground" htmlFor={htmlFor}>{label}</label><div className="mt-1">{children}</div></div>;
 }
