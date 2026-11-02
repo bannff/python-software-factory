@@ -71,7 +71,7 @@ class GraphRuntime:
     @staticmethod
     def provenance_backends() -> list[str]:
         """Backends with the durable Graph provenance contract."""
-        return ["persistent_networkx", "networkx"]
+        return ["persistent_networkx", "networkx", "neo4j"]
 
 
 _runtime: GraphRuntime | None = None
