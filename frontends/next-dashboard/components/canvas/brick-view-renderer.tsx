@@ -1,5 +1,6 @@
 "use client";
 
+import { EmptyState } from "@/components/ui/empty-state";
 import { useEffect, useMemo } from "react";
 import { AlertCircle, Inbox } from "lucide-react";
 import { useToolData, ComponentTree, type ReactAdapterNode } from "@companion-x/shared-renderer";
@@ -95,10 +96,7 @@ export default function BrickViewRenderer({
   }
   if (!viewState) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-        <Inbox className="h-5 w-5 text-muted-foreground/50" />
-        <p className="text-sm text-muted-foreground">No view data available.</p>
-      </div>
+      <EmptyState icon={Inbox} title="Nothing to show yet" />
     );
   }
 

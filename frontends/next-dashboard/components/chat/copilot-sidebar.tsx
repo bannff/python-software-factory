@@ -8,6 +8,7 @@ import { useAgent } from "@copilotkit/react-core/v2";
 import type { Message } from "@ag-ui/core";
 import { useLiveToolStream } from "@/lib/hooks/use-live-tool-stream";
 import { cn } from "@/lib/utils";
+import { useSendPromptHandler } from "@/lib/chat/send-prompt";
 import { ChatResizeHandle } from "./chat-resize-handle";
 import { makeCollapsibleComposerInput } from "./composer-collapse";
 import { PinnedPromptBanner, latestUserPrompt } from "./pinned-prompt-banner";
@@ -91,6 +92,7 @@ export function CopilotChatSidebar({ onToggle, activeView, width, onResize }: Co
     scroller.scrollTop = (index / (turns.length - 1)) * (scroller.scrollHeight - scroller.clientHeight);
   };
   const [draft, setDraft] = useState("");
+  useSendPromptHandler(AGENT_ID);
   // Chat right-side-panel (registry-driven; off by default → no regression
   // when closed). Summary is the first real tab (row 18's proper home);
   // future tabs (Pins/Side/Browser/…) append to this array.
