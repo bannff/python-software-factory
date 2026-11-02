@@ -70,6 +70,8 @@ export interface Finding {
   affected_resource_arn?: string;
   analysis_id?: string;
   analysis_target?: string;
+  /** The workflow run that produced this finding, for links to Timeline and Graph. */
+  run_id?: string;
   source?: "graph" | "live";
 }
 

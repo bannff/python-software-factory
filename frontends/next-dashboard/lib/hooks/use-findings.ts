@@ -64,6 +64,7 @@ function rowToFinding(r: Record<string, unknown>, idx: number): Finding {
     cwe,
     category: r.category ? String(r.category) : undefined,
     remediation: r.remediation ? String(r.remediation) : undefined,
+    run_id: r.run_id ? String(r.run_id) : undefined,
     timestamp: Date.now(),
     source: "graph" as const,
   };

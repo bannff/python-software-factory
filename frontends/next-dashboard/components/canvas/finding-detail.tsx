@@ -7,6 +7,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { cn } from "@/lib/utils";
 import type { Finding } from "@/lib/types";
+import { FindingLinks } from "./finding-links";
 
 interface FindingDetailProps {
   finding: Finding;
@@ -120,6 +121,8 @@ export function FindingDetail({ finding }: FindingDetailProps) {
             )}
           </div>
         </div>
+
+        <FindingLinks runId={finding.run_id} />
 
         {/* Description */}
         {finding.description && <p className="text-sm text-foreground/80">{finding.description}</p>}
