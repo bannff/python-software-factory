@@ -28,8 +28,8 @@ async function pickReplacementProject(caller: Caller): Promise<string | null> {
   return decision.action === "answer" ? decision.value : null;
 }
 
-/** Resolve the default Crew, then materialize it through Session's sole create path. */
-export async function startDefaultCrewSession(
+/** Resolve a Crew by id, then materialize it through Session's sole create path. */
+export async function startCrewSession(
   crewId: string, caller: Caller = callTool,
 ): Promise<StartedCrewSession> {
   let crew: ResolvedCrew;
@@ -38,7 +38,7 @@ export async function startDefaultCrewSession(
       crew_id: crewId,
     }));
   } catch {
-    throw new Error("Default crew unavailable");
+    throw new Error("Crew unavailable");
   }
   const create = (project: string) => caller("session_create", {
     title: "New session", agent_id: crew.persona_id, model: crew.model_id,
@@ -50,15 +50,15 @@ export async function startDefaultCrewSession(
     return { crew, session };
   } catch (error) {
     if (!(error instanceof Error) || error.message !== "session_project_path_refused") {
-      throw new Error("Default crew session could not be created");
+      throw new Error("Crew session could not be created");
     }
     const replacement = await pickReplacementProject(caller);
-    if (!replacement) throw new Error("Default crew session could not be created");
+    if (!replacement) throw new Error("Crew session could not be created");
     try {
       const session = parseSession(await create(replacement));
       return { crew, session };
     } catch {
-      throw new Error("Default crew session could not be created");
+      throw new Error("Crew session could not be created");
     }
   }
 }

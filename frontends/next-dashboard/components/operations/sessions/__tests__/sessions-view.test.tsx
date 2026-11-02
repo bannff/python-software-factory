@@ -31,7 +31,7 @@ vi.mock("@/lib/hooks/use-session-list", async (importOriginal) => {
     },
   };
 });
-vi.mock("@/lib/hooks/use-personas", () => ({
+vi.mock("@/lib/hooks/use-crews", () => ({ useCrews: () => ({ crews: [], loading: false, error: null }) })); vi.mock("@/lib/hooks/use-personas", () => ({
   usePersonas: () => ({ personas: [{ id: "red-team", name: "Red Team" }], loading: false, error: null, refresh: vi.fn() }),
 }));
 vi.mock("@/lib/api", () => ({ callTool: (...args: unknown[]) => mocks.callTool(...args) }));

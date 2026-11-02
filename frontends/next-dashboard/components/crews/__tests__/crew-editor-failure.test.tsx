@@ -40,4 +40,19 @@ describe("CrewEditor domain failures", () => {
     expect(onSaved).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it("puts a refused project path on the Project field and keeps the form", async () => {
+    callTool.mockResolvedValue({ tool: "agent_create_crew", result: { ok: false, error: "crew_project_path_refused" } });
+    render(<CrewEditor crew={null} isDefault={false} onSaved={vi.fn()} onClose={vi.fn()} />);
+    const fill = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
+    fill("Crew ID", "alpha"); fill("Name", "Alpha"); fill("Persona", "redteam");
+    fill("Project path", "/tmp"); fill("Memory scope", "alpha");
+    fireEvent.click(screen.getByRole("button", { name: /create|save/i }));
+    const project = screen.getByLabelText("Project path");
+    await waitFor(() => expect(project.getAttribute("aria-invalid")).toBe("true"));
+    expect(document.getElementById("crew-project-control-error")?.textContent).toMatch(/allowed project root/i);
+    expect((project as HTMLInputElement).value).toBe("/tmp");
+    expect((screen.getByLabelText("Name") as HTMLInputElement).value).toBe("Alpha");
+    expect(screen.queryByText(/Couldn’t create this crew/)).toBeNull();
+  });
 });

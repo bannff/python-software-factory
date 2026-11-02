@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validateCrewForm, type CrewFormValues } from "../crew-validation";
+import { serverFieldError, validateCrewForm, type CrewFormValues } from "../crew-validation";
 
 const valid: CrewFormValues = {
   id: "redteam", name: "Red Team", persona_id: "redteam", project: "/work/app",
@@ -29,5 +29,15 @@ describe("validateCrewForm", () => {
   it("rejects more than 32 triggers", () => {
     const triggers = Array.from({ length: 33 }, (_, i) => `t${i}`).join(",");
     expect(validateCrewForm({ ...valid, triggers }, true).triggers).toMatch(/32/);
+  });
+});
+
+describe("serverFieldError", () => {
+  it("maps crew_project_path_refused to the project field", () => {
+    expect(serverFieldError("crew_project_path_refused")?.project).toMatch(/allowed project root/i);
+  });
+  it("leaves unmapped or missing reasons form-level", () => {
+    expect(serverFieldError("crew_exists")).toBeUndefined();
+    expect(serverFieldError(undefined)).toBeUndefined();
   });
 });
