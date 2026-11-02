@@ -96,6 +96,7 @@ export function ModelPicker({ agentId }: { agentId: string }) {
   return (
     <Popover
       align="left"
+      side="down"
       trigger={
         <span className="flex items-center gap-1 text-[10px] text-muted-foreground/70" title="Choose the chat model">
           <Cpu className="h-3 w-3" />
