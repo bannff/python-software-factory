@@ -19,6 +19,15 @@ ALLOWED_PREFIXES = (
     "components/arcade_config/",
     "bases/openarcade/",
     "scripts/test/test_rename_corruption_guard.py",
+    # Pinned host-guidance snapshot (AGENTS.md): repair held for owner review,
+    # tracked in issue #125. Remove these entries when that lands.
+    ".kiro/",
+    ".github/copilot-instructions.md",
+    ".github/agents/",
+    ".github/hooks/",
+    ".opencode/",
+    ".vscode/",
+    "opencode.json",
 )
 
 

@@ -2,7 +2,7 @@
 name: "Factory Doc Writer"
 description: "Use when updating README files, steering docs, recipes, BRICK metadata, or explaining code and architecture changes in the Python Factory."
 model: "Kimi Code 2.7"
-tools: [vscode, read, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'companion-x/*', 'python-factory/*', todo]
+tools: [vscode, read, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'the control-plane runtime/*', 'python-factory/*', todo]
 argument-hint: "Describe the code or workflow change that the documentation should cover."
 user-invocable: false
 ---

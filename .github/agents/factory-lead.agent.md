@@ -1,7 +1,7 @@
 ---
 name: "Factory Lead"
 description: "Use when you want one VS Code agent to triage work, choose the right specialist, and coordinate architecture review, implementation, QA, and docs in the Python Factory."
-tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'companion-x/*', 'python-factory/*', todo]
+tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'the control-plane runtime/*', 'python-factory/*', todo]
 agents: [Factory Meta-Architect, Strands Expert, Factory Implementer, Factory QA Tester, Factory Security Engineer, Factory Doc Writer]
 argument-hint: "Describe the task and any constraints or acceptance criteria."
 user-invocable: true

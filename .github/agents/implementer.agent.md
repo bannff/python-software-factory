@@ -2,7 +2,7 @@
 name: "Factory Implementer"
 description: "Use when implementing features, fixing bugs, editing Python bricks, adding MCP tools, building adapters, or refactoring code in the Python Factory."
 model: "minimax-m3"
-tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'companion-x/*', 'python-factory/*', todo]
+tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'the control-plane runtime/*', 'python-factory/*', todo]
 argument-hint: "Describe the code change, affected brick, and acceptance criteria."
 user-invocable: false
 ---
