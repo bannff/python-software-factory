@@ -7,6 +7,7 @@ from typing import Any
 
 from factory.memory.runtime.models import Memory, MemoryHealth, MemoryQuery, MemoryStats
 from factory.memory.runtime.adapters.neo4j import Neo4jMemoryStore, to_memory
+from factory.memory.runtime.adapters.neo4j_index import sync_vector_index
 from factory.memory.runtime.adapters._neo4j_filters import build_filter_clauses
 from factory.memory.runtime.emit import emit_memory_event
 
@@ -42,24 +43,8 @@ class Neo4jEmbeddingMemoryStore:
         if dims <= 0:
             return
         with self._session() as s:
-            try:
-                have = s.run("SHOW VECTOR INDEXES YIELD name, options WHERE name = "
-                             "'memory_embedding' RETURN options").single()
-                if have is not None:
-                    size = have["options"].get("indexConfig", {}).get("vector.dimensions")
-                    if size == dims:
-                        return
-                    # IF NOT EXISTS never resizes; rebuild on a provider change
-                    # (existing memories must be re-embedded).
-                    logger.warning("memory vector index is %s-d, embedder is %s-d: "
-                                   "rebuilding", size, dims)
-                    s.run("DROP INDEX memory_embedding")
-                s.run(
-                    "CREATE VECTOR INDEX memory_embedding FOR (m:Memory) ON (m.embedding) "
-                    "OPTIONS {indexConfig: {`vector.dimensions`: $dims, "
-                    "`vector.similarity_function`: 'cosine'}}", dims=dims)
-            except Exception as exc:  # noqa: BLE001 - retrieval degrades, never breaks
-                logger.warning("memory vector index setup failed: %s", exc)
+            sync_vector_index(s, "memory_embedding", "Memory", "embedding", dims)
+
     def _ensure_evolution_constraints(self) -> None:
         with self._session() as s:
             for q in ["CREATE INDEX mem_keywords IF NOT EXISTS FOR (m:Memory) ON (m.keywords)",
