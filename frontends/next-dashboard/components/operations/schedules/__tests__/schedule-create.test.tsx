@@ -3,7 +3,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const mocks = vi.hoisted(() => ({ callTool: vi.fn() }));
 vi.mock("@copilotkit/react-core/v2", () => ({ useAgent: () => ({ agent: { threadId: "thread-1" } }) }));
-vi.mock("@/lib/api", () => ({ callTool: (...args: unknown[]) => mocks.callTool(...args) }));
+vi.mock("@/lib/api", () => ({
+  callTool: (...args: unknown[]) => mocks.callTool(...args),
+  listPersonas: () => Promise.resolve({ count: 2, personas: [
+    { id: "companion-x-default", name: "Companion X", description: "", model: null },
+    { id: "reviewer", name: "Reviewer", description: "", model: null },
+  ] }),
+}));
 
 import SchedulesView from "../schedules-view";
 
@@ -78,5 +84,48 @@ describe("Schedule creation", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(mocks.callTool).not.toHaveBeenCalledWith("scheduler_add", expect.anything());
+  });
+
+  it("sends the agent picked from the registry", async () => {
+    render(<SchedulesView />);
+    fireEvent.click((await screen.findAllByRole("button", { name: "New schedule" }))[0]);
+    await screen.findByRole("option", { name: "Reviewer" });
+    fireEvent.change(screen.getByLabelText("Agent"), { target: { value: "reviewer" } });
+    fireEvent.change(screen.getByLabelText("Task"), { target: { value: "Review" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create schedule" }));
+    await waitFor(() => expect(mocks.callTool).toHaveBeenCalledWith("scheduler_add",
+      expect.objectContaining({ agent_id: "reviewer" })));
+  });
+
+  it.each([
+    ["scheduler_task_required", "Task", "Enter what this schedule should do."],
+    ["scheduler_agent_not_found", "Agent", "That agent doesn't exist. Pick one from the list."],
+    ["scheduler_interval_too_short", /^Interval/, "Use at least 60 seconds."],
+    ["scheduler_one_shot_in_past", "Fire at", "Pick a time in the future."],
+  ])("puts %s on its own field", async (code, label, message) => {
+    mocks.callTool.mockImplementation((name: string) => name === "scheduler_add"
+      ? Promise.resolve({ ok: false, error: { message: code } }) : defaultImpl(name));
+    render(<SchedulesView />);
+    fireEvent.click((await screen.findAllByRole("button", { name: "New schedule" }))[0]);
+    fireEvent.change(await screen.findByLabelText("Task"), { target: { value: "Do it" } });
+    if (code === "scheduler_one_shot_in_past") {
+      fireEvent.click(screen.getByRole("radio", { name: "Once at a time" }));
+      fireEvent.change(screen.getByLabelText("Fire at"), { target: { value: "2020-01-01T00:00" } });
+    }
+    fireEvent.click(screen.getByRole("button", { name: "Create schedule" }));
+
+    expect(await screen.findByText(message)).toBeTruthy();
+    expect(screen.getByLabelText(label).getAttribute("aria-invalid")).toBe("true");
+    expect(screen.queryByText(/Check the fields and try again/)).toBeNull();
+  });
+
+  it("keeps the generic text and the server's reason for an unmapped failure", async () => {
+    mocks.callTool.mockImplementation((name: string) => name === "scheduler_add"
+      ? Promise.resolve({ ok: false, error: { message: "scheduler_origin_not_found" } }) : defaultImpl(name));
+    render(<SchedulesView />);
+    fireEvent.click((await screen.findAllByRole("button", { name: "New schedule" }))[0]);
+    fireEvent.change(await screen.findByLabelText("Task"), { target: { value: "Do it" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create schedule" }));
+    expect(await screen.findByText(/didn't go through.*scheduler_origin_not_found/)).toBeTruthy();
   });
 });

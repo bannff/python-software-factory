@@ -4,9 +4,18 @@ import { useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { withReason } from "@/lib/error-reason";
 import type { ActionResult } from "@/lib/hooks/use-schedules";
-import { isCreateInputComplete, MIN_INTERVAL_SECONDS, type ScheduleCreateInput, type ScheduleKind } from "./schedule-types";
+import { usePersonas } from "@/lib/hooks/use-personas";
+import {
+  isCreateInputComplete, MIN_INTERVAL_SECONDS, scheduleFieldError,
+  type ScheduleCreateInput, type ScheduleFieldErrors, type ScheduleKind,
+} from "./schedule-types";
 
 const DEFAULT_AGENT = "companion-x-default";
+const FIELD = "mt-1 w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm";
+
+function FieldError({ message }: { message?: string }) {
+  return message ? <p className="mt-1 text-xs text-destructive">{message}</p> : null;
+}
 
 /**
  * Row 55 (Schedule) creation control. Agent-turn schedules only — the
@@ -27,6 +36,11 @@ export function ScheduleCreateDialog({ onClose, onCreate }: {
   const [cronExpression, setCronExpression] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<ScheduleFieldErrors>({});
+  const { personas } = usePersonas();
+
+  const invalid = (field: keyof ScheduleFieldErrors) =>
+    ({ "aria-invalid": fieldErrors[field] ? true : undefined });
 
   const input: ScheduleCreateInput = {
     agentId, task, kind,
@@ -37,10 +51,12 @@ export function ScheduleCreateDialog({ onClose, onCreate }: {
   const canCreate = isCreateInputComplete(input) && !busy;
 
   const submit = async () => {
-    setBusy(true); setError(null);
+    setBusy(true); setError(null); setFieldErrors({});
     const result = await onCreate(input);
     setBusy(false);
+    const refused = scheduleFieldError(result.reason);
     if (result.status === "ok") onClose();
+    else if (refused) setFieldErrors(refused);
     else setError(withReason("That schedule didn't go through. Check the fields and try again.", result.reason));
   };
 
@@ -56,13 +72,21 @@ export function ScheduleCreateDialog({ onClose, onCreate }: {
       {error && <p role="alert" className="mb-3 rounded-md border border-destructive/30 bg-destructive/5 p-2 text-xs">{error}</p>}
 
       <label className="block text-xs font-medium text-muted-foreground" htmlFor="sc-agent">Agent</label>
-      <input id="sc-agent" value={agentId} onChange={(e) => setAgentId(e.target.value)}
-        className="mt-1 w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm" />
+      {personas.length > 0
+        ? <select id="sc-agent" value={agentId} onChange={(e) => setAgentId(e.target.value)} {...invalid("agentId")}
+            className={FIELD}>
+            {personas.some((p) => p.id === agentId) || <option value={agentId}>{agentId}</option>}
+            {personas.map((p) => <option key={p.id} value={p.id}>{p.name || p.id}</option>)}
+          </select>
+        : <input id="sc-agent" value={agentId} onChange={(e) => setAgentId(e.target.value)} {...invalid("agentId")}
+            className={FIELD} />}
+      <FieldError message={fieldErrors.agentId} />
 
       <label className="mt-3 block text-xs font-medium text-muted-foreground" htmlFor="sc-task">Task</label>
       <textarea id="sc-task" value={task} onChange={(e) => setTask(e.target.value)} rows={3}
         placeholder="What should this run do each time it fires?"
-        className="mt-1 w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm" />
+        {...invalid("task")} className={FIELD} />
+      <FieldError message={fieldErrors.task} />
 
       <fieldset className="mt-3">
         <legend className="text-xs font-medium text-muted-foreground">Timing</legend>
@@ -81,14 +105,16 @@ export function ScheduleCreateDialog({ onClose, onCreate }: {
           <label className="block text-[11px] text-muted-foreground" htmlFor="sc-interval">Interval (seconds, at least {MIN_INTERVAL_SECONDS})</label>
           <input id="sc-interval" type="number" min={MIN_INTERVAL_SECONDS} max={86400} value={intervalSeconds}
             onChange={(e) => setIntervalSeconds(Number(e.target.value) || 3600)}
-            className="mt-1 w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm" />
+            {...invalid("intervalSeconds")} className={FIELD} />
+          <FieldError message={fieldErrors.intervalSeconds} />
         </div>
       )}
       {kind === "one_shot" && (
         <div className="mt-2">
           <label className="block text-[11px] text-muted-foreground" htmlFor="sc-when">Fire at</label>
           <input id="sc-when" type="datetime-local" value={oneShotAt} onChange={(e) => setOneShotAt(e.target.value)}
-            className="mt-1 w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm" />
+            {...invalid("oneShotAt")} className={FIELD} />
+          <FieldError message={fieldErrors.oneShotAt} />
         </div>
       )}
       {kind === "cron" && (
