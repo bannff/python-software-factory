@@ -13,15 +13,16 @@ services:
 
   # Graph Database
   neo4j:
-    image: neo4j:5-community
+    image: neo4j:5.26-community
     environment:
-      NEO4J_AUTH: neo4j/password
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-password}
       NEO4J_PLUGINS: '["graph-data-science"]'
       NEO4J_server_memory_heap_initial__size: 512m
       NEO4J_server_memory_heap_max__size: 1G
+    # Loopback only: the stock password is a dev default, never publish it.
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
     volumes:
       - neo4j_data:/data
 
