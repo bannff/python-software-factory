@@ -28,4 +28,16 @@ describe("CrewEditor domain failures", () => {
     expect(onSaved).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
   });
+
+  it("shows the server's reason and stays open when set-default resolves ok:false", async () => {
+    callTool.mockResolvedValue({ tool: "agent_set_default_crew", result: { ok: false, error: "crew_not_found" } });
+    const onSaved = vi.fn();
+    const onClose = vi.fn();
+    const crew = { id: "alpha", name: "Alpha", persona_id: "redteam", project: "/work/app", memory_scope: "alpha", revision: 1 };
+    render(<CrewEditor crew={crew as never} isDefault={false} onSaved={onSaved} onClose={onClose} />);
+    fireEvent.click(screen.getByRole("button", { name: /set as default/i }));
+    expect((await screen.findByRole("alert")).textContent).toContain("crew_not_found");
+    expect(onSaved).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
 });
