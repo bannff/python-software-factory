@@ -91,15 +91,19 @@ def _configure_neo4j(runtime: KBRuntime, get_neo4j_config: Any) -> None:
     from .runtime.retrieval.neo4j_embedding import LLMGatewayKBEmbedder, NoOpKBEmbedder
 
     neo4j = get_neo4j_config()
-    cfg = Neo4jVectorConfig(
-        uri=neo4j["uri"], user=neo4j["user"], password=neo4j["password"],
-    )
     try:
         embedder = LLMGatewayKBEmbedder()
-        logger.info("KB using LLMGatewayKBEmbedder (dims=%d)", embedder.dimensions)
+        dims = embedder.dimensions
+        if dims == 0:
+            raise RuntimeError("no embedding provider reachable")
+        logger.info("KB using LLMGatewayKBEmbedder (dims=%d)", dims)
     except Exception as e:
         logger.warning("KB embedder init failed, using NoOp: %s", e)
         embedder = NoOpKBEmbedder()
+    cfg = Neo4jVectorConfig(
+        uri=neo4j["uri"], user=neo4j["user"], password=neo4j["password"],
+        embedding_dimensions=embedder.dimensions or 1024,
+    )
     runtime.set_vector_store(Neo4jVectorStore(cfg, embedder=embedder))
 
 

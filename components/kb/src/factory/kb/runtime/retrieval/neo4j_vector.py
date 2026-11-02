@@ -7,6 +7,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 from ..models import Document, SearchResult
 from ..ports import VectorStore
+from .neo4j_index import sync_vector_index
 
 try:
     from neo4j import GraphDatabase
@@ -58,12 +59,9 @@ class Neo4jVectorStore(VectorStore):
 
     def _ensure_index(self) -> None:
         cfg = self._config
-        q = (f"CREATE VECTOR INDEX {cfg.index_name} IF NOT EXISTS FOR (n:{cfg.node_label}) "
-             f"ON (n.{cfg.embedding_property}) OPTIONS {{indexConfig: "
-             f"{{`vector.dimensions`: $dims, `vector.similarity_function`: 'cosine'}}}}")
         with self._driver.session(database=cfg.database) as s:
-            try: s.run(q, dims=cfg.embedding_dimensions)
-            except Exception: pass
+            sync_vector_index(s, cfg.index_name, cfg.node_label,
+                              cfg.embedding_property, cfg.embedding_dimensions)
 
     def _run(self, cypher: str, **params: Any) -> list[Any]:
         with self._driver.session(database=self._config.database) as s:

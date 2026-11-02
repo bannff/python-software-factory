@@ -28,11 +28,12 @@ class MemoryEmbedder(Protocol):
 class LLMGatewayEmbedder:
     """Adapter: Use llm_gateway's EmbeddingProvider for memory embeddings."""
 
-    def __init__(self, backend: str = "bedrock", model: str | None = None) -> None:
+    def __init__(self, backend: str | None = None, model: str | None = None) -> None:
+        # backend None = the gateway's FACTORY_LLM_EMBEDDING_ADAPTER (no hardcoded cloud).
         self._backend = backend
         self._model = model
         self._provider: Any = None
-        self._dims: int = 1024  # Titan v2 default
+        self._dims: int | None = None
 
     def _get_provider(self) -> Any:
         if self._provider is None:
@@ -56,8 +57,20 @@ class LLMGatewayEmbedder:
         return vectors
 
     @property
+    def label(self) -> str:
+        """Human-readable provider/model for status displays."""
+        return f"{self._backend or 'gateway default'}/{self._model or 'default model'}"
+
+    @property
     def dimensions(self) -> int:
-        return self._dims
+        """Vector size, learned once by embedding a probe string (0 = unavailable)."""
+        if self._dims is None:
+            try:
+                self.embed(["dimension probe"])
+            except Exception as exc:  # noqa: BLE001 - no provider means no vectors
+                logger.warning("embedding provider unavailable: %s", exc)
+                self._dims = 0
+        return self._dims or 0
 
 
 class NoOpEmbedder:

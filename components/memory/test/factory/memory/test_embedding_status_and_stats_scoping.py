@@ -22,8 +22,8 @@ def test_embedding_status_reports_non_graph_backend_honestly() -> None:
     assert result.ok
     assert result.data.is_graph_backend is False
     assert result.data.embedder_configured is False
-    assert result.data.load_error == "not_graph_backend"
-    assert "MEMORY_BACKEND=graph" in result.data.change_hint
+    assert result.data.load_error == "embeddings_not_enabled"
+    assert "MEMORY_BACKEND=neo4j" in result.data.change_hint
 
 
 def test_embedding_status_reports_graph_backend_with_fallback_embedder() -> None:
@@ -73,3 +73,18 @@ def test_memory_stats_scopes_to_caller_by_default_not_global_aggregate() -> None
     # No ambient identity in this unit test -> falls through to the
     # pre-existing global-aggregate contract, unchanged for that case.
     assert explicit_global.ok and explicit_global.data.total_memories == 2
+
+
+def test_embedding_status_reports_neo4j_backend_with_a_live_embedder() -> None:
+    class _Embedder:
+        label = "ollama/nomic-embed-text"
+        dimensions = 768
+
+    class Neo4jEmbeddingMemoryStore:  # status keys off the store's embedder, not its module
+        embedder = _Embedder()
+
+    tools = {t.name: t for t in asyncio.run(create_mcp_server(
+        MemoryRuntime(store=Neo4jEmbeddingMemoryStore())).list_tools())}
+    data = tools["memory_get_embedding_status"].fn().data
+    assert (data.backend, data.is_graph_backend, data.is_semantic) == ("neo4j", True, True)
+    assert (data.dimensions, data.model_path, data.load_error) == (768, "ollama/nomic-embed-text", None)

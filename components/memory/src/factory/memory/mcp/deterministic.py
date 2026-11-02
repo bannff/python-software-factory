@@ -145,17 +145,31 @@ def register(mcp: Any, runtime: MemoryRuntime) -> None:
         """
         store = runtime.adapter
         embedder = getattr(store, "embedder", None)
-        is_graph = embedder is not None
+        has_embedder = embedder is not None
+        is_local_graph = has_embedder and hasattr(embedder, "is_semantic")
+        if is_local_graph:  # GraphMemoryStore + llama.cpp GGUF
+            return {
+                "backend": "graph", "is_graph_backend": True,
+                "embedder_configured": True, "is_semantic": bool(embedder.is_semantic),
+                "load_error": embedder.load_error, "model_path": embedder.model_path,
+                "dimensions": embedder.dimensions,
+                "change_hint": (
+                    "Set MEMORY_BACKEND=graph and MEMORY_LOCAL_EMBED_MODEL="
+                    "/path/to/model.gguf in the API environment and restart."
+                ),
+            }
+        dims = embedder.dimensions if has_embedder else 0
         return {
-            "backend": "graph" if is_graph else type(store).__name__,
-            "is_graph_backend": is_graph,
-            "embedder_configured": is_graph,
-            "is_semantic": bool(is_graph and embedder.is_semantic),
-            "load_error": embedder.load_error if is_graph else "not_graph_backend",
-            "model_path": embedder.model_path if is_graph else "",
-            "dimensions": embedder.dimensions if is_graph else 0,
+            "backend": "neo4j" if has_embedder else type(store).__name__,
+            "is_graph_backend": has_embedder or type(store).__name__ == "Neo4jMemoryStore",
+            "embedder_configured": has_embedder,
+            "is_semantic": bool(has_embedder and dims > 0),
+            "load_error": None if (has_embedder and dims > 0) else (
+                "embedding provider unreachable" if has_embedder else "embeddings_not_enabled"),
+            "model_path": getattr(embedder, "label", "") if has_embedder else "",
+            "dimensions": dims,
             "change_hint": (
-                "Set MEMORY_BACKEND=graph and MEMORY_LOCAL_EMBED_MODEL="
-                "/path/to/model.gguf in the API environment and restart."
+                "Set MEMORY_BACKEND=neo4j and MEMORY_EMBEDDINGS=true (or ollama/openai/bedrock); "
+                "pick the provider with FACTORY_LLM_EMBEDDING_ADAPTER, then restart the API."
             ),
         }

@@ -7,6 +7,7 @@ from typing import Any
 
 from factory.memory.runtime.models import Memory, MemoryHealth, MemoryQuery, MemoryStats
 from factory.memory.runtime.adapters.neo4j import Neo4jMemoryStore, to_memory
+from factory.memory.runtime.adapters.neo4j_index import sync_vector_index
 from factory.memory.runtime.adapters._neo4j_filters import build_filter_clauses
 from factory.memory.runtime.emit import emit_memory_event
 
@@ -23,6 +24,11 @@ class Neo4jEmbeddingMemoryStore:
         if llm_complete:
             self._ensure_evolution_constraints()
 
+    @property
+    def embedder(self) -> Any:
+        """Read-only introspection for the Embeddings status tool."""
+        return self._embedder
+
     def _get_engine(self) -> Any:
         if self._engine is None and self._llm_complete is not None:
             from factory.memory.runtime.evolution import EvolutionEngine
@@ -37,14 +43,8 @@ class Neo4jEmbeddingMemoryStore:
         if dims <= 0:
             return
         with self._session() as s:
-            try:
-                s.run(
-                    "CREATE VECTOR INDEX memory_embedding IF NOT EXISTS "
-                    "FOR (m:Memory) ON (m.embedding) OPTIONS {indexConfig: {"
-                    "`vector.dimensions`: $dims, `vector.similarity_function`: 'cosine'}}",
-                    dims=dims)
-            except Exception:
-                pass
+            sync_vector_index(s, "memory_embedding", "Memory", "embedding", dims)
+
     def _ensure_evolution_constraints(self) -> None:
         with self._session() as s:
             for q in ["CREATE INDEX mem_keywords IF NOT EXISTS FOR (m:Memory) ON (m.keywords)",
