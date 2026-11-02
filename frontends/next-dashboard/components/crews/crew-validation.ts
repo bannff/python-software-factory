@@ -7,6 +7,17 @@ export interface CrewFormValues {
 
 export type CrewFormErrors = Partial<Record<keyof CrewFormValues, string>>;
 
+/** Typed server refusals that belong to one field, keyed by the code `errorReason` surfaces. */
+const SERVER_FIELD_ERRORS: Readonly<Record<string, readonly [keyof CrewFormValues, string]>> = {
+  crew_project_path_refused: ["project", "This path is outside the allowed project roots. Pick an allowed project root."],
+};
+
+/** The field-level error for a server refusal, or undefined when it is not field-specific. */
+export function serverFieldError(reason: string | undefined): CrewFormErrors | undefined {
+  const mapped = reason === undefined ? undefined : SERVER_FIELD_ERRORS[reason];
+  return mapped && { [mapped[0]]: mapped[1] };
+}
+
 const SLUG = /^[a-z0-9][a-z0-9_-]{0,63}$/;
 const SLUG_RULE = "Use lowercase letters, digits, hyphen or underscore (1–64), starting with a letter or digit.";
 const MAX_TRIGGERS = 32;
