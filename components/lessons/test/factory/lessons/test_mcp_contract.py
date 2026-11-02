@@ -28,7 +28,7 @@ def _session_factory(_caller):
         assert target == {"brick_name": "session", "tool_name": "resolve_thread"}
         return {"ok": True, "result": {"structured_content": {
             "ok": True, "data": {"session": {
-                "session_id": "session", "thread_id": "thread", "state": "active",
+                "session_id": "session", "thread_id": "thread", "archived_at": None,
             }},
         }}}
     return invoke
@@ -90,7 +90,7 @@ def test_archived_session_refuses_durable_lesson_write(tmp_path) -> None:
             "ok": True, "result": {"structured_content": {
                 "ok": True, "data": {"session": {
                     "session_id": "session", "thread_id": "thread",
-                    "state": "archived",
+                    "archived_at": "2026-11-01T00:00:00Z",
                 }},
             }},
         }
@@ -165,7 +165,7 @@ def test_archived_session_refuses_lesson_curation(tmp_path) -> None:
             "ok": True, "result": {"structured_content": {
                 "ok": True, "data": {"session": {
                     "session_id": "session", "thread_id": "thread",
-                    "state": "archived",
+                    "archived_at": "2026-11-01T00:00:00Z",
                 }},
             }},
         }

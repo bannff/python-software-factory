@@ -135,3 +135,26 @@ def test_concurrent_update_single_winner() -> None:
     assert len(wins) == 1
     assert len(conflicts) == 7
     assert store.get_crew(_T, _O, "c1").revision == 2
+
+
+def test_project_outside_allowed_roots_is_a_typed_refusal(monkeypatch) -> None:
+    from factory.agent.mcp.crew_tools import _run
+    from factory.agent.runtime.crew_contracts import CrewProjectRejectedError
+
+    def refuse(*_args):
+        raise ValueError("project is outside the allowed roots")
+
+    monkeypatch.setattr("factory.devtools.interface.validate_project", refuse)
+    with pytest.raises(CrewProjectRejectedError):
+        CrewLifecycle._validate_project(_T, _O, "c1", "/tmp")
+
+    def raiser(*_ids):
+        CrewLifecycle._validate_project(_T, _O, "c1", "/tmp")
+
+    from factory.mcp_utils.interface import reset_envelope, set_envelope
+    token = set_envelope({"tenant_id": _T, "principal_id": _O})
+    try:
+        result = _run(raiser)
+    finally:
+        reset_envelope(token)
+    assert result.ok is False and result.error == "crew_project_path_refused"
