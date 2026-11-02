@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArrowUpRight, Globe, Loader2, PlayCircle, ShieldCheck } from "lucide-react";
 import { callTool } from "@/lib/api";
 import { unwrapToolData } from "@/lib/tool-result-data";
+import { errorReason, withReason } from "@/lib/error-reason";
 
 interface EngineStatus {
   engine: string; availableEngines: string[]; chromePath: string | null;
@@ -35,7 +36,7 @@ export default function BrowserSettingsPanel() {
 
   const refresh = useCallback(async () => {
     try { setStatus(statusFrom(await callTool("browser_get_engine_status"))); setError(null); }
-    catch { setError("Engine status unavailable."); }
+    catch (cause) { setError(withReason("Engine status unavailable.", errorReason(cause))); }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);
 

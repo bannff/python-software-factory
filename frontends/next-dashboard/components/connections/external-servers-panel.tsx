@@ -8,6 +8,7 @@ import {
   addExternalServer, importExternalServers, listExternalServers,
   removeExternalServer, specFrom, updateExternalServer, type ExternalServer,
 } from "./external-servers-api";
+import { errorReason, withReason } from "@/lib/error-reason";
 
 interface ExternalServersPanelProps {
   ready: boolean;
@@ -24,14 +25,14 @@ export function ExternalServersPanel({ ready, onChanged }: ExternalServersPanelP
   const refresh = useCallback(async () => {
     if (!ready) return;
     try { setServers(await listExternalServers()); setError(null); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Servers unavailable."); }
+    catch (cause) { setError(withReason("Servers unavailable.", errorReason(cause))); }
   }, [ready]);
   useEffect(() => { void refresh(); }, [refresh]);
 
   const run = async (key: string, action: () => Promise<unknown>) => {
     setBusy(key); setError(null);
     try { await action(); await refresh(); onChanged(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Operation failed."); }
+    catch (cause) { setError(withReason("Operation failed.", errorReason(cause))); }
     finally { setBusy(null); }
   };
 

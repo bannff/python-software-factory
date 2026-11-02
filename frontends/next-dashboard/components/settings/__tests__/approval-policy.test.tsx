@@ -42,3 +42,12 @@ describe("Security approval list", () => {
     expect((await screen.findByRole("alert")).textContent).toContain("could not be saved");
   });
 });
+
+describe("Security approval list load failure", () => {
+  it("says why the policy could not be loaded", async () => {
+    mocks.get.mockRejectedValue(Object.assign(new Error("API 502: Tool 'x' failed"), { reason: "approval_store_locked" }));
+    render(<SecuritySettingsPanel />);
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("approval_store_locked");
+  });
+});

@@ -26,7 +26,7 @@ export default function SecuritySettingsPanel() {
     try {
       const [saved, names] = await Promise.all([getApprovalPolicy(), listApprovalToolNames()]);
       setPolicy(saved); setCatalog(names);
-    } catch { setError("Approval settings are unavailable."); }
+    } catch (cause) { setError(withReason("Approval settings are unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   };
   useEffect(() => { void load(); }, []);

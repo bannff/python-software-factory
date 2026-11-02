@@ -6,6 +6,7 @@ import { callTool } from "@/lib/api";
 import { parseSession } from "@/lib/hooks/use-session-list";
 import { loadSessionHistory } from "@/lib/hooks/use-session-history";
 import { togglePinnedMessage } from "@/lib/copilotkit/chat-pin";
+import { errorReason, withReason } from "@/lib/error-reason";
 
 /**
  * Row 9 (feature-map) — the "pins panel per session", now homed in the chat
@@ -41,7 +42,7 @@ export function ChatPinsTab({ threadId }: { threadId: string }) {
   const unpin = async (messageId: string) => {
     setBusy(true);
     try { await togglePinnedMessage(threadId, messageId); await load(); }
-    catch { setError("Couldn’t unpin that message."); }
+    catch (cause) { setError(withReason("Couldn’t unpin that message.", errorReason(cause))); }
     finally { setBusy(false); }
   };
 
