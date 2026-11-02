@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 export type EntityKind = "run" | "brick" | "tx" | "session";
 
 const KIND_STYLE: Record<EntityKind, string> = {
-  run: "bg-sky-500/15 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300",
-  brick: "bg-violet-500/15 text-violet-700 dark:bg-violet-500/10 dark:text-violet-300",
-  tx: "bg-amber-500/15 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",
-  session: "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300",
+  run: "bg-sky-500/15 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300",
+  brick: "bg-violet-500/15 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300",
+  tx: "bg-amber-500/15 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300",
+  session: "bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
 };
 
 export interface EntityChipProps {
