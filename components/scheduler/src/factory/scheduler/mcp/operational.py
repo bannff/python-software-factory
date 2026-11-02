@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any, Callable
 
 from factory.mcp_utils.interface import ToolResult, fail, get_envelope, get_service, operational
@@ -10,7 +11,11 @@ from factory.mcp_utils.registration import typed_tool
 from .contracts import (
     AddScheduleInput, FireOutput, RemovedOutput, RevisionInput, ScheduleOutput,
 )
+from ..runtime.errors import ScheduleConflictError, ScheduleNotFoundError
 from .support import failure_code, identity, owner_identity, result
+
+
+logger = logging.getLogger(__name__)
 
 
 def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
@@ -81,7 +86,12 @@ def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
                 tenant, owner, schedule_id, expected_revision,
             )
             return result(lambda: FireOutput(fire=fire))
+        except ScheduleNotFoundError:
+            return fail("schedule_not_found")
+        except ScheduleConflictError:
+            return fail("schedule_revision_conflict")
         except Exception:
+            logger.exception("scheduler_trigger failed schedule=%s", schedule_id)
             return fail("schedule_trigger_failed")
 
 

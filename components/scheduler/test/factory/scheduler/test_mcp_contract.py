@@ -119,3 +119,15 @@ def test_scheduler_add_reports_a_typed_error_when_the_origin_session_is_missing(
         reset_envelope(token)
         set_service("tool_invoker_for_caller", previous)
     assert not created.ok and created.error == "scheduler_origin_not_found"
+
+
+def test_scheduler_trigger_types_stale_revision_and_missing_schedule(tmp_path) -> None:
+    tools = {tool.name: tool for tool in asyncio.run(_catalog(tmp_path).list_tools())}
+    token = set_envelope({"tenant_id": "tenant", "principal_id": "owner"})
+    try:
+        stale = asyncio.run(tools["scheduler_trigger"].fn(schedule_id="job", expected_revision=99))
+        missing = asyncio.run(tools["scheduler_trigger"].fn(schedule_id="nope", expected_revision=1))
+    finally:
+        reset_envelope(token)
+    assert stale.error == "schedule_revision_conflict"
+    assert missing.error == "schedule_not_found"
