@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
+from uuid import uuid4
 
 from factory.mcp_utils.interface import get_envelope, get_service
 
@@ -25,7 +26,9 @@ def owner_authority(explicit: dict[str, Any] | None) -> tuple[str, str, dict[str
 def authority(explicit: dict[str, Any] | None) -> tuple[str, str, str, dict[str, Any]]:
     """Resolve owner plus active thread for lesson creation."""
     tenant, owner, context = owner_authority(explicit)
-    thread = context.get("session_id") or context.get("thread_id")
+    # A thread id (t_...) keys resolve_thread; a session id (s_...) never matches it,
+    # so a caller sending both must be resolved by its thread.
+    thread = context.get("thread_id") or context.get("session_id")
     if not isinstance(thread, str) or not thread:
         raise ValueError("lesson_owner_context_required")
     return tenant, owner, thread, context
@@ -39,7 +42,9 @@ async def verify_session(thread_id: str, context: dict[str, Any]) -> None:
     raw = await asyncio.to_thread(
         invoke, {"brick_name": "session", "tool_name": "resolve_thread"},
         arguments={"thread_id": thread_id, "envelope": context},
-        idempotency_key=f"lessons-session:{thread_id}", envelope=context,
+        # Fresh key per check: a constant key replayed with a different envelope
+        # shape is rejected as an idempotency conflict and read as not-found.
+        idempotency_key=f"lessons-session:{thread_id}:{uuid4().hex}", envelope=context,
     )
     structured = raw.get("result", {}).get("structured_content") if isinstance(raw, dict) else None
     data = structured.get("data") if isinstance(structured, dict) and structured.get("ok") else None

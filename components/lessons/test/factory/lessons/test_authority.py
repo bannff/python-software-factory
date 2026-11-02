@@ -95,3 +95,12 @@ def test_archived_session_is_restricted_for_lesson_writes() -> None:
             asyncio.run(verify_session("t", {"tenant_id": "tenant", "principal_id": "owner"}))
     finally:
         set_service("tool_invoker_for_caller", previous)
+
+
+def test_thread_id_wins_over_session_id_when_both_are_sent() -> None:
+    from factory.lessons.mcp.support import authority
+
+    context = {"tenant_id": "t", "principal_id": "o",
+               "session_id": "s_" + "a" * 32, "thread_id": "t_" + "b" * 32}
+    assert authority(context)[2] == "t_" + "b" * 32
+    assert authority({**context, "thread_id": None})[2] == "s_" + "a" * 32
