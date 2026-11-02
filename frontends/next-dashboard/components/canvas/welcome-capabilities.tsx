@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  Shield, Network, GitBranch, Beaker, BarChart3,
+  ListChecks, Network, GitBranch, Beaker, BarChart3,
   Brain, Gamepad2, Link2, Container, type LucideIcon,
 } from "lucide-react";
 import type { CanvasViewId } from "@/lib/types";
 
 export const CAPABILITIES: { icon: LucideIcon; label: string; desc: string; viewId: CanvasViewId }[] = [
-  { icon: Shield,    label: "Findings",   desc: "Security findings with severity and STRIDE classification", viewId: "findings" },
+  { icon: ListChecks, label: "Findings",   desc: "Issues found by any analysis, ranked by severity", viewId: "findings" },
   { icon: Beaker,    label: "Evals",      desc: "Benchmark agents with LLMAJ rubric scoring", viewId: "evals" },
   { icon: BarChart3, label: "Metrics",    desc: "Watch live runtime telemetry from the current buffer", viewId: "metrics" },
   { icon: Network,   label: "Graph",      desc: "Explore knowledge graphs and entity relationships", viewId: "graph" },
