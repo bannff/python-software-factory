@@ -9,7 +9,7 @@ vi.mock("@/lib/hooks/use-model-catalog", () => ({
   useModelCatalog: () => ({ models: [], groups: [], loading: false, error: null, refresh: vi.fn() }),
 }));
 const callTool = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/api", () => ({ callTool }));
+vi.mock("@/lib/api", () => ({ callTool, listTools: () => Promise.resolve({ tools: [] }) }));
 
 import { CrewEditor } from "../crew-editor";
 
@@ -25,6 +25,18 @@ describe("CrewEditor domain failures", () => {
     fireEvent.click(screen.getByRole("button", { name: /create|save/i }));
     expect((await screen.findByRole("alert")).textContent).toContain("crew_exists");
     await waitFor(() => expect(callTool).toHaveBeenCalled());
+    expect(onSaved).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("shows the server's reason and stays open when set-default resolves ok:false", async () => {
+    callTool.mockResolvedValue({ tool: "agent_set_default_crew", result: { ok: false, error: "crew_not_found" } });
+    const onSaved = vi.fn();
+    const onClose = vi.fn();
+    const crew = { id: "alpha", name: "Alpha", persona_id: "redteam", project: "/work/app", memory_scope: "alpha", revision: 1 };
+    render(<CrewEditor crew={crew as never} isDefault={false} onSaved={onSaved} onClose={onClose} />);
+    fireEvent.click(screen.getByRole("button", { name: /set as default/i }));
+    expect((await screen.findByRole("alert")).textContent).toContain("crew_not_found");
     expect(onSaved).not.toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
   });

@@ -21,6 +21,10 @@ class SessionBindingRejectedError(ValueError):
     pass
 
 
+class SessionCrewNotFoundError(LookupError):
+    """The bound ``crew_id`` does not exist for this owner."""
+
+
 class SessionProjectRejectedError(ValueError):
     """The requested ``project`` path was refused by devtools' own path
     validation (outside ``COMPANION_X_PROJECT_ALLOWED_ROOTS``). Session-
@@ -34,5 +38,6 @@ class SessionProjectRejectedError(ValueError):
 
 __all__ = [
     "SendIdRejectedError", "SessionBindingRejectedError", "SessionConflictError",
-    "SessionIdentityError", "SessionNotFoundError", "SessionProjectRejectedError",
+    "SessionCrewNotFoundError", "SessionIdentityError", "SessionNotFoundError",
+    "SessionProjectRejectedError",
 ]

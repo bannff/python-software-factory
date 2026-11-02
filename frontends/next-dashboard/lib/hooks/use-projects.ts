@@ -1,14 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useAgent } from "@copilotkit/react-core/v2";
 import { callTool } from "@/lib/api";
+import { errorReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import {
   classifyLoopError, parseLoopCycle, parseLoopList,
   type Loop, type LoopCycle, type LoopErrorKind,
 } from "@/components/operations/projects/project-types";
 
-export interface ActionResult { status: "ok" | LoopErrorKind }
+export interface ActionResult { status: "ok" | LoopErrorKind; reason?: string }
 
 type LifecycleTool = "workflow.pause_loop" | "workflow.resume_loop" | "workflow.stop_loop";
 
@@ -18,6 +20,8 @@ export interface StartLoopSpec {
 }
 
 export function useProjects() {
+  const { agent } = useAgent({ agentId: "companion_x" });
+  const threadId = agent?.threadId;
   const [loops, setLoops] = useState<Loop[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -48,14 +52,14 @@ export function useProjects() {
       unwrapToolData(await callTool("workflow.start_loop", {
         kind: "goal", agent_id: input.agentId, objective: input.title,
         cycle_instructions: input.spec, interval_seconds: input.intervalSeconds,
-        max_cycles: input.maxCycles,
+        max_cycles: input.maxCycles, envelope: { session_id: threadId },
       }));
       await refresh();
       return { status: "ok" };
     } catch (err) {
-      return { status: classifyLoopError(err) };
+      return { status: classifyLoopError(err), reason: errorReason(err) };
     }
-  }, [refresh]);
+  }, [refresh, threadId]);
 
   const runAction = useCallback(async (tool: LifecycleTool, loop: Loop): Promise<ActionResult> => {
     try {
@@ -73,7 +77,7 @@ export function useProjects() {
   const resume = useCallback((l: Loop) => runAction("workflow.resume_loop", l), [runAction]);
   const stop = useCallback((l: Loop) => runAction("workflow.stop_loop", l), [runAction]);
 
-  return { loops, loading, error, refresh, start, pause, resume, stop };
+  return { loops, loading, error, threadId, refresh, start, pause, resume, stop };
 }
 
 /** One loop's latest settled cycle detail, or null when not yet settled/unreadable. */

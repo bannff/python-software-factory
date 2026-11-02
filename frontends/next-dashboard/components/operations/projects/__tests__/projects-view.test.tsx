@@ -1,8 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-const mocks = vi.hoisted(() => ({ callTool: vi.fn() }));
-vi.mock("@/lib/api", () => ({ callTool: (...args: unknown[]) => mocks.callTool(...args) }));
+const mocks = vi.hoisted(() => ({ callTool: vi.fn(), listPersonas: vi.fn(), threadId: "thr_1" as string | undefined }));
+vi.mock("@copilotkit/react-core/v2", () => ({ useAgent: () => ({ agent: { threadId: mocks.threadId } }) }));
+vi.mock("@/lib/api", () => ({
+  callTool: (...args: unknown[]) => mocks.callTool(...args),
+  listPersonas: () => mocks.listPersonas(),
+}));
 
 import ProjectsView from "../projects-view";
 
@@ -23,7 +27,15 @@ function defaultImpl(name: string) {
 }
 
 beforeEach(() => {
+  mocks.threadId = "thr_1";
   mocks.callTool.mockReset().mockImplementation((name: string) => defaultImpl(name));
+  mocks.listPersonas.mockReset().mockResolvedValue({
+    count: 2,
+    personas: [
+      { id: "companion-x-default", name: "Default", description: "", model: null },
+      { id: "researcher", name: "Researcher", description: "", model: null },
+    ],
+  });
 });
 
 describe("ProjectsView", () => {
@@ -51,15 +63,44 @@ describe("ProjectsView", () => {
     expect(await screen.findByText("Port the Task Runner")).toBeTruthy();
   });
 
-  it("starts a project by mapping the spec form onto start_loop's existing fields", async () => {
-    render(<ProjectsView />);
+  async function fillForm() {
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "New effort" } });
     fireEvent.change(screen.getByLabelText("Spec"), { target: { value: "Do the thing each cycle." } });
+    await waitFor(() => expect((screen.getByLabelText("Agent") as HTMLSelectElement).options.length).toBe(2));
+  }
+
+  it("starts a project from the chosen persona and the active chat thread", async () => {
+    render(<ProjectsView />);
+    await fillForm();
+    fireEvent.change(screen.getByLabelText("Agent"), { target: { value: "researcher" } });
     fireEvent.click(screen.getByRole("button", { name: "Start project" }));
     await waitFor(() => expect(mocks.callTool).toHaveBeenCalledWith("workflow.start_loop", {
-      kind: "goal", agent_id: "companion-x-default", objective: "New effort",
+      kind: "goal", agent_id: "researcher", objective: "New effort",
       cycle_instructions: "Do the thing each cycle.", interval_seconds: 300, max_cycles: 24,
+      envelope: { session_id: "thr_1" },
     }));
+    await waitFor(() => expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe(""));
+  });
+
+  it("asks for a chat first and cannot start when there is no active thread", async () => {
+    mocks.threadId = undefined;
+    render(<ProjectsView />);
+    await fillForm();
+    expect(screen.getByText(/Open or start a chat first/)).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Start project" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("keeps the form and shows the server reason when starting fails", async () => {
+    mocks.callTool.mockImplementation((name: string) => name === "workflow.start_loop"
+      ? Promise.resolve({ ok: false, error: { message: "loop_origin_not_found" } })
+      : defaultImpl(name));
+    render(<ProjectsView />);
+    await fillForm();
+    fireEvent.click(screen.getByRole("button", { name: "Start project" }));
+    const alert = await screen.findByText(/Could not start the project/);
+    expect(alert.textContent).toContain("loop_origin_not_found");
+    expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe("New effort");
+    expect((screen.getByLabelText("Spec") as HTMLTextAreaElement).value).toBe("Do the thing each cycle.");
   });
 
   it("opens a project, shows its latest cycle, and pauses it with revision fencing", async () => {

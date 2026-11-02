@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Save, Trash2, GitFork, RotateCcw } from "lucide-react";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
@@ -44,7 +45,7 @@ export default function AgentTemplatesView() {
       if (caps.config.read) setUserIds(new Set(await listUserTemplateIds()));
     }).catch((cause) => {
       setCapabilities({ status: "failed",
-        message: cause instanceof Error ? cause.message : "Couldn’t inspect Agent authoring capabilities." });
+        message: withReason("Couldn’t inspect Agent authoring capabilities.", errorReason(cause)) });
     });
   }, [personas.length, ready]);
 
@@ -60,7 +61,7 @@ export default function AgentTemplatesView() {
         description: String(config.description ?? ""), model: String(config.model ?? ""),
         system_prompt: String(config.system_prompt ?? ""),
       });
-    } catch (cause) { setNotice(cause instanceof Error ? cause.message : "Template unavailable."); }
+    } catch (cause) { setNotice(withReason("Template unavailable.", errorReason(cause))); }
     finally { setBusy(false); }
   };
   const set = (key: keyof Form) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -73,14 +74,14 @@ export default function AgentTemplatesView() {
         skills: Array.isArray(raw.skills) ? raw.skills : [],
       });
       setNotice("Template saved."); setSelected(form.id); refresh();
-    } catch (cause) { setNotice(cause instanceof Error ? cause.message : "Couldn’t save template."); }
+    } catch (cause) { setNotice(withReason("Couldn’t save template.", errorReason(cause))); }
     finally { setBusy(false); }
   };
   const remove = async () => {
     if (!selected) return;
     setBusy(true); setNotice(null);
     try { await deleteUserTemplate(selected); setSelected(null); setForm(EMPTY); setRaw({}); refresh(); }
-    catch (cause) { setNotice(cause instanceof Error ? cause.message : "Couldn’t delete template."); }
+    catch (cause) { setNotice(withReason("Couldn’t delete template.", errorReason(cause))); }
     finally { setBusy(false); }
   };
   const fork = async () => {
@@ -92,7 +93,7 @@ export default function AgentTemplatesView() {
       setUserIds((prev) => new Set(prev).add(id));
       setSelected(id); refresh();
       setNotice("Forked a private copy you can edit.");
-    } catch (cause) { setNotice(cause instanceof Error ? cause.message : "Couldn’t fork this template."); }
+    } catch (cause) { setNotice(withReason("Couldn’t fork this template.", errorReason(cause))); }
     finally { setBusy(false); }
   };
   const reset = async () => {
@@ -102,7 +103,7 @@ export default function AgentTemplatesView() {
       await resetTemplate(selected);
       await choose({ id: selected, name: form.name, description: form.description, model: form.model } as Persona);
       setNotice("Reset to the original template.");
-    } catch (cause) { setNotice(cause instanceof Error ? cause.message : "Couldn’t reset — this template may not be a fork."); }
+    } catch (cause) { setNotice(withReason("Couldn’t reset — this template may not be a fork.", errorReason(cause))); }
     finally { setBusy(false); }
   };
 

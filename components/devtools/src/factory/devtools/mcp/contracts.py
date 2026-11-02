@@ -96,6 +96,10 @@ class ReadFileInput(DTO):
     envelope: EnvelopeInput | None = None
 
 
+class AllowedProjectRootsInput(DTO):
+    """Zero-argument list of the roots a Session or Crew project may live under."""
+
+
 class ListDirInput(DTO):
     path: str = Field(default=".", min_length=1, max_length=2048)
     limit: int = Field(default=500, ge=1, le=2000)
