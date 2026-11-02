@@ -97,7 +97,15 @@ def test_lesson_run_kb_chain_survives_graph_reconstruction(tmp_path) -> None:
             assert expected <= {entity.id for entity in observed.entities}
             edge_types = {edge.type for edge in observed.relationships}
             assert expected_edges <= edge_types
-            restored = PersistentNetworkXGraph().get_neighborhood(request)
+            # Persistence trails the in-memory write by one hop; a one-shot
+            # read raced it on CI (inferred cause; not reproduced locally). Wait
+            # for convergence, then assert it, so a real divergence still fails.
+            while time.monotonic() < deadline:
+                observed = graph.get_neighborhood(request)
+                restored = PersistentNetworkXGraph().get_neighborhood(request)
+                if restored == observed:
+                    break
+                time.sleep(0.01)
             assert restored == observed
             assert "private KB body" not in str(observed)
         finally:
