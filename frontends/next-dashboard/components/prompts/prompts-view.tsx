@@ -7,6 +7,7 @@ import {
   type PromptCatalog, type RenderedPromptMessage,
 } from "./prompts-api";
 import { errorReason, withReason } from "@/lib/error-reason";
+import { AuthoredPromptsPanel } from "./authored-prompts-panel";
 
 const EMPTY: PromptCatalog = { prompts: [], failedBricks: [] };
 
@@ -63,6 +64,7 @@ export default function PromptsView() {
     </div><button type="button" aria-label="Refresh prompts" onClick={() => void refresh()}
       disabled={!ready || loading} className="rounded-md border p-2 disabled:opacity-40">
       <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /></button></div>
+    {ready && <AuthoredPromptsPanel />}
     {error && <p role="alert" className="mb-3 rounded-md border border-destructive/30 p-3 text-xs text-destructive">{error}</p>}
     {!ready ? <p className="text-sm text-muted-foreground">MCP is {status}.</p>
       : loading && catalog.prompts.length === 0 ? <p className="text-sm text-muted-foreground">Loading MCP prompt registries…</p>
