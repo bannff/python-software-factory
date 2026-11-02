@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { callTool } from "@/lib/api";
+import { errorReason } from "@/lib/error-reason";
 import {
   groupByProvider,
   parseCatalog,
@@ -9,6 +10,11 @@ import {
   type ModelChoice,
   type ProviderGroup,
 } from "@/lib/model-catalog";
+
+/** Fresh install: the gateway has nothing to list, which is not a failure to retry. */
+export const MODEL_NOT_CONFIGURED =
+  "No chat model configured yet: set COMPANION_X_CHAT_MODEL (or an openai-compat profile)";
+const CATALOG_UNAVAILABLE = "Model catalog unavailable";
 
 interface ModelCatalog {
   models: ModelChoice[];
@@ -66,11 +72,12 @@ export function useModelCatalog(options: ModelCatalogOptions = {}): ModelCatalog
       setHiddenCount(catalog.hiddenCount);
       setUnresolved(catalog.unresolved);
       setError(null);
-    } catch {
+    } catch (cause) {
       setModels([]);
       setHiddenCount(0);
       setUnresolved([]);
-      setError("Model catalog unavailable");
+      setError(errorReason(cause)?.includes("model_catalog_not_configured")
+        ? MODEL_NOT_CONFIGURED : CATALOG_UNAVAILABLE);
     } finally {
       setLoading(false);
     }

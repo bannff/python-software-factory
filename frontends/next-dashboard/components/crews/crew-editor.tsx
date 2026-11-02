@@ -119,7 +119,7 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
           </select>
         </Field>
         <Field field="model" note={catalogError ? (
-          <span className="text-[10px] text-muted-foreground/70">Model catalog unavailable — Inherit is safe; other options can’t load right now.</span>
+          <span className="text-[10px] text-muted-foreground/70">{catalogError} — Inherit is safe; other options can’t load right now.</span>
         ) : null}>
           <select className={FIELD} value={form.model} onChange={set("model")}>
             <option value="">Inherit (persona / default)</option>
