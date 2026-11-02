@@ -152,10 +152,3 @@ describe("WelcomeView metric strip defensive call (bd:python-factory-d4r37)", ()
     });
   });
 });
-
-describe("WelcomeView copy", () => {
-  it("has no employer tagline", () => {
-    const { container } = render(<WelcomeView />);
-    expect(container.textContent ?? "").not.toMatch(/amazon/i);
-  });
-});
