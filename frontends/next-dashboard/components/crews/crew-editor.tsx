@@ -10,6 +10,8 @@ import { useModelCatalog } from "@/lib/hooks/use-model-catalog";
 import { CrewDelete } from "./crew-delete";
 import { CREW_FORM_HINT } from "./crew-field-hints";
 import { Field, InfoHint, FIELD } from "./crew-field";
+import { CrewProjectField } from "./crew-project-field";
+import { validateCrewForm, type CrewFormErrors } from "./crew-validation";
 import type { Crew } from "./crew-types";
 
 /**
@@ -32,12 +34,19 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<CrewFormErrors>({});
 
   const set = (key: keyof typeof form) => (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => setForm((prev) => ({ ...prev, [key]: event.target.value }));
 
   const save = async () => {
+    const invalid = validateCrewForm(form, creating);
+    setFieldErrors(invalid);
+    if (Object.keys(invalid).length > 0) {
+      setError("Fix the highlighted fields to continue.");
+      return;
+    }
     setSaving(true);
     setError(null);
     const triggers = form.triggers.split(",").map((t) => t.trim()).filter(Boolean);
@@ -90,14 +99,14 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
       </div>
       {error && <div role="alert" className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-amber-200">{error}</div>}
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field field="id">
+        <Field field="id" error={fieldErrors.id}>
           <input className={FIELD} value={form.id} onChange={set("id")} disabled={!creating}
             placeholder="redteam-crew" />
         </Field>
-        <Field field="name">
+        <Field field="name" error={fieldErrors.name}>
           <input className={FIELD} value={form.name} onChange={set("name")} placeholder="Red Team" />
         </Field>
-        <Field field="persona_id">
+        <Field field="persona_id" error={fieldErrors.persona_id}>
           <select className={FIELD} value={form.persona_id} onChange={set("persona_id")}>
             <option value="">Select a persona…</option>
             {personas.map((p) => <option key={p.id} value={p.id}>{p.name || p.id}</option>)}
@@ -115,16 +124,14 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
             ))}
           </select>
         </Field>
-        <Field field="project">
-          <input className={FIELD} value={form.project} onChange={set("project")} placeholder="/abs/path/to/project" />
-        </Field>
-        <Field field="memory_scope">
+        <CrewProjectField value={form.project} onChange={set("project")} error={fieldErrors.project} />
+        <Field field="memory_scope" error={fieldErrors.memory_scope}>
           <input className={FIELD} value={form.memory_scope} onChange={set("memory_scope")} placeholder="redteam" />
         </Field>
-        <Field field="description" className="sm:col-span-2">
+        <Field field="description" error={fieldErrors.description} className="sm:col-span-2">
           <textarea className={FIELD} value={form.description} onChange={set("description")} rows={2} />
         </Field>
-        <Field field="triggers" className="sm:col-span-2">
+        <Field field="triggers" error={fieldErrors.triggers} className="sm:col-span-2">
           <input className={FIELD} value={form.triggers} onChange={set("triggers")} placeholder="scan, audit" />
         </Field>
       </div>

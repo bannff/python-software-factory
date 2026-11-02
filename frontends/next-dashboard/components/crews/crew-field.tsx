@@ -42,11 +42,12 @@ export function InfoHint({ id, label, hint }: { id: string; label: string; hint:
 }
 
 /** Label + ⓘ hint + control, wired to `CREW_FIELD_HINTS` in one place. */
-export function Field({ field, className, note, children }: {
+export function Field({ field, className, note, error, children }: {
   field: CrewFieldKey;
+  error?: string;
   className?: string;
   note?: ReactNode;
-  children: ReactElement<{ id?: string; "aria-describedby"?: string }>;
+  children: ReactElement<{ id?: string; "aria-describedby"?: string; "aria-invalid"?: boolean }>;
 }) {
   const { label, hint } = CREW_FIELD_HINTS[field];
   const hintId = `crew-${field}-hint`;
@@ -61,7 +62,11 @@ export function Field({ field, className, note, children }: {
         <label htmlFor={controlId}>{label}</label>
         <InfoHint id={hintId} label={label} hint={hint} />
       </span>
-      {cloneElement(children, { id: controlId, "aria-describedby": hintId })}
+      {cloneElement(children, {
+        id: controlId, "aria-invalid": error ? true : undefined,
+        "aria-describedby": error ? `${hintId} ${controlId}-error` : hintId,
+      })}
+      {error && <span id={`${controlId}-error`} className="text-[11px] text-amber-300">{error}</span>}
       {note}
     </div>
   );

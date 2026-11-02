@@ -4,6 +4,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 vi.mock("@/lib/hooks/use-personas", () => ({
   usePersonas: () => ({ personas: [{ id: "redteam", name: "Red Team" }], loading: false, error: null, refresh: vi.fn() }),
 }));
+vi.mock("@/lib/hooks/use-project-roots", () => ({ useProjectRoots: () => ({ roots: [], loading: false }) }));
 vi.mock("@/lib/hooks/use-model-catalog", () => ({
   useModelCatalog: () => ({ models: [], groups: [], loading: false, error: null, refresh: vi.fn() }),
 }));
@@ -18,6 +19,9 @@ describe("CrewEditor domain failures", () => {
     const onSaved = vi.fn();
     const onClose = vi.fn();
     render(<CrewEditor crew={null} isDefault={false} onSaved={onSaved} onClose={onClose} />);
+    const fill = (label: string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
+    fill("Crew ID", "alpha"); fill("Name", "Alpha"); fill("Persona", "redteam");
+    fill("Project path", "/work/app"); fill("Memory scope", "alpha");
     fireEvent.click(screen.getByRole("button", { name: /create|save/i }));
     expect((await screen.findByRole("alert")).textContent).toContain("crew_exists");
     await waitFor(() => expect(callTool).toHaveBeenCalled());
