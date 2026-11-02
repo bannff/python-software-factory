@@ -112,6 +112,31 @@ describe("LessonsView curation", () => {
     expect(alert.textContent).not.toContain("conflict");
   });
 
+  it("does not call a failed delete 'removed': the lesson stays and the reason shows", async () => {
+    route({
+      lessons_list: async () => wrap({ lessons: [proposed] }),
+      lessons_remove: async () => ({ ok: false, error: { message: "lesson_session_not_found" } }),
+      lessons_get: async () => wrap({ lesson: proposed }),
+    });
+    await open();
+    fireEvent.click(screen.getByRole("button", { name: /Delete/ }));
+    const notice = await screen.findByText(/didn't go through.*lesson_session_not_found/i);
+    expect(notice.textContent).not.toMatch(/changed since|no longer here/i);
+    expect(screen.getByRole("heading", { name: "Prefer dark mode" })).toBeTruthy();
+  });
+
+  it("reports an unchanged lesson's failed action as a failure, not a conflict", async () => {
+    route({
+      lessons_list: async () => wrap({ lessons: [proposed] }),
+      lessons_accept: async () => { throw new Error("boom"); },
+      lessons_get: async () => wrap({ lesson: proposed }),
+    });
+    await open();
+    fireEvent.click(screen.getByRole("button", { name: /Keep lesson/ }));
+    const notice = await screen.findByText(/didn't go through.*boom/i);
+    expect(notice.textContent).not.toMatch(/changed since/i);
+  });
+
   it("shows a truthful deleted state after a successful delete", async () => {
     let removed = false;
     route({

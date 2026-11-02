@@ -87,7 +87,7 @@ export function ModelPicker({ agentId }: { agentId: string }) {
   const label = resolved?.effectiveModelId ?? (unresolvable ? "Unavailable" : selectedModelId ?? "Model");
   const pillTitle = unresolvable
     ? `${storedSelector} is not a resolvable model`
-    : error && selectedModelId ? `Model catalog unavailable — showing ${storedSelector}` : "";
+    : error && selectedModelId ? `${error} — showing ${storedSelector}` : "";
   const total = visibleGroups.reduce((sum, group) => sum + group.models.length, 0);
   // A deployment that pins the scope serves "configured" even after a reveal
   // request; saying so beats a button that looks live and does nothing.

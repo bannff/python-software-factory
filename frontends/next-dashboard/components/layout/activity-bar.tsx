@@ -4,7 +4,7 @@ import {
   Search,
   Network,
   GitBranch,
-  Shield,
+  ListChecks,
   Beaker,
   BarChart3,
   Brain,
@@ -54,7 +54,7 @@ export const NAV_GROUPS: NavGroup[] = [
     caption: "Analysis",
     items: [
       { id: "graph", icon: Network, label: "Graph" },
-      { id: "findings", icon: Shield, label: "Findings" },
+      { id: "findings", icon: ListChecks, label: "Findings" },
       { id: "evals", icon: Beaker, label: "Evals" },
       { id: "metrics", icon: BarChart3, label: "Metrics" },
     ],
