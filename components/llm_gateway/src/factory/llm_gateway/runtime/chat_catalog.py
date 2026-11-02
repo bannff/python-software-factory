@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from .catalog_errors import CatalogUnavailable
 from .chat_profile import resolve_chat_profile
 from .openai_compat_policy import configured_profile_names
 from .openrouter_catalog import ModelPricing, openrouter_models, openrouter_pricing
@@ -30,19 +31,6 @@ _FULL_ENV_VALUE = "full"
 def configured_chat_model_id() -> str:
     """Return the configured chat model selector ("" when unset)."""
     return os.getenv(CONFIGURED_CHAT_MODEL_ENV, "").strip()
-
-
-class CatalogUnavailable(ValueError):
-    """The catalog cannot be built; ``reason`` is a safe, stable code.
-
-    ``not_configured``: no chat model selector and no allowed profile exist, so
-    there is nothing to list (the normal state of a fresh install).
-    ``malformed``: a configured selector failed to resolve.
-    """
-
-    def __init__(self, reason: str) -> None:
-        super().__init__("chat model catalog unavailable")
-        self.reason = reason
 
 
 @dataclass(frozen=True, slots=True)
