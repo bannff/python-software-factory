@@ -64,6 +64,8 @@ export type ItemListProps = {
   item_key?: string;
   empty_icon?: string;
   empty_message?: string;
+  /** A prompt for the host's chat agent, offered as a one-click action when empty. */
+  empty_action?: string;
   header?: {
     icon?: string;
     stats_tool?: string;
