@@ -12,6 +12,7 @@ from .contracts import (
     AddScheduleInput, FireOutput, RemovedOutput, RevisionInput, ScheduleOutput,
 )
 from ..runtime.errors import ScheduleConflictError, ScheduleNotFoundError
+from .admission import check_agent, check_fields
 from .support import failure_code, identity, owner_identity, result
 
 
@@ -33,6 +34,8 @@ def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
                             envelope: dict | None = None) -> ToolResult[ScheduleOutput]:
         try:
             tenant, owner, thread = identity(envelope)
+            check_fields(task, kind, interval_seconds, one_shot_at)
+            await check_agent(agent_id, {"tenant_id": tenant, "principal_id": owner})
             origin = await _origin(thread, get_envelope() or envelope or {})
         except ValueError as exc:
             return failure_code(exc)
