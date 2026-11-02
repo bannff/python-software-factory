@@ -60,11 +60,13 @@ export default function NotificationSettingsPanel() {
       <div className="mt-4 rounded-md border border-border/40 p-4">
         <div className="flex items-start justify-between gap-4"><div>
           <h3 className="text-sm font-medium">Mute all event delivery</h3>
-          <p className="mt-1 text-xs text-muted-foreground">Notifications still land in your inbox.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            <span className="font-medium">{preferences.globalMuted ? "All event delivery is muted." : "Event delivery is on."}</span>{" "}
+            Notifications still land in your inbox.</p>
         </div><label className="flex items-center gap-2 text-xs">
           <input aria-label="Mute all event delivery" type="checkbox" checked={preferences.globalMuted}
             disabled={busy} onChange={(event) => void save({ ...preferences, globalMuted: event.target.checked })} />
-          {preferences.globalMuted ? "Muted" : "Active"}</label></div>
+          Mute</label></div>
       </div>
       <div className="mt-4 grid gap-2">{EVENTS.map((event) => {
         const muted = preferences.mutedKinds.includes(event.kind);
