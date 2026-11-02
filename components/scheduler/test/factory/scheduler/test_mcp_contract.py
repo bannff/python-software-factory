@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timedelta, timezone
 
 from factory.mcp_utils.interface import (
     get_service, reset_envelope, set_envelope, set_service,
@@ -75,11 +76,14 @@ def test_scheduler_add_accepts_wire_iso_one_shot_at(tmp_path) -> None:
     tools = {tool.name: tool for tool in asyncio.run(_catalog(tmp_path).list_tools())}
 
     def resolve(target, **kwargs):
-        assert target == {"brick_name": "session", "tool_name": "resolve_thread"}
-        return {"ok": True, "result": {"structured_content": {"ok": True, "data": {
-            "session": {"session_id": "session", "thread_id": "thread"},
-        }}}}
+        if target["tool_name"] == "get_agent_registry":
+            data = {"count": 1, "agents": [{"id": "developer"}]}
+        else:
+            assert target == {"brick_name": "session", "tool_name": "resolve_thread"}
+            data = {"session": {"session_id": "session", "thread_id": "thread"}}
+        return {"ok": True, "result": {"structured_content": {"ok": True, "data": data}}}
 
+    wire = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat().replace("+00:00", "Z")
     previous = get_service("tool_invoker_for_caller")
     set_service("tool_invoker_for_caller", lambda _caller: resolve)
     token = set_envelope({
@@ -89,7 +93,7 @@ def test_scheduler_add_accepts_wire_iso_one_shot_at(tmp_path) -> None:
     try:
         created = asyncio.run(tools["scheduler_add"].fn(
             agent_id="developer", task="loop cycle", kind="one_shot",
-            one_shot_at="2026-09-15T14:35:46.081296Z",
+            one_shot_at=wire,
             output_schema="loop-cycle-report-v1", delivery_mode="workflow_loop",
             loop_id="loop", loop_cycle=1, schedule_id="loop_loop_1",
         ))
@@ -99,7 +103,7 @@ def test_scheduler_add_accepts_wire_iso_one_shot_at(tmp_path) -> None:
     assert created.ok is True, created.error
     schedule = created.data.schedule
     assert schedule.schedule_id == "loop_loop_1"
-    assert schedule.one_shot_at.isoformat() == "2026-09-15T14:35:46.081296+00:00"
+    assert schedule.one_shot_at.isoformat() == wire.replace("Z", "+00:00")
 
 
 def test_scheduler_add_reports_a_typed_error_when_the_origin_session_is_missing(tmp_path) -> None:
