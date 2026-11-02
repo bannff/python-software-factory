@@ -46,7 +46,8 @@ async def verify_session(thread_id: str, context: dict[str, Any]) -> None:
     session = data.get("session") if isinstance(data, dict) else None
     if not isinstance(session, dict):
         raise ValueError("lesson_session_not_found")
-    if session.get("state") != "active":
+    # SessionRecord has no state field; an archived session is the restricted one.
+    if session.get("archived_at") is not None:
         raise ValueError("lesson_session_restricted")
 
 

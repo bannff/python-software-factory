@@ -1,5 +1,6 @@
 "use client";
 
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { callTool, listTools } from "@/lib/api";
 import {
@@ -63,7 +64,7 @@ export function useWorkflowLibrary() {
       await refresh();
       return null;
     } catch (cause) {
-      return cause instanceof Error ? cause.message : "Couldn't save that definition.";
+      return withReason("Couldn't save that definition.", errorReason(cause));
     }
   }, [refresh]);
 

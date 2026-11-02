@@ -55,6 +55,10 @@ class CrewIdentityError(PermissionError):
     """Ambient identity was absent or malformed."""
 
 
+class CrewProjectRejectedError(ValueError):
+    """The project path is outside the allowed roots or otherwise inadmissible."""
+
+
 class CrewModelUnresolvedError(ValueError):
     """No non-empty effective model could be resolved."""
 
@@ -109,5 +113,5 @@ class CrewConfig(BaseModel):
 
 __all__ = [
     "CrewConfig", "CrewConflictError", "CrewExistsError", "CrewIdentityError",
-    "CrewModelUnresolvedError", "CrewNotFoundError", "Identity", "credential_clean",
+    "CrewModelUnresolvedError", "CrewNotFoundError", "CrewProjectRejectedError", "Identity", "credential_clean",
 ]

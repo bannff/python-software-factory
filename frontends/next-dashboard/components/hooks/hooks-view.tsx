@@ -1,4 +1,5 @@
 "use client";
+import { errorReason, withReason } from "@/lib/error-reason";
 import { useCallback, useEffect, useState } from "react";
 import { Plus, RefreshCw, Trash2, Webhook } from "lucide-react";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
@@ -27,7 +28,7 @@ export default function HooksView() {
     try {
       const [rows, writable, invocable] = await Promise.all([listHooks(), hookAuthoringAvailable(), listInvocableTools()]);
       setHooks(rows); setCanWrite(writable); setTools(invocable);
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Hooks unavailable."); }
+    } catch (cause) { setError(withReason("Hooks unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   }, [ready]);
   useEffect(() => { void refresh(); }, [refresh]);
@@ -43,19 +44,19 @@ export default function HooksView() {
   const toggle = async (hook: Hook) => {
     setBusy(hook.id); setError(null);
     try { await saveHook({ ...hook, enabled: !hook.enabled }); await refresh(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn't update hook."); }
+    catch (cause) { setError(withReason("Couldn't update hook.", errorReason(cause))); }
     finally { setBusy(null); }
   };
   const remove = async (hook: Hook) => {
     setBusy(hook.id); setError(null);
     try { await deleteHook(hook.id); await refresh(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn't delete hook."); }
+    catch (cause) { setError(withReason("Couldn't delete hook.", errorReason(cause))); }
     finally { setBusy(null); }
   };
   const create = async () => {
     setBusy(form.id); setError(null);
     try { await saveHook(form); setCreating(false); setForm(EMPTY); await refresh(); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn't create hook."); }
+    catch (cause) { setError(withReason("Couldn't create hook.", errorReason(cause))); }
     finally { setBusy(null); }
   };
 
