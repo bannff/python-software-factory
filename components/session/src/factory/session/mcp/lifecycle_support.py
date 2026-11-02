@@ -8,7 +8,8 @@ from factory.mcp_utils.interface import ToolResult, fail, ok
 
 from ..runtime.errors import (
     SendIdRejectedError, SessionBindingRejectedError, SessionConflictError,
-    SessionIdentityError, SessionNotFoundError, SessionProjectRejectedError,
+    SessionCrewNotFoundError, SessionIdentityError, SessionNotFoundError,
+    SessionProjectRejectedError,
 )
 
 _ERRORS = {
@@ -18,6 +19,7 @@ _ERRORS = {
     SendIdRejectedError: "send_id_rejected",
     SessionBindingRejectedError: "session_binding_rejected",
     SessionProjectRejectedError: "session_project_path_refused",
+    SessionCrewNotFoundError: "crew_not_found",
 }
 
 

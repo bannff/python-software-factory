@@ -11,6 +11,7 @@ from .lifecycle_contracts import (
     MovePinnedInput, RebindSessionInput, RenameSessionInput, RevisionSessionInput,
     SessionOutput, SetModelInput, SetPinnedInput,
 )
+from .crew_check import verify_crew
 from .lifecycle_support import _ERRORS, identity, result
 
 
@@ -24,10 +25,14 @@ def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
         envelope: dict[str, Any] | None = None,
     ) -> ToolResult[SessionOutput]:
         runtime = get_runtime().lifecycle
-        return result(lambda: SessionOutput(session=runtime.create(
-            *identity(runtime, envelope), title, agent_id, model,
-            mode, workspace, project, origin, crew_id, memory_scope,
-        )))
+        def create() -> SessionOutput:
+            who = identity(runtime, envelope)
+            verify_crew(*who, crew_id)
+            return SessionOutput(session=runtime.create(
+                *who, title, agent_id, model,
+                mode, workspace, project, origin, crew_id, memory_scope,
+            ))
+        return result(create)
 
 
     @typed_tool(mcp)
@@ -40,10 +45,14 @@ def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
         envelope: dict[str, Any] | None = None,
     ) -> ToolResult[SessionOutput]:
         runtime = get_runtime().lifecycle
-        return result(lambda: SessionOutput(session=runtime.ensure_thread(
-            *identity(runtime, envelope), thread_id, title, agent_id, model,
-            crew_id, memory_scope, mode, project,
-        )))
+        def ensure() -> SessionOutput:
+            who = identity(runtime, envelope)
+            verify_crew(*who, crew_id)
+            return SessionOutput(session=runtime.ensure_thread(
+                *who, thread_id, title, agent_id, model,
+                crew_id, memory_scope, mode, project,
+            ))
+        return result(ensure)
     @typed_tool(mcp)
     @operational(input_model=BindProjectInput, output_model=SessionOutput)
     def session_bind_project(
@@ -75,11 +84,15 @@ def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
         envelope: dict[str, Any] | None = None,
     ) -> ToolResult[SessionOutput]:
         runtime = get_runtime().lifecycle
-        return result(lambda: SessionOutput(session=runtime.rebind(
-            *identity(runtime, envelope), session_id, crew_id, memory_scope,
-            agent_id, model, expected_revision,
-            project=project, workspace=workspace,
-        )))
+        def rebind() -> SessionOutput:
+            who = identity(runtime, envelope)
+            verify_crew(*who, crew_id)
+            return SessionOutput(session=runtime.rebind(
+                *who, session_id, crew_id, memory_scope,
+                agent_id, model, expected_revision,
+                project=project, workspace=workspace,
+            ))
+        return result(rebind)
 
     @typed_tool(mcp)
     @operational(input_model=RenameSessionInput, output_model=SessionOutput)

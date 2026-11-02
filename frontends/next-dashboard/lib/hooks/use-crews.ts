@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { callTool } from "@/lib/api";
+import { errorReason } from "@/lib/error-reason";
 import { parseRoster, type Crew } from "@/components/crews/crew-types";
 
 /**
@@ -22,8 +23,8 @@ export function useCrews() {
       setCrews(roster.crews);
       setDefaultId(roster.defaultId);
       setError(null);
-    } catch {
-      setError("Crews unavailable");
+    } catch (cause) {
+      setError(errorReason(cause) ?? "no reason given");
     } finally {
       setLoading(false);
     }
