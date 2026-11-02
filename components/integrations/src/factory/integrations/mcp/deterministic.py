@@ -6,13 +6,17 @@ from typing import Any
 from factory.mcp_utils.interface import deterministic
 
 from factory.integrations.runtime.runtime import IntegrationsRuntime
+from factory.integrations.mcp.contracts import (
+    CallInput, ConnectorIdInput, ConnectorOutput, ConnectorsOutput, EmptyInput,
+    ObjectOutput, RegisterInput, ViewsOutput,
+)
 
 
 def register(mcp: Any, runtime: IntegrationsRuntime) -> None:
     """Register deterministic tools."""
 
     @mcp.tool()
-    @deterministic
+    @deterministic(input_model=EmptyInput, output_model=ObjectOutput)
     def get_capabilities() -> dict[str, Any]:
         """Return machine-readable capabilities for integrations brick."""
         return {
@@ -35,14 +39,14 @@ def register(mcp: Any, runtime: IntegrationsRuntime) -> None:
         }
 
     @mcp.tool()
-    @deterministic
+    @deterministic(input_model=EmptyInput, output_model=ObjectOutput)
     def health_check() -> dict[str, Any]:
         """Fast readiness probe for integrations brick."""
         health = runtime.health_check()
         return health.model_dump()
 
     @mcp.tool()
-    @deterministic
+    @deterministic(input_model=EmptyInput, output_model=ObjectOutput)
     def describe_config_schema() -> dict[str, Any]:
         """Return JSON schema for integrations configuration."""
         from factory.integrations.runtime.models import Settings
@@ -50,15 +54,14 @@ def register(mcp: Any, runtime: IntegrationsRuntime) -> None:
         return Settings.model_json_schema()
 
     @mcp.tool()
-    @deterministic
-    def integrations_get(connector_id: str) -> dict[str, Any] | None:
-        """Get a specific connector by ID."""
+    @deterministic(input_model=ConnectorIdInput, output_model=ConnectorOutput)
+    def integrations_get(connector_id: str) -> dict[str, Any]:
+        """Get a specific connector by ID (``connector`` is null when unknown)."""
         connector = runtime.get(connector_id)
-        return connector.model_dump() if connector else None
+        return {"connector": connector.model_dump(mode="json") if connector else None}
 
     @mcp.tool()
-    @deterministic
-    def integrations_list() -> list[dict[str, Any]]:
+    @deterministic(input_model=EmptyInput, output_model=ConnectorsOutput)
+    def integrations_list() -> dict[str, Any]:
         """List all registered connectors."""
-        connectors = runtime.list_connectors()
-        return [c.model_dump() for c in connectors]
+        return {"connectors": [c.model_dump(mode="json") for c in runtime.list_connectors()]}

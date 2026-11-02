@@ -7,6 +7,10 @@ from factory.mcp_utils.registration import typed_tool
 from factory.integrations.mcp.email_contracts import SendEmailInput, SendEmailOutput
 from factory.integrations.runtime.email_models import EmailIdempotencyConflict, ProviderReceiptError
 from factory.integrations.runtime.runtime import IntegrationsRuntime
+from factory.integrations.mcp.contracts import (
+    CallInput, ConnectorIdInput, ConnectorOutput, ConnectorsOutput, EmptyInput,
+    ObjectOutput, RegisterInput, ViewsOutput,
+)
 
 
 def register(mcp: Any, runtime: IntegrationsRuntime) -> None:
@@ -29,18 +33,18 @@ def register(mcp: Any, runtime: IntegrationsRuntime) -> None:
         return ok(SendEmailOutput.model_validate(receipt.model_dump()), idempotency_key=idempotency_key)
 
     @mcp.tool()
-    @operational
+    @operational(input_model=ConnectorIdInput, output_model=ObjectOutput)
     def integrations_connect(connector_id: str) -> dict[str, Any]:
         success = runtime.connect(connector_id); connector = runtime.get(connector_id)
         return {"connector_id": connector_id, "connected": success, "status": connector.status if connector else "not_found"}
 
     @mcp.tool()
-    @operational
+    @operational(input_model=ConnectorIdInput, output_model=ObjectOutput)
     def integrations_disconnect(connector_id: str) -> dict[str, Any]:
         return {"connector_id": connector_id, "disconnected": runtime.disconnect(connector_id)}
 
     @mcp.tool()
-    @operational
+    @operational(input_model=CallInput, output_model=ObjectOutput)
     def integrations_call(connector_id: str, method: str, path: str = "", params: dict[str, Any] | None = None, data: Any = None, headers: dict[str, str] | None = None) -> dict[str, Any]:
         """Reject generic connector effects until a trusted context is available."""
         envelope, principal_id = get_envelope() or {}, get_principal_id()

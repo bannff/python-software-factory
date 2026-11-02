@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, JsonValue
 
 
 class KbEmptyRequest(BaseModel):
     schema_version: Literal["v1"] = "v1"
+
+
+class KbViewsResult(BaseModel):
+    schema_version: Literal["v1"] = "v1"
+    views: list[dict[str, Any]]
 
 
 class KbCapabilitiesResult(BaseModel):

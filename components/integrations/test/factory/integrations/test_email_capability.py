@@ -87,8 +87,8 @@ def test_generic_connector_call_requires_ambient_identity():
     runtime, _, _, _ = fixture()
     runtime.call = MagicMock()  # type: ignore[method-assign]
     tool = asyncio.run(create_server(runtime).get_tool("integrations_call")).fn
-    result = tool("connector", "POST", data={"body": "private body"})
-    assert result == {
+    result = tool(connector_id="connector", method="POST", data={"body": "private body"})
+    assert result.data.model_dump() == {
         "success": False, "error": "unauthenticated_context",
         "connector_id": "connector",
     }
@@ -104,10 +104,10 @@ def test_generic_connector_call_projects_provider_data():
     tool = asyncio.run(create_server(runtime).get_tool("integrations_call")).fn
     token = set_envelope({"principal_id": "owner-a", "tenant_id": "tenant"})
     try:
-        result = tool("connector", "POST", data={"body": "private body"})
+        result = tool(connector_id="connector", method="POST", data={"body": "private body"})
     finally:
         reset_envelope(token)
-    assert result == {
+    assert result.data.model_dump() == {
         "success": True, "status_code": 200, "latency_ms": 12.5,
         "connector_id": "connector",
     }

@@ -3,13 +3,15 @@ from __future__ import annotations
 from typing import Any
 from factory.mcp_utils.interface import deterministic
 
+from ...models.surface import KbEmptyRequest, KbViewsResult
+
 
 def register(mcp: Any) -> None:
     @mcp.tool()
-    @deterministic
-    def kb_get_views() -> list[dict[str, Any]]:
+    @deterministic(input_model=KbEmptyRequest, output_model=KbViewsResult)
+    def kb_get_views() -> dict[str, Any]:
         """Return panel definitions for the KB brick."""
-        return [_search_panel(), _ingest_panel(), _collections_panel()]
+        return {"views": [_search_panel(), _ingest_panel(), _collections_panel()]}
 
 
 def _search_panel() -> dict[str, Any]:
