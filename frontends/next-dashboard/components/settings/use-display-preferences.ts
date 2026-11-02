@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import { getDisplayPreferences, type DisplayPreferences } from "./display-preferences-api";
+import { errorReason, withReason } from "@/lib/error-reason";
 const EVENT = "companion-x-display-preferences";
 const DEFAULTS: DisplayPreferences = {
   theme: "system", terminalFontSize: 11, terminalShell: null,
@@ -16,7 +17,7 @@ export function useDisplayPreferences() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try { setPreferences(await getDisplayPreferences()); setError(null); }
-    catch { setError("Display preferences unavailable"); }
+    catch (cause) { setError(withReason("Display preferences unavailable", errorReason(cause))); }
     finally { setLoading(false); }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);

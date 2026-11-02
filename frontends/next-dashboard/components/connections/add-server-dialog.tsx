@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import type { ExternalServerSpec } from "./external-servers-api";
+import { errorReason, withReason } from "@/lib/error-reason";
 
 interface AddServerDialogProps {
   onAdd: (name: string, spec: ExternalServerSpec) => Promise<void>;
@@ -47,7 +48,7 @@ export function AddServerDialog({ onAdd, onImport, onClose }: AddServerDialogPro
         await onAdd(name.trim(), spec);
       }
       onClose();
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn’t add server."); }
+    } catch (cause) { setError(withReason("Couldn’t add server.", errorReason(cause))); }
     finally { setBusy(false); }
   };
 

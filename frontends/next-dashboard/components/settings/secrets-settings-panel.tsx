@@ -18,7 +18,7 @@ export default function SecretsSettingsPanel() {
   const load = async () => {
     setLoading(true); setError(null);
     try { setNames(await listOwnerSecretNames()); }
-    catch { setError("Secrets are unavailable."); }
+    catch (cause) { setError(withReason("Secrets are unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   };
   useEffect(() => { void load(); }, []);

@@ -8,6 +8,7 @@ import {
   type ConnectionBrick, type ConnectionTool,
 } from "./connections-api";
 import { ExternalServersPanel } from "./external-servers-panel";
+import { errorReason, withReason } from "@/lib/error-reason";
 
 export default function ConnectionsView() {
   const { ready, status } = useMcpConnection();
@@ -23,7 +24,7 @@ export default function ConnectionsView() {
     if (!ready) return;
     setLoading(true); setError(null);
     try { setBricks(await listConnectionBricks()); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Connections unavailable."); }
+    catch (cause) { setError(withReason("Connections unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   }, [ready]);
   useEffect(() => { void refresh(); }, [refresh]);
@@ -40,7 +41,7 @@ export default function ConnectionsView() {
     if (!brick.loaded) return;
     setEnabling(brick.name);
     try { setTools(await enableConnectionBrick(brick.name)); }
-    catch (cause) { setError(cause instanceof Error ? cause.message : "Tool inventory unavailable."); }
+    catch (cause) { setError(withReason("Tool inventory unavailable.", errorReason(cause))); }
     finally { setEnabling(null); }
   };
   const enable = async (brick: ConnectionBrick) => {
@@ -48,7 +49,7 @@ export default function ConnectionsView() {
     try {
       const nextTools = await enableConnectionBrick(brick.name);
       setSelected(brick.name); setTools(nextTools); await refresh();
-    } catch (cause) { setError(cause instanceof Error ? cause.message : "Couldn’t enable connection."); }
+    } catch (cause) { setError(withReason("Couldn’t enable connection.", errorReason(cause))); }
     finally { setEnabling(null); }
   };
 
