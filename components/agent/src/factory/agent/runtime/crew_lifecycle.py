@@ -15,7 +15,8 @@ from typing import Any
 from pydantic import TypeAdapter, ValidationError
 
 from .crew_contracts import (
-    CrewConfig, CrewIdentityError, CrewModelUnresolvedError, Identity,
+    CrewConfig, CrewIdentityError, CrewModelUnresolvedError, CrewProjectRejectedError,
+    Identity,
 )
 from .crew_ports import CrewStore
 from .personas import resolve_agent_config
@@ -143,7 +144,10 @@ class CrewLifecycle:
     ) -> str:
         from factory.devtools.interface import validate_project
 
-        return validate_project(tenant_id, owner_id, crew_id, project)
+        try:
+            return validate_project(tenant_id, owner_id, crew_id, project)
+        except ValueError as exc:
+            raise CrewProjectRejectedError("project path refused") from exc
 
 
 def _effective_model(session_model: str, crew_model: str, persona_model: str) -> str:
