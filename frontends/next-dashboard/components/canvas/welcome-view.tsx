@@ -2,15 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import {
-  Shield, Network, GitBranch, Beaker, BarChart3,
-  Brain, Gamepad2, Link2, Container,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { callTool } from "@/lib/api";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import { useLiveToolStream } from "@/lib/hooks/use-live-tool-stream";
 import { ParticleText } from "@/components/ui/particle-text";
+import { CapabilityGrid } from "./welcome-capabilities";
 import type { CanvasViewId } from "@/lib/types";
 
 interface WelcomeViewProps {
@@ -20,20 +17,6 @@ interface WelcomeViewProps {
 const ROTATING_WORDS = [
   "Evals", "Findings", "Blockchain", "Machine Learning",
   "Sandbox", "Games", "Metrics", "Graph", "Timeline",
-];
-
-const CAPABILITIES: {
-  icon: typeof Shield; label: string; desc: string; viewId: CanvasViewId;
-}[] = [
-  { icon: Shield,    label: "Findings",   desc: "Security findings with severity and STRIDE classification", viewId: "findings" },
-  { icon: Beaker,    label: "Evals",      desc: "Benchmark agents with LLMAJ rubric scoring", viewId: "evals" },
-  { icon: BarChart3, label: "Metrics",    desc: "Watch live runtime telemetry from the current buffer", viewId: "metrics" },
-  { icon: Network,   label: "Graph",      desc: "Explore knowledge graphs and entity relationships", viewId: "graph" },
-  { icon: GitBranch, label: "Timeline",   desc: "Watch agent tool calls live", viewId: "timeline-v2" },
-  { icon: Brain,     label: "ML",         desc: "Fine-tuning pipelines and dataset generation", viewId: "ml" },
-  { icon: Gamepad2,  label: "Games",      desc: "RL game arena — CTF challenges", viewId: "games" },
-  { icon: Link2,     label: "Blockchain", desc: "Token economy — wallets and bounties", viewId: "blockchain" },
-  { icon: Container, label: "Sandbox",    desc: "Docker containers for agent execution", viewId: "sandbox" },
 ];
 
 interface StatusMetric {
@@ -111,26 +94,14 @@ export default function WelcomeView({ onNavigate }: WelcomeViewProps) {
         </motion.p>
       </div>
 
-      {/* Capability list */}
+      {/* Capability cards */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
         className="relative z-10 w-full max-w-xl mb-6 px-4"
       >
-        <div className="grid grid-cols-1 gap-px rounded-lg border border-border/30 bg-border/20 overflow-hidden">
-          {CAPABILITIES.map(({ icon: Icon, label, desc, viewId }) => (
-            <button
-              key={viewId}
-              onClick={() => onNavigate?.(viewId)}
-              className="flex items-center gap-3 bg-card/40 px-4 py-2.5 text-left hover:bg-accent/30 transition-colors group"
-            >
-              <Icon className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground/70 transition-colors shrink-0" />
-              <span className="text-[12px] font-medium text-foreground/70 w-20 shrink-0">{label}</span>
-              <span className="text-[11px] text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors">{desc}</span>
-            </button>
-          ))}
-        </div>
+        <CapabilityGrid onNavigate={onNavigate} />
       </motion.div>
 
       {/* Status strip — anchored at bottom */}
