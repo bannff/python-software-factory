@@ -42,7 +42,6 @@ export function MetricCard({
         {value}
       </p>
       <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
-      {onClick && <p className="mt-2 text-[10px] text-sky-300/80">Click to inspect backing events</p>}
     </>
   );
 

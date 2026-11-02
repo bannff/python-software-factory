@@ -6,12 +6,13 @@ import { callTool } from "@/lib/api";
 import { errorReason, withReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import { filesState } from "./files-tab-states";
+import { sendPrompt } from "@/lib/chat/send-prompt";
 
 /**
  * Row 24 (feature-map) — Files in chat, homed in the chat side panel.
  * Browses the workspace via the existing `devtools_list_dir` MCP read and
- * lets you insert a file reference into the composer. Scaffold: browse +
- * reference-insert ship; upload and inline attachment previews are deferred.
+ * lets you ask the agent about a file in one click (CopilotChat's composer can't
+ * be prefilled from outside). Upload and attachment previews are deferred.
  */
 interface Entry { path: string; kind: string }
 
@@ -25,7 +26,7 @@ function parentDir(path: string): string {
  * `devtools_list_dir` resolves the workspace from the active chat Session, so
  * the thread id must ride along or the brick has nothing to bind to.
  */
-export function ChatFilesTab({ threadId, onInsert }: { threadId: string; onInsert: (reference: string) => void }) {
+export function ChatFilesTab({ threadId }: { threadId: string }) {
   const [cwd, setCwd] = useState(".");
   const [entries, setEntries] = useState<Entry[] | null>(null);
   const [error, setError] = useState<{ text: string; icon?: LucideIcon } | null>(null);
@@ -73,8 +74,8 @@ export function ChatFilesTab({ threadId, onInsert }: { threadId: string; onInser
             <span className="truncate">{entry.path.split("/").pop()}</span>
           </button>
         ) : (
-          <button key={entry.path} type="button" aria-label={`Reference ${entry.path}`}
-            onClick={() => onInsert(`@${entry.path} `)}
+          <button key={entry.path} type="button" aria-label={`Ask about ${entry.path}`}
+            onClick={() => sendPrompt(`Read @${entry.path} and tell me what it is for.`)}
             className="flex items-center gap-2 rounded-md px-2 py-1 text-left text-xs hover:bg-muted/40">
             <FileIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
             <span className="truncate">{entry.path.split("/").pop()}</span>

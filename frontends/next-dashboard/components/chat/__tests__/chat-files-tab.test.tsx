@@ -12,21 +12,22 @@ const listing = (entries: { path: string; kind: string }[]) =>
 beforeEach(() => mocks.callTool.mockReset());
 
 describe("ChatFilesTab (row 24 — files in chat)", () => {
-  it("lists directory entries and inserts a file reference on click", async () => {
+  it("lists directory entries and asks the agent about a file on click", async () => {
     mocks.callTool.mockResolvedValue(listing([
       { path: "src", kind: "dir" }, { path: "README.md", kind: "file" },
     ]));
-    const onInsert = vi.fn();
-    render(<ChatFilesTab threadId="t1" onInsert={onInsert} />);
+    const sent = vi.fn();
+    window.addEventListener("companion-x:send-prompt", (e) => sent((e as CustomEvent).detail), { once: true });
+    render(<ChatFilesTab threadId="t1" />);
     await waitFor(() => expect(screen.getByText("README.md")).toBeTruthy());
-    fireEvent.click(screen.getByRole("button", { name: "Reference README.md" }));
-    expect(onInsert).toHaveBeenCalledWith("@README.md ");
+    fireEvent.click(screen.getByRole("button", { name: "Ask about README.md" }));
+    expect(sent).toHaveBeenCalledWith("Read @README.md and tell me what it is for.");
     expect(mocks.callTool).toHaveBeenCalledWith("devtools_list_dir", { path: ".", envelope: { thread_id: "t1" } });
   });
 
   it("navigates into a directory", async () => {
     mocks.callTool.mockResolvedValue(listing([{ path: "src", kind: "dir" }]));
-    render(<ChatFilesTab threadId="t1" onInsert={vi.fn()} />);
+    render(<ChatFilesTab threadId="t1" />);
     await waitFor(() => expect(screen.getByText("src")).toBeTruthy());
     fireEvent.click(screen.getByText("src"));
     await waitFor(() => expect(mocks.callTool).toHaveBeenCalledWith("devtools_list_dir", { path: "src", envelope: { thread_id: "t1" } }));
@@ -34,7 +35,7 @@ describe("ChatFilesTab (row 24 — files in chat)", () => {
 
   it("says why the directory could not be listed instead of a fixed sentence", async () => {
     mocks.callTool.mockResolvedValue({ tool: "x", result: { schema_version: "v1", ok: false, data: null, error: "tool_execution_failed" } });
-    render(<ChatFilesTab threadId="t1" onInsert={vi.fn()} />);
+    render(<ChatFilesTab threadId="t1" />);
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("tool_execution_failed");
   });
@@ -47,7 +48,7 @@ describe("ChatFilesTab (row 24 — files in chat)", () => {
     ["devtools_path_refused", "That path is outside the workspace."],
   ])("shows a short state for %s", async (code, text) => {
     mocks.callTool.mockResolvedValue({ tool: "x", result: { schema_version: "v1", ok: false, data: null, error: code } });
-    render(<ChatFilesTab threadId="t1" onInsert={vi.fn()} />);
+    render(<ChatFilesTab threadId="t1" />);
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toBe(text);
   });
