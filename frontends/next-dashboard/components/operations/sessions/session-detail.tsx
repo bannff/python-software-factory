@@ -7,6 +7,8 @@ import { agentLabel, isArchived, relativeTime } from "./session-format";
 import { DeleteSessionControl } from "./delete-session-control";
 import { ForkSessionControl } from "./fork-session-control";
 import { Field } from "./session-detail-field";
+import { SessionCrewField } from "./session-crew-field";
+import type { Crew } from "@/components/crews/crew-types";
 import { useSessionDetailActions } from "./use-session-detail-actions";
 
 /**
@@ -16,10 +18,12 @@ import { useSessionDetailActions } from "./use-session-detail-actions";
  * revision-fenced MCP tools; resume is delegated to the runtime owner so this
  * view never duplicates SessionDeck's agent/thread state.
  */
-export function SessionDetail({ session, agentName, active, focusHeading, onFocusHandled, onResume, onChanged, onDeleted, onForked,
+export function SessionDetail({ session, agentName, crews, active, focusHeading, onFocusHandled, onResume, onChanged, onDeleted, onForked,
   moveUpBeforeId, moveDownBeforeId }: {
   session: SessionSummary;
   agentName?: string;
+  /** Live crew roster; undefined while unknown, so a crew is never wrongly called removed. */
+  crews?: readonly Crew[];
   active: boolean;
   focusHeading: boolean;
   onFocusHandled?: () => void;
@@ -92,7 +96,7 @@ export function SessionDetail({ session, agentName, active, focusHeading, onFocu
 
       <dl className="grid gap-2 border-t border-border/40 pt-4 text-sm sm:grid-cols-2">
         <Field label="Model" value={session.model} />
-        <Field label="Crew" value={session.crew_id || "—"} />
+        <SessionCrewField crewId={session.crew_id ?? ""} crews={crews} />
         <Field label="Memory scope" value={session.memory_scope || "—"} />
       </dl>
 

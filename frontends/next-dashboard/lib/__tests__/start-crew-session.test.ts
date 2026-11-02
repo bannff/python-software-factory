@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { startDefaultCrewSession } from "@/lib/start-default-crew-session";
+import { startCrewSession } from "@/lib/start-crew-session";
 import { cancelAllQuestions, getQuestionSnapshot, answerQuestion } from "@/lib/mcp-question";
 
 afterEach(() => cancelAllQuestions());
 
-describe("startDefaultCrewSession", () => {
+describe("startCrewSession", () => {
   it("resolves the Crew then materializes one Session", async () => {
     const caller = vi.fn()
       .mockResolvedValueOnce({ schema_version: "v1", ok: true, data: {
@@ -19,7 +19,7 @@ describe("startDefaultCrewSession", () => {
         crew_id: "redteam-crew", memory_scope: "redteam",
       } } });
 
-    const started = await startDefaultCrewSession("redteam-crew", caller);
+    const started = await startCrewSession("redteam-crew", caller);
 
     expect(started.session.thread_id).toBe("t-new");
     expect(caller).toHaveBeenNthCalledWith(1, "agent_resolve_crew", {
@@ -47,7 +47,7 @@ describe("startDefaultCrewSession", () => {
         crew_id: "redteam-crew", memory_scope: "redteam",
       } } });
 
-    const started = startDefaultCrewSession("redteam-crew", caller);
+    const started = startCrewSession("redteam-crew", caller);
     await vi.waitFor(() => expect(getQuestionSnapshot()).not.toBeNull());
     expect(getQuestionSnapshot()?.options).toEqual(["/work"]);
     answerQuestion("/work");
@@ -69,11 +69,11 @@ describe("startDefaultCrewSession", () => {
       .mockResolvedValueOnce({ schema_version: "v1", ok: false, error: "session_project_path_refused" })
       .mockResolvedValueOnce({ schema_version: "v1", ok: true, data: { roots: ["/work"] } });
 
-    const started = startDefaultCrewSession("redteam-crew", caller);
+    const started = startCrewSession("redteam-crew", caller);
     await vi.waitFor(() => expect(getQuestionSnapshot()).not.toBeNull());
     cancelAllQuestions();
 
-    await expect(started).rejects.toThrow("Default crew session could not be created");
+    await expect(started).rejects.toThrow("Crew session could not be created");
   });
 
   it("fails without prompting when the failure is unrelated to the project path", async () => {
@@ -85,8 +85,8 @@ describe("startDefaultCrewSession", () => {
       } })
       .mockResolvedValueOnce({ schema_version: "v1", ok: false, error: "session_binding_rejected" });
 
-    await expect(startDefaultCrewSession("redteam-crew", caller))
-      .rejects.toThrow("Default crew session could not be created");
+    await expect(startCrewSession("redteam-crew", caller))
+      .rejects.toThrow("Crew session could not be created");
     expect(getQuestionSnapshot()).toBeNull();
   });
 });

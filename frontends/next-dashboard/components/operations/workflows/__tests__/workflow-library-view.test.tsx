@@ -122,4 +122,53 @@ describe("WorkflowLibraryView states", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cancel run run_1" }));
     await waitFor(() => expect(screen.queryByText("run_1")).toBeNull());
   });
+
+  describe("action failures", () => {
+    const reject = (reason: string) => async () => { throw new Error(reason); };
+
+    it("says why a run could not start, on the row, and clears it on retry", async () => {
+      let fail = true;
+      route({
+        "workflow.get_workflow_registry": async () => wrap({ workflows: [def1] }),
+        "workflow.list_runs": async () => wrap({ runs: [] }),
+        "workflow.start_run": async () => (fail ? reject("tool_execution_failed")() : wrap({ run_id: "r2", status: "pending" })),
+      });
+      render(<WorkflowLibraryView />);
+      await screen.findByText("Daily digest");
+      fireEvent.click(screen.getByRole("button", { name: "Run workflow daily-digest" }));
+      const alert = await screen.findByRole("alert");
+      expect(alert.textContent).toContain("tool_execution_failed");
+      expect(screen.getByRole("button", { name: "Run workflow daily-digest" })).toHaveProperty("disabled", false);
+      fail = false;
+      fireEvent.click(screen.getByRole("button", { name: "Run workflow daily-digest" }));
+      await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    });
+
+    it("says why a delete failed and keeps the definition listed", async () => {
+      mocks.listTools.mockResolvedValue({ tools: ["workflow.authoring.upsert_workflow_definition"], count: 1 });
+      route({
+        "workflow.get_workflow_registry": async () => wrap({ workflows: [def1] }),
+        "workflow.list_runs": async () => wrap({ runs: [] }),
+        "workflow.authoring.delete_workflow_definition": async () => ({ tool: "t", result: { ok: true, data: { ok: false } } }),
+      });
+      render(<WorkflowLibraryView />);
+      await screen.findByText("Daily digest");
+      fireEvent.click(screen.getByRole("button", { name: "Delete workflow definition daily-digest" }));
+      expect((await screen.findByRole("alert")).textContent).toMatch(/delete/i);
+      expect(screen.getByText("Daily digest")).toBeTruthy();
+    });
+
+    it("says why a cancel failed and keeps the run listed", async () => {
+      route({
+        "workflow.get_workflow_registry": async () => wrap({ workflows: [] }),
+        "workflow.list_runs": async () => wrap({ runs: [run1] }),
+        "workflow.cancel_run": reject("no such run"),
+      });
+      render(<WorkflowLibraryView />);
+      await screen.findByText("run_1");
+      fireEvent.click(screen.getByRole("button", { name: "Cancel run run_1" }));
+      expect((await screen.findByRole("alert")).textContent).toContain("no such run");
+      expect(screen.getByText("run_1")).toBeTruthy();
+    });
+  });
 });

@@ -5,7 +5,7 @@ import { UseAgentUpdate, useAgent, useCopilotKit } from "@copilotkit/react-core/
 import type { SessionSummary } from "@/lib/hooks/use-session-list";
 import { loadSessionHistory } from "@/lib/hooks/use-session-history";
 import { useCrews } from "@/lib/hooks/use-crews";
-import { startDefaultCrewSession } from "@/lib/start-default-crew-session";
+import { startCrewSession } from "@/lib/start-crew-session";
 
 export function useSessionRuntime(agentId: string) {
   const { agent } = useAgent({ agentId, updates: [UseAgentUpdate.OnMessagesChanged] });
@@ -37,7 +37,7 @@ export function useSessionRuntime(agentId: string) {
   const createSession = useCallback(async () => {
     revision.current += 1;
     if (defaultId) {
-      const { session } = await startDefaultCrewSession(defaultId);
+      const { session } = await startCrewSession(defaultId);
       agent.threadId = session.thread_id;
       setBinding(session);
     } else {
