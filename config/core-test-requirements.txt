@@ -1,5 +1,5 @@
 # Exact CI-only overlay. Install with --no-deps so each revision keeps its own lock.
-authlib==1.6.12
+authlib==1.9.1
 ddgs==9.16.0
 httpx-sse==0.4.3
 langchain-classic==1.0.8
