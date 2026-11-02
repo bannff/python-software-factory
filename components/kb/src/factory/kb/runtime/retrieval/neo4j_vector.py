@@ -44,7 +44,7 @@ class Neo4jVectorStore(VectorStore):
             user=os.environ.get("NEO4J_USER", "neo4j"),
             password=os.environ.get("NEO4J_PASSWORD", "password"),
         )
-        self._driver = GraphDatabase.driver(self._config.uri, auth=(self._config.user, self._config.password))
+        self._driver = GraphDatabase.driver(self._config.uri, auth=(self._config.user, self._config.password), notifications_disabled_classifications=["UNRECOGNIZED", "PERFORMANCE"])
         self._embedder = embedder or self._default_embedder()
         self._ensure_index()
 

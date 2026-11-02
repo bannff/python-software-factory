@@ -23,7 +23,7 @@ class Neo4jGraph(Neo4jProvenanceMixin):
         if self._driver is None:
             try:
                 from neo4j import GraphDatabase
-                self._driver = GraphDatabase.driver(self._uri, auth=(self._user, self._password))
+                self._driver = GraphDatabase.driver(self._uri, auth=(self._user, self._password), notifications_disabled_classifications=["UNRECOGNIZED", "PERFORMANCE"])
             except ImportError:
                 raise ImportError("neo4j required: pip install neo4j")
         return self._driver
