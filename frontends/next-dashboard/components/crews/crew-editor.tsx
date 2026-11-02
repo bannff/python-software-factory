@@ -78,7 +78,7 @@ export function CrewEditor({ crew, isDefault, onSaved, onClose }: {
     setSaving(true);
     setError(null);
     try {
-      await callTool("agent_set_default_crew", { crew_id: crew.id, expected_revision: crew.revision });
+      unwrapToolData(await callTool("agent_set_default_crew", { crew_id: crew.id, expected_revision: crew.revision }));
       onSaved();
       onClose();
     } catch (cause) {
