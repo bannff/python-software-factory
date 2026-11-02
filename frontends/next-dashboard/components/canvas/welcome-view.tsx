@@ -84,14 +84,6 @@ export default function WelcomeView({ onNavigate }: WelcomeViewProps) {
           interval={2500}
           className="relative z-10 text-4xl font-bold tracking-tight text-foreground/90"
         />
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="relative z-10 mt-6 text-[13px] text-muted-foreground/50 text-center leading-relaxed"
-        >
-          I build agentic systems for Information Security In Amazon that scale.
-        </motion.p>
       </div>
 
       {/* Capability cards */}
