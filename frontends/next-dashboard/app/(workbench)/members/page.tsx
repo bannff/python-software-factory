@@ -1,10 +1,7 @@
-"use client";
-import { MembersPage } from "@/components/operations/members/members-page";
+import { redirect } from "next/navigation";
 
-// Row 30 (feature-map) — /members. Mounts the composed Crew Members surface.
-// The live members/activity data source is the deferred backend seam, so this
-// renders MembersPage with an empty roster (honest "not wired" state) until
-// the crew→member mapping + activity endpoint land.
+// A crew is one persona + project, so a "member" is a crew; the Crews tab is
+// the roster. No live per-member state source exists to justify a second page.
 export default function Page() {
-  return <MembersPage members={[]} />;
+  redirect("/crews");
 }
