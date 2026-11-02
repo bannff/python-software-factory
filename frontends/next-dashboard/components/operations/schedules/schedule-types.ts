@@ -56,9 +56,12 @@ export interface ScheduleCreateInput {
 }
 
 /** True when the create form has everything ``scheduler_add`` requires for its kind. */
+/** The scheduler's own floor (`interval_seconds` ge=60); it rejects, not clamps, anything lower. */
+export const MIN_INTERVAL_SECONDS = 60;
+
 export function isCreateInputComplete(input: ScheduleCreateInput): boolean {
   if (!input.agentId.trim() || !input.task.trim()) return false;
-  if (input.kind === "interval") return Number.isFinite(input.intervalSeconds) && (input.intervalSeconds ?? 0) > 0;
+  if (input.kind === "interval") return Number.isFinite(input.intervalSeconds) && (input.intervalSeconds ?? 0) >= MIN_INTERVAL_SECONDS;
   if (input.kind === "one_shot") return Boolean(input.oneShotAt);
   return Boolean(input.cronExpression?.trim());
 }

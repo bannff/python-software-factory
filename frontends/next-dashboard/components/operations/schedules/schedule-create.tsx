@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Loader2, Plus, X } from "lucide-react";
 import { withReason } from "@/lib/error-reason";
 import type { ActionResult } from "@/lib/hooks/use-schedules";
-import { isCreateInputComplete, type ScheduleCreateInput, type ScheduleKind } from "./schedule-types";
+import { isCreateInputComplete, MIN_INTERVAL_SECONDS, type ScheduleCreateInput, type ScheduleKind } from "./schedule-types";
 
 const DEFAULT_AGENT = "companion-x-default";
 
@@ -78,8 +78,8 @@ export function ScheduleCreateDialog({ onClose, onCreate }: {
 
       {kind === "interval" && (
         <div className="mt-2">
-          <label className="block text-[11px] text-muted-foreground" htmlFor="sc-interval">Interval (seconds)</label>
-          <input id="sc-interval" type="number" min={15} max={86400} value={intervalSeconds}
+          <label className="block text-[11px] text-muted-foreground" htmlFor="sc-interval">Interval (seconds, at least {MIN_INTERVAL_SECONDS})</label>
+          <input id="sc-interval" type="number" min={MIN_INTERVAL_SECONDS} max={86400} value={intervalSeconds}
             onChange={(e) => setIntervalSeconds(Number(e.target.value) || 3600)}
             className="mt-1 w-full rounded-md border border-border/60 bg-background px-2 py-1.5 text-sm" />
         </div>

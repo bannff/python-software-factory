@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  classifyScheduleError, parseLastFire, parseScheduleList, parseScheduleOutput,
+  classifyScheduleError, isCreateInputComplete, MIN_INTERVAL_SECONDS, parseLastFire, parseScheduleList, parseScheduleOutput,
 } from "../schedule-types";
 
 const intervalRow = {
@@ -84,5 +84,17 @@ describe("classifyScheduleError", () => {
     expect(classifyScheduleError(new Error("schedule_not_found"))).toBe("deleted");
     expect(classifyScheduleError(new Error("schedule_invalid"))).toBe("error");
     expect(classifyScheduleError("boom")).toBe("error");
+  });
+});
+
+describe("isCreateInputComplete interval floor", () => {
+  const base = { agentId: "a", task: "t", kind: "interval" as const };
+
+  it("accepts exactly the scheduler's minimum and rejects anything below it", () => {
+    expect(MIN_INTERVAL_SECONDS).toBe(60);
+    expect(isCreateInputComplete({ ...base, intervalSeconds: 60 })).toBe(true);
+    for (const seconds of [1, 15, 59]) {
+      expect(isCreateInputComplete({ ...base, intervalSeconds: seconds })).toBe(false);
+    }
   });
 });
