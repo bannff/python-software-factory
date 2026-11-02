@@ -187,3 +187,4 @@ def test_archived_session_refuses_lesson_curation(tmp_path) -> None:
     assert runtime.lifecycle.get(
         "tenant", "owner", proposed.lesson_id,
     ).status.value == "proposed"
+
