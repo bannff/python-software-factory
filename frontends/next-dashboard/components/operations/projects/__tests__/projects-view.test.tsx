@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-const mocks = vi.hoisted(() => ({ callTool: vi.fn() }));
-vi.mock("@/lib/api", () => ({ callTool: (...args: unknown[]) => mocks.callTool(...args) }));
+const mocks = vi.hoisted(() => ({ callTool: vi.fn(), listPersonas: vi.fn() }));
+vi.mock("@/lib/api", () => ({
+  callTool: (...args: unknown[]) => mocks.callTool(...args),
+  listPersonas: () => mocks.listPersonas(),
+}));
 
 import ProjectsView from "../projects-view";
 
@@ -16,7 +19,13 @@ const loopRow = {
 const listOk = (rows: unknown[]) => ({ ok: true, data: { loops: rows } });
 const cycleOk = { ok: true, data: { cycle: { cycle: 2, state: "settled", disposition: "continue", summary: "Flipped row 92." } } };
 
+const sessionRow = {
+  session_id: "ses_1", thread_id: "thr_1", title: "Main", agent_id: "researcher",
+  model: "m", updated_at: "2026-09-15T00:00:00Z", revision: 1,
+};
+
 function defaultImpl(name: string) {
+  if (name === "session_list") return Promise.resolve({ ok: true, data: { sessions: [sessionRow] } });
   if (name === "workflow.list_loops") return Promise.resolve(listOk([loopRow]));
   if (name === "workflow.get_loop_cycle") return Promise.resolve(cycleOk);
   return Promise.resolve({ ok: true, data: { loop: loopRow } });
@@ -24,6 +33,13 @@ function defaultImpl(name: string) {
 
 beforeEach(() => {
   mocks.callTool.mockReset().mockImplementation((name: string) => defaultImpl(name));
+  mocks.listPersonas.mockReset().mockResolvedValue({
+    count: 2,
+    personas: [
+      { id: "companion-x-default", name: "Default", description: "", model: null },
+      { id: "researcher", name: "Researcher", description: "", model: null },
+    ],
+  });
 });
 
 describe("ProjectsView", () => {
@@ -51,15 +67,36 @@ describe("ProjectsView", () => {
     expect(await screen.findByText("Port the Task Runner")).toBeTruthy();
   });
 
-  it("starts a project by mapping the spec form onto start_loop's existing fields", async () => {
-    render(<ProjectsView />);
+  async function fillForm() {
     fireEvent.change(screen.getByLabelText("Title"), { target: { value: "New effort" } });
     fireEvent.change(screen.getByLabelText("Spec"), { target: { value: "Do the thing each cycle." } });
+    await waitFor(() => expect((screen.getByLabelText("Agent") as HTMLSelectElement).options.length).toBe(2));
+  }
+
+  it("starts a project from the chosen persona and an explicit origin session", async () => {
+    render(<ProjectsView />);
+    await fillForm();
+    fireEvent.change(screen.getByLabelText("Agent"), { target: { value: "researcher" } });
     fireEvent.click(screen.getByRole("button", { name: "Start project" }));
     await waitFor(() => expect(mocks.callTool).toHaveBeenCalledWith("workflow.start_loop", {
-      kind: "goal", agent_id: "companion-x-default", objective: "New effort",
+      kind: "goal", agent_id: "researcher", objective: "New effort",
       cycle_instructions: "Do the thing each cycle.", interval_seconds: 300, max_cycles: 24,
+      envelope: { session_id: "thr_1" },
     }));
+    await waitFor(() => expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe(""));
+  });
+
+  it("keeps the form and shows the server reason when starting fails", async () => {
+    mocks.callTool.mockImplementation((name: string) => name === "workflow.start_loop"
+      ? Promise.resolve({ ok: false, error: { message: "loop_origin_not_found" } })
+      : defaultImpl(name));
+    render(<ProjectsView />);
+    await fillForm();
+    fireEvent.click(screen.getByRole("button", { name: "Start project" }));
+    const alert = await screen.findByText(/Could not start the project/);
+    expect(alert.textContent).toContain("loop_origin_not_found");
+    expect((screen.getByLabelText("Title") as HTMLInputElement).value).toBe("New effort");
+    expect((screen.getByLabelText("Spec") as HTMLTextAreaElement).value).toBe("Do the thing each cycle.");
   });
 
   it("opens a project, shows its latest cycle, and pauses it with revision fencing", async () => {

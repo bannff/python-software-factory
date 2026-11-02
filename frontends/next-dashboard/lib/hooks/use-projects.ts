@@ -2,18 +2,21 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { callTool } from "@/lib/api";
+import { errorReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import {
   classifyLoopError, parseLoopCycle, parseLoopList,
   type Loop, type LoopCycle, type LoopErrorKind,
 } from "@/components/operations/projects/project-types";
 
-export interface ActionResult { status: "ok" | LoopErrorKind }
+export interface ActionResult { status: "ok" | LoopErrorKind; reason?: string }
 
 type LifecycleTool = "workflow.pause_loop" | "workflow.resume_loop" | "workflow.stop_loop";
 
 export interface StartLoopSpec {
   title: string; spec: string; agentId: string;
+  /** Thread of the session that owns the loop (``envelope.session_id``). */
+  originThreadId: string;
   intervalSeconds: number; maxCycles: number;
 }
 
@@ -48,12 +51,12 @@ export function useProjects() {
       unwrapToolData(await callTool("workflow.start_loop", {
         kind: "goal", agent_id: input.agentId, objective: input.title,
         cycle_instructions: input.spec, interval_seconds: input.intervalSeconds,
-        max_cycles: input.maxCycles,
+        max_cycles: input.maxCycles, envelope: { session_id: input.originThreadId },
       }));
       await refresh();
       return { status: "ok" };
     } catch (err) {
-      return { status: classifyLoopError(err) };
+      return { status: classifyLoopError(err), reason: errorReason(err) };
     }
   }, [refresh]);
 
