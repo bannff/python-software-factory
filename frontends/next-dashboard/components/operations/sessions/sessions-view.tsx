@@ -110,7 +110,7 @@ export default function SessionsView({
               includeArchived && "border-violet-500/40 bg-violet-500/[0.06] text-foreground")}>
             <Archive className="h-3.5 w-3.5" /> Archived
           </button>
-          <ClearArchivedControl visible={includeArchived} onCleared={refresh} />
+          <ClearArchivedControl visible={includeArchived} listVersion={sessions.length} onCleared={refresh} />
           <button type="button" onClick={refresh} aria-label="Refresh sessions"
             className="rounded-lg border border-border/60 p-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground">
             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
