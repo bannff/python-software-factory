@@ -48,7 +48,7 @@ class Neo4jDocumentStore(Neo4jCreateOrMatchMixin):
             os.environ.get("NEO4J_USER", "neo4j"),
             os.environ.get("NEO4J_PASSWORD", "password"),
         )
-        self._driver = GraphDatabase.driver(uri, auth=auth)
+        self._driver = GraphDatabase.driver(uri, auth=auth, notifications_disabled_classifications=["UNRECOGNIZED", "PERFORMANCE"])
         self._database = database
         self._uri = uri
         self._ensure_index()

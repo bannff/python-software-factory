@@ -28,7 +28,7 @@ class Neo4jGraphStore:
     ) -> None:
         _require_neo4j()
         from neo4j import GraphDatabase
-        self._driver = GraphDatabase.driver(uri, auth=auth)
+        self._driver = GraphDatabase.driver(uri, auth=auth, notifications_disabled_classifications=["UNRECOGNIZED", "PERFORMANCE"])
         self._database = database
         self._uri = uri
 

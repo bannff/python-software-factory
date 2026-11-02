@@ -70,7 +70,7 @@ class Neo4jMemoryStore:
         self._user = user or os.environ.get("NEO4J_USER", "neo4j")
         self._password = password or os.environ.get("NEO4J_PASSWORD", "password")
         self._database = database
-        self._driver = GraphDatabase.driver(self._uri, auth=(self._user, self._password))
+        self._driver = GraphDatabase.driver(self._uri, auth=(self._user, self._password), notifications_disabled_classifications=["UNRECOGNIZED", "PERFORMANCE"])
         self._ensure_constraints()
 
     @property
