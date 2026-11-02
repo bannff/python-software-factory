@@ -108,6 +108,24 @@ def test_mount_error_never_echoes_exception_text(stack, with_owner, monkeypatch)
     assert "super-secret-value" not in added.model_dump_json()
 
 
+def test_mcp_protocol_errors_show_their_message(stack, with_owner, monkeypatch) -> None:
+    class MCPError(Exception):
+        pass
+
+    added = _add(stack, with_owner, monkeypatch, MCPError("Connection closed\nsecond line"))
+    assert added.data.server.mount_error == "MCPError: Connection closed"
+
+
+def test_reason_masks_the_servers_own_secrets_and_other_types_show_only_the_type() -> None:
+    from factory.connections.runtime.runtime import _reason
+
+    class MCPError(Exception):
+        pass
+
+    assert _reason(MCPError("401 Bearer tok-1234567 rejected"), ("tok-1234567",)) == "MCPError: 401 Bearer *** rejected"
+    assert _reason(ValueError("https://h/?token=abc")) == "ValueError"
+
+
 def test_mount_error_unwraps_exception_groups(stack, with_owner, monkeypatch) -> None:
     group = ExceptionGroup("unhandled errors in a TaskGroup", [ConnectionRefusedError(61, "Connection refused")])
     added = _add(stack, with_owner, monkeypatch, group)
