@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { File as FileIcon, Folder, ChevronUp } from "lucide-react";
+import { File as FileIcon, Folder, ChevronUp, type LucideIcon } from "lucide-react";
 import { callTool } from "@/lib/api";
 import { errorReason, withReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
+import { filesState } from "./files-tab-states";
 
 /**
  * Row 24 (feature-map) — Files in chat, homed in the chat side panel.
@@ -27,7 +28,7 @@ function parentDir(path: string): string {
 export function ChatFilesTab({ threadId, onInsert }: { threadId: string; onInsert: (reference: string) => void }) {
   const [cwd, setCwd] = useState(".");
   const [entries, setEntries] = useState<Entry[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ text: string; icon?: LucideIcon } | null>(null);
 
   const load = useCallback(async (path: string) => {
     setError(null);
@@ -36,7 +37,9 @@ export function ChatFilesTab({ threadId, onInsert }: { threadId: string; onInser
         { result?: { entries?: Entry[] } } | null;
       setEntries(data?.result?.entries ?? []);
     } catch (cause) {
-      setError(withReason("Couldn’t list this directory.", errorReason(cause)));
+      const reason = errorReason(cause);
+      const known = filesState(reason);
+      setError(known ?? { text: withReason("Couldn’t list this directory.", reason) });
       setEntries([]);
     }
   }, [threadId]);
@@ -53,7 +56,12 @@ export function ChatFilesTab({ threadId, onInsert }: { threadId: string; onInser
           className="rounded-md p-1 hover:bg-accent/40 disabled:opacity-30"><ChevronUp className="h-3.5 w-3.5" /></button>
         <span className="truncate" title={cwd}>{cwd === "." ? "workspace" : cwd}</span>
       </div>
-      {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+      {error && (
+        <p role="alert" className="flex items-center gap-2 text-xs text-muted-foreground">
+          {error.icon && <error.icon className="h-3.5 w-3.5 shrink-0" aria-hidden />}
+          {error.text}
+        </p>
+      )}
       {entries && entries.length === 0 && !error && (
         <p className="text-sm italic text-muted-foreground/70">Empty directory.</p>
       )}

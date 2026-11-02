@@ -38,4 +38,17 @@ describe("ChatFilesTab (row 24 — files in chat)", () => {
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("tool_execution_failed");
   });
+
+  it.each([
+    ["devtools_session_required", "Start a chat to browse files."],
+    ["devtools_session_unavailable", "This chat’s session is gone."],
+    ["devtools_project_unbound", "No project is bound to this chat."],
+    ["devtools_binding_unavailable", "The project’s files can’t be reached."],
+    ["devtools_path_refused", "That path is outside the workspace."],
+  ])("shows a short state for %s", async (code, text) => {
+    mocks.callTool.mockResolvedValue({ tool: "x", result: { schema_version: "v1", ok: false, data: null, error: code } });
+    render(<ChatFilesTab threadId="t1" onInsert={vi.fn()} />);
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toBe(text);
+  });
 });
