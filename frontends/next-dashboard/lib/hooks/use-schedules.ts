@@ -79,7 +79,7 @@ export function useSchedules() {
         const kind = classifyScheduleError(err);
         // Conflict or deleted → the list is now stale; refresh to the truth.
         await refresh();
-        return { status: kind };
+        return { status: kind, reason: errorReason(err) };
       }
     },
     [refresh],

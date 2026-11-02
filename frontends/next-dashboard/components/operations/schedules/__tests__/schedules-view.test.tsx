@@ -128,6 +128,17 @@ describe("SchedulesView", () => {
     expect(listCalls()).toBeGreaterThan(before); // refreshed rather than lied
   });
 
+  it("shows the server's reason when an action fails for an unclassified cause", async () => {
+    mocks.callTool.mockImplementation((name: string) =>
+      name === "scheduler_trigger"
+        ? Promise.resolve({ ok: false, error: { message: "schedule_trigger_failed" } })
+        : defaultImpl(name));
+    render(<SchedulesView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Open schedule sch_daily" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Run now" }));
+    expect(await screen.findByText(/didn't go through.*schedule_trigger_failed/)).toBeTruthy();
+  });
+
   it("focuses the detail heading for a deep-linked schedule and clears the intent", async () => {
     const onFocusHandled = vi.fn();
     render(<SchedulesView focusScheduleId="sch_report" onFocusHandled={onFocusHandled} />);
