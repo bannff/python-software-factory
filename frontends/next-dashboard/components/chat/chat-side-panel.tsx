@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { X } from "lucide-react";
+import { X, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 export interface ChatPanelTab {
   id: string;
   label: string;
+  /** Optional: contributed app tabs may omit it and fall back to a text tab. */
+  icon?: LucideIcon;
   render: () => ReactNode;
 }
 
@@ -35,14 +37,19 @@ export function ChatSidePanel({ tabs, activeId, onSelect, onClose }: {
     <div aria-label="Chat side panel" className="flex h-full flex-col border-l border-border/50 bg-card/10">
       <div className="flex h-9 items-center gap-1 border-b border-border/50 px-2">
         <div role="tablist" className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
-          {tabs.map((tab) => (
-            <button key={tab.id} type="button" role="tab" aria-selected={tab.id === active.id}
-              onClick={() => onSelect(tab.id)}
-              className={cn("shrink-0 rounded-md px-2.5 py-1 text-xs transition-colors",
-                tab.id === active.id ? "bg-violet-500/10 text-violet-300" : "text-muted-foreground hover:bg-muted/40")}>
-              {tab.label}
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const selected = tab.id === active.id;
+            const Icon = tab.icon;
+            return (
+              <button key={tab.id} type="button" role="tab" aria-selected={selected}
+                aria-label={tab.label} title={tab.label} onClick={() => onSelect(tab.id)}
+                className={cn("flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors",
+                  selected ? "bg-violet-500/10 text-violet-300" : "text-muted-foreground hover:bg-muted/40")}>
+                {Icon && <Icon className="h-3.5 w-3.5" aria-hidden />}
+                {(selected || !Icon) && tab.label}
+              </button>
+            );
+          })}
         </div>
         <button type="button" aria-label="Close panel" onClick={onClose}
           className="rounded-md p-1 text-muted-foreground hover:bg-accent/40 hover:text-foreground">
