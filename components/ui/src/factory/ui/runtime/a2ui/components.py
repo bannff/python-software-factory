@@ -148,7 +148,7 @@ COMPONENT_CATALOG: dict[str, ComponentSpec] = {
         a2ui_type="ItemList", native_type=ComponentType.ITEM_LIST,
         description="Rich filterable list with per-item detail drill-down",
         required_props=["data_tool", "item_key"],
-        optional_props=["empty_icon", "empty_message", "header", "filters",
+        optional_props=["empty_icon", "empty_message", "empty_action", "header", "filters",
                          "item_layout", "item_snapshot_tool", "item_snapshot_args",
                          "snapshot_merge_path", "detail", "live_state_path",
                          "page_size", "sort_fields", "refresh_interval_ms"],

@@ -3,6 +3,7 @@
 import React, { useCallback } from "react";
 import { FallbackComponent, getRenderer, normalizeComponentName } from "./component-map";
 import { AnimationWrapper } from "./animation-wrapper";
+import { CustomRenderer } from "./renderers-layout";
 import type { ReactAdapterNode } from "./renderers";
 
 export type { ReactAdapterNode };
@@ -32,7 +33,10 @@ interface ComponentRendererProps {
  */
 export function ComponentRenderer({ node }: ComponentRendererProps) {
   const key = node.component || (node as Record<string, unknown>).type as string || "";
-  const Comp = getRenderer(key) ?? FallbackComponent;
+  // The Python ReactAdapter labels types it has no shadcn twin for as `Custom`
+  // and keeps the real type in `originalType`; use that renderer when it exists.
+  const Comp = (getRenderer(key) === CustomRenderer ? getRenderer(node.originalType) : null)
+    ?? getRenderer(key) ?? FallbackComponent;
 
   const renderChildren = useCallback(
     (children?: ReactAdapterNode[]): React.ReactNode => {

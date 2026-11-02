@@ -18,7 +18,7 @@ from factory.mcp_utils.interface import (
 
 from ..runtime.crew_contracts import (
     CrewConflictError, CrewExistsError, CrewIdentityError,
-    CrewModelUnresolvedError, CrewNotFoundError,
+    CrewModelUnresolvedError, CrewNotFoundError, CrewProjectRejectedError,
 )
 from ..runtime.crew_lifecycle import CrewLifecycle
 from .contracts.crews import (
@@ -58,6 +58,8 @@ def _run(fn: Callable[[str, str], Any]) -> ToolResult[Any]:
         return fail("crew_revision_conflict")
     except CrewModelUnresolvedError:
         return fail("crew_model_unresolved")
+    except CrewProjectRejectedError:
+        return fail("crew_project_path_refused")
     except (ValueError, OSError, PermissionError) as exc:
         logger.warning(
             "Crew operation unavailable error_type=%s", type(exc).__name__,
