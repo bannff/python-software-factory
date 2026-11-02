@@ -102,4 +102,13 @@ describe("startCrewSession", () => {
     await expect(startCrewSession("redteam-crew", caller)).rejects.toThrow("Crew no longer exists");
     expect(caller).toHaveBeenCalledTimes(2);
   });
+
+  it("says the crew is gone when resolving a deleted crew's card, and stays generic otherwise", async () => {
+    const gone = vi.fn().mockResolvedValueOnce({ schema_version: "v1", ok: false, error: "crew_not_found" });
+    await expect(startCrewSession("redteam-crew", gone)).rejects.toThrow("Crew no longer exists");
+    expect(gone).toHaveBeenCalledTimes(1);
+
+    const broken = vi.fn().mockResolvedValueOnce({ schema_version: "v1", ok: false, error: "boom" });
+    await expect(startCrewSession("redteam-crew", broken)).rejects.toThrow("Crew unavailable");
+  });
 });
