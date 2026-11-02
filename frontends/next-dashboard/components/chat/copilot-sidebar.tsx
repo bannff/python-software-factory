@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, type ReactElement } from "react";
-import { PanelRightClose } from "lucide-react";
+import { PanelRightClose, ScrollText, Pin, Folder, MessagesSquare, Globe } from "lucide-react";
 import { PanelRight as PanelRightIcon } from "lucide-react";
 import { CopilotChat } from "@copilotkit/react-core/v2";
 import { useAgent } from "@copilotkit/react-core/v2";
@@ -108,13 +108,13 @@ export function CopilotChatSidebar({ onToggle, activeView, width, onResize }: Co
     setDraft("");
   }, []);
   const panelTabs: ChatPanelTab[] = useMemo(() => mergeContributedTabs([
-    { id: "summary", label: "Summary", render: () => <ChatSummaryTab threadId={agent.threadId} /> },
-    { id: "pins", label: "Pins", render: () => <ChatPinsTab threadId={agent.threadId} /> },
-    { id: "files", label: "Files", render: () => (
+    { id: "summary", icon: ScrollText, label: "Summary", render: () => <ChatSummaryTab threadId={agent.threadId} /> },
+    { id: "pins", icon: Pin, label: "Pins", render: () => <ChatPinsTab threadId={agent.threadId} /> },
+    { id: "files", icon: Folder, label: "Files", render: () => (
       <ChatFilesTab threadId={agent.threadId} />
     ) },
-    { id: "side", label: "Side", render: () => <ChatSideTab seed={sideSeed} /> },
-    { id: "browser", label: "Browser", render: () => <ChatBrowserTab /> },
+    { id: "side", icon: MessagesSquare, label: "Side", render: () => <ChatSideTab seed={sideSeed} /> },
+    { id: "browser", icon: Globe, label: "Browser", render: () => <ChatBrowserTab /> },
   ], []), [agent.threadId, sideSeed]);
 
   // Memoise the slot components so identity stays stable across renders

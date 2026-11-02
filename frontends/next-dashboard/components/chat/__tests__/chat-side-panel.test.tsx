@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { Pin } from "lucide-react";
 import { ChatSidePanel, type ChatPanelTab } from "../chat-side-panel";
 
 const tabs: ChatPanelTab[] = [
@@ -28,5 +29,17 @@ describe("ChatSidePanel (chat right-panel host)", () => {
   it("renders nothing with no tabs", () => {
     const { container } = render(<ChatSidePanel tabs={[]} activeId="x" onSelect={vi.fn()} onClose={vi.fn()} />);
     expect(container.firstChild).toBeNull();
+  });
+
+  it("shows an icon-only tab by its tooltip and accessible name, label only when active", () => {
+    const iconTabs: ChatPanelTab[] = [
+      { id: "summary", label: "Summary", icon: Pin, render: () => <div>s</div> },
+      { id: "pins", label: "Pins", icon: Pin, render: () => <div>p</div> },
+    ];
+    render(<ChatSidePanel tabs={iconTabs} activeId="summary" onSelect={vi.fn()} onClose={vi.fn()} />);
+    const inactive = screen.getByRole("tab", { name: "Pins" });
+    expect(inactive.getAttribute("title")).toBe("Pins");
+    expect(inactive.textContent).toBe("");
+    expect(screen.getByRole("tab", { name: "Summary" }).textContent).toBe("Summary");
   });
 });
