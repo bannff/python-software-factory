@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Brain, Play, Plus, Square } from "lucide-react";
+import { Brain, Play, Plus, Square, Trash2 } from "lucide-react";
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { EmptyState } from "@/components/ui/empty-state";
 import { errorReason, withReason } from "@/lib/error-reason";
-import { createJob, listJobs, listMethods, startJob, stopJob, type FineTuneJob, type FineTuneMethod, type JobInput } from "./finetune-api";
+import { createJob, deleteJob, jobFailure, listJobs, listMethods, startJob, stopJob, type FineTuneJob, type FineTuneMethod, type JobInput } from "./finetune-api";
 import { listBaseModels, type BaseModel } from "./base-models-api";
 import { listDatasets, type Dataset } from "./datasets-api";
 import { FineTuneForm } from "./finetune-form";
@@ -46,7 +47,7 @@ export function FineTunePanel() {
   const run = async (action: () => Promise<void>, failure: string) => {
     setBusy(true);
     try { await action(); await refresh(); return true; }
-    catch (cause) { setNotice(withReason(failure, errorReason(cause))); return false; }
+    catch (cause) { setNotice(jobFailure(failure, cause)); return false; }
     finally { setBusy(false); }
   };
   const save = async () => {
@@ -81,6 +82,9 @@ export function FineTunePanel() {
           {j.status === "pending" && <button type="button" aria-label={`Start job ${j.id}`} disabled={busy}
             onClick={() => void run(() => startJob(j.id), "Job could not be started.")}
             className="rounded-md p-1.5 text-muted-foreground hover:text-foreground"><Play className="h-3.5 w-3.5" /></button>}
+          {!RUNNING.has(j.status) && <ConfirmDelete label={`Delete job ${j.id}`} disabled={busy}
+            onConfirm={() => void run(() => deleteJob(j.id), "Job could not be deleted.")}
+            className="rounded-md p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></ConfirmDelete>}
           {RUNNING.has(j.status) && <button type="button" aria-label={`Stop job ${j.id}`} disabled={busy}
             onClick={() => void run(() => stopJob(j.id), "Job could not be stopped.")}
             className="rounded-md p-1.5 text-muted-foreground hover:text-destructive"><Square className="h-3.5 w-3.5" /></button>}

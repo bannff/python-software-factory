@@ -58,6 +58,28 @@ describe("FineTunePanel", () => {
     expect(screen.queryByRole("button", { name: "Stop job job-a" })).toBeNull();
   });
 
+  it("deletes a finished job after confirmation and offers no delete on a running one", async () => {
+    jobs = [job("job-a", "completed"), job("job-b", "running")];
+    render(<FineTunePanel />);
+    fireEvent.click(await screen.findByRole("button", { name: "Delete job job-a" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete job job-a" }));
+    await waitFor(() => expect(callTool).toHaveBeenCalledWith("ml_delete_finetuning_job", { job_id: "job-a" }));
+    expect(screen.queryByRole("button", { name: "Delete job job-b" })).toBeNull();
+  });
+
+  it("explains a job that is still running when the server refuses the delete", async () => {
+    jobs = [job("job-a", "completed")];
+    callTool.mockImplementation(async (name: string) => {
+      if (name === "ml_list_finetuning_jobs") return ok({ count: 1, jobs });
+      if (name === "ml_list_finetuning_methods") return methods;
+      throw typed("job_running");
+    });
+    render(<FineTunePanel />);
+    fireEvent.click(await screen.findByRole("button", { name: "Delete job job-a" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete job job-a" }));
+    expect((await screen.findByRole("alert")).textContent).toMatch(/stop the job/i);
+  });
+
   it("creates a job from the form with the chosen method", async () => {
     render(<FineTunePanel />);
     fireEvent.click(await screen.findByRole("button", { name: "New job" }));
