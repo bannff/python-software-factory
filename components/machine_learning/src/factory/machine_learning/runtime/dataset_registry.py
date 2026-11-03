@@ -14,6 +14,8 @@ from typing import Iterable
 
 from factory.mcp_utils.interface import TypedToolFailure
 
+from .models import DatasetTrainingInput
+
 ID_PATTERN = re.compile(r"^[a-z][a-z0-9_-]{1,63}$")
 _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 
@@ -92,3 +94,25 @@ class DatasetRegistry:
 
 
 REGISTRY = DatasetRegistry()
+
+
+def resolve_training_input(
+    dataset_id: str | None, uri: str | None, manifest_uri: str | None, digest: str | None,
+    view_name: str | None, view_schema_version: str | None,
+) -> DatasetTrainingInput:
+    """Build trainer input from a registered ``dataset_id`` or the explicit fields.
+
+    The trainer takes a bare 64-hex digest; registered digests carry ``sha256:``.
+    """
+    if dataset_id is not None:
+        rec = REGISTRY.get(dataset_id)
+        uri, manifest_uri, digest = rec.uri, rec.manifest_uri, rec.digest
+        view_name, view_schema_version = rec.view_name, rec.view_schema_version
+    fields = (uri, manifest_uri, digest, view_name, view_schema_version)
+    if any(f is None for f in fields):
+        raise ValueError("pass dataset_id or all of the dataset fields")
+    return DatasetTrainingInput(
+        dataset_uri=uri, manifest_uri=manifest_uri,
+        dataset_digest=digest.removeprefix("sha256:"),
+        view_name=view_name, view_schema_version=view_schema_version,
+    )
