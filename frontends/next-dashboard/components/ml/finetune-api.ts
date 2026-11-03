@@ -1,4 +1,5 @@
 import { callTool } from "@/lib/api";
+import { errorReason, withReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 
 export interface FineTuneJob {
@@ -46,4 +47,15 @@ export async function startJob(jobId: string): Promise<void> {
 }
 export async function stopJob(jobId: string): Promise<void> {
   unwrapToolData(await callTool("ml_stop_finetuning_job", { job_id: jobId }));
+}
+export async function deleteJob(jobId: string): Promise<void> {
+  unwrapToolData(await callTool("ml_delete_finetuning_job", { job_id: jobId }));
+}
+
+/** Typed job refusals in words; anything else keeps the server's reason. */
+export function jobFailure(prose: string, cause: unknown): string {
+  const reason = errorReason(cause) ?? "";
+  if (reason.includes("job_running")) return "This job is still running. Stop the job before deleting it.";
+  if (reason.includes("job_not_found")) return "This job no longer exists.";
+  return withReason(prose, reason || undefined);
 }
