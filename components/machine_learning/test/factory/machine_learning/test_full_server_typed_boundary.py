@@ -30,6 +30,10 @@ TOOLS = {
     "ml_stop_finetuning_job", "ml_train_can_portfolio", "ml_train_timeseries",
     "ml_adjust_hyperparam", "ml_verify_and_promote_can_passport",
     "ml_verify_and_promote_lightgbm_passport",
+    # Registry and catalog tools added with the ML tab controls (#196, #221, #226).
+    "ml_register_dataset", "ml_list_datasets", "ml_get_dataset", "ml_update_dataset",
+    "ml_delete_dataset", "ml_list_base_models", "ml_update_base_model",
+    "ml_delete_base_model", "ml_delete_finetuning_job",
     "tracking_create_experiment", "tracking_end_run", "tracking_get_experiment",
     "tracking_get_run", "tracking_list_experiments", "tracking_log_metrics",
     "tracking_log_params", "tracking_start_run",
@@ -37,12 +41,12 @@ TOOLS = {
 
 
 @pytest.mark.asyncio
-async def test_fresh_server_exposes_exactly_sixty_one_strict_typed_tools() -> None:
+async def test_fresh_server_exposes_exactly_seventy_strict_typed_tools() -> None:
     tools = await create_mcp_server().list_tools()
     names = [tool.name for tool in tools]
 
     assert set(names) == TOOLS
-    assert len(names) == len(set(names)) == 61
+    assert len(names) == len(set(names)) == 70
     assert not any(name.endswith("_v2") for name in names)
 
     for tool in tools:

@@ -3,12 +3,13 @@ from __future__ import annotations
 
 from typing import Any, Callable
 
-from factory.mcp_utils.interface import deterministic, fail, ok, operational
+from factory.mcp_utils.interface import TypedToolFailure, deterministic, fail, ok, operational
 from factory.mcp_utils.runtime.tool_result import ToolResult
 
 from ..runtime.adapters.timeseries_training import MemoryTimeSeriesTrainingAdapter
 from ..runtime.adapters.training_run_store import persist_training_run
 from ..runtime.emit import emit_ml_event
+from ..runtime.training_errors import classify_training_error
 from ..runtime.runtime import TrackingRuntime
 from ..runtime.time_series_ports import (
     TimeSeriesModelConfig, TimeSeriesModelType, TimeSeriesTrainingConfig,
@@ -35,11 +36,14 @@ def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
         """Train a time-series classifier on windowed features."""
         try:
             model_type_enum = TimeSeriesModelType(model_type)
+        except ValueError as error:
+            raise TypedToolFailure("timeseries_model_type_invalid", model_type) from error
+        try:
             cfg = TimeSeriesTrainingConfig(**(config or {}))
             family_config = TimeSeriesModelConfig.model_validate(model_config) if model_config else None
             validate_model_config_for_family(model_type_enum, family_config)
         except (TypeError, ValueError) as error:
-            return fail(str(error))
+            return fail(str(error))  # field-level text; callers and tests rely on it
         emit_ml_event("ml.training.started", {
             "model_type": model_type_enum.value,
             "experiment_name": experiment_name, "status": "started",
@@ -58,7 +62,8 @@ def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
                 "experiment_name": experiment_name, "status": "failed",
                 "error": str(error),
             })
-            raise
+            # Server-config causes (model root, symlinks, missing native deps) are distinguished from bad data.
+            raise TypedToolFailure(classify_training_error(error), str(error)) from error
         persist_training_run(job, experiment_name=experiment_name, source="mcp")
         emit_ml_event("ml.training.completed", {
             "job_id": job.id, "model_type": job.model_type.value,
