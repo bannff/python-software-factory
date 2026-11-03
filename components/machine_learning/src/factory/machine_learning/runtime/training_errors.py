@@ -15,6 +15,9 @@ def classify_training_error(error: BaseException) -> str:
         return "model_root_not_configured"
     if "symlink" in text:
         return "symlink_path_rejected"
+    if "not exact binary tabular data" in text:
+        # LightGBM needs X 2-D, y strictly 0/1, as .npy or .parquet; the log has the detail.
+        return "training_data_shape_invalid"
     if "no module named" in text or isinstance(error, ModuleNotFoundError):
         return "native_dependency_missing"
     if isinstance(error, OSError):

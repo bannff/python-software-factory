@@ -10,6 +10,7 @@ from factory.machine_learning.runtime.training_errors import classify_training_e
     (ValueError("ModelPassport paths must not contain symlink ancestors"), "symlink_path_rejected"),
     (RuntimeError("native_operation_failed: ModuleNotFoundError: No module named lightgbm"), "native_dependency_missing"),
     (ModuleNotFoundError("x"), "native_dependency_missing"),
+    (ValueError("LightGBM training arrays are not exact binary tabular data"), "training_data_shape_invalid"),
     (FileNotFoundError("missing.npy"), "training_data_unreadable"),
     (ValueError("shapes do not match"), "training_failed"),
 ])
