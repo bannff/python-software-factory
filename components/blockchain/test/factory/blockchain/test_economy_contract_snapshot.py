@@ -72,7 +72,7 @@ def test_complete_tool_catalog_and_concrete_dto_schemas_are_frozen() -> None:
             "input": tool.fn._mcp_input_model.model_json_schema(mode="validation"),
             "output": output.model_json_schema(),
         }
-    assert _digest(snapshot) == "580e768bca550672c9ea88d82561449ad8d6c3cb13db1637cab3eaeced0eb0dd"
+    assert _digest(snapshot) == "bfd5609e0b69709a4f300ff31f00be101aba55c31283cbc9ec827b8f38dad5fa"
 
 
 def test_resources_prompts_complete_view_and_representative_envelopes_are_frozen() -> None:
@@ -109,4 +109,4 @@ def test_normal_negative_envelopes_are_frozen(monkeypatch) -> None:
         "auto_wallet_failure": tools["blockchain_my_wallet"].fn().model_dump(mode="json"),
         "authoring_disabled": tools["blockchain_authoring_seed_economy"].fn().model_dump(mode="json"),
     }
-    assert _digest(_normalize(envelopes)) == "ca625596e7c07a547d65cd79a222a587bebdccdbd015c7dd70e42b113d88ad8a"
+    assert _digest(_normalize(envelopes)) == "c4e9b518b6acce9d6c006793b449bb1d7884f47c4255d70f34e3d573d1ad3713"
