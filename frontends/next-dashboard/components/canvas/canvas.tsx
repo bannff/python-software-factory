@@ -19,6 +19,7 @@ const FindingsView = lazy(() => import("./findings-view"));
 const BrickViewRenderer = lazy(() => import("./brick-view-renderer"));
 const SandboxBanner = lazy(() => import("../sandbox/sandbox-banner").then((m) => ({ default: m.SandboxBanner })));
 const GamesPanel = lazy(() => import("../games/games-panel").then((m) => ({ default: m.GamesPanel })));
+const BountiesPanel = lazy(() => import("../blockchain/bounties-panel").then((m) => ({ default: m.BountiesPanel })));
 const BlockchainPanel = lazy(() => import("../blockchain/blockchain-panel").then((m) => ({ default: m.BlockchainPanel })));
 const FineTunePanel = lazy(() => import("../ml/finetune-panel").then((m) => ({ default: m.FineTunePanel })));
 const DatasetsPanel = lazy(() => import("../ml/datasets-panel").then((m) => ({ default: m.DatasetsPanel })));
@@ -116,7 +117,7 @@ export function Canvas(props: CanvasProps) {
           {props.activeView === "metrics" && <RuntimeMetricsView onNavigate={props.onNavigate} />}
           {props.activeView === "ml" && <><BrickViewRenderer viewTool="ml_get_views" /><DatasetsPanel /><FineTunePanel /></>}
           {props.activeView === "games" && <Refreshable label="games"><><GamesPanel /><GraphBrickView viewTool="games_get_views" defaultEntityType="GameSession" onNavigate={props.onNavigate} /></></Refreshable>}
-          {props.activeView === "blockchain" && <Refreshable label="blockchain"><><BlockchainPanel /><GraphBrickView viewTool="blockchain_get_views" defaultEntityType="Transaction" onNavigate={props.onNavigate} /></></Refreshable>}
+          {props.activeView === "blockchain" && <Refreshable label="blockchain"><><BlockchainPanel /><BountiesPanel /><GraphBrickView viewTool="blockchain_get_views" defaultEntityType="Transaction" onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "sandbox" && <Refreshable label="sandbox"><><SandboxBanner /><GraphBrickView viewTool="sandbox_get_views" defaultEntityType="ToolInvocation" onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "capabilities" && <AgentCapabilitiesView />}
           {props.activeView === "sessions" && <SessionsCanvas pathname={pathname}

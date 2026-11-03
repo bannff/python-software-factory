@@ -5,7 +5,7 @@ export interface Wallet { wallet_id: string; owner_id: string; balance: number }
 export interface ChainCheck { valid: boolean; blocks_checked: number; errors: string[] }
 
 /** Ledger tools may refuse inside a successful envelope (`success:false, error`); surface that as a failure. */
-function refuseIfFailed(data: unknown): void {
+export function refuseIfFailed(data: unknown): void {
   const v = data as { success?: unknown; error?: unknown } | null;
   if (v?.success === false) throw new Error(typeof v.error === "string" ? v.error : "The ledger refused this request.");
 }
