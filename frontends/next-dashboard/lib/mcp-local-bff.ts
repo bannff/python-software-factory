@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import {
+  localCredentialCandidates,
   localMcpAuthEnabled,
   localTokenFileDisplayPath,
-  resolveLocalCredential,
+  type LocalCredential,
 } from "./mcp-local-credential";
+import { fetchWithCredentials, rejectedResponse } from "./mcp-local-credential-retry";
 
 const LOCAL_HOSTS = new Set([
   "127.0.0.1", "::1", "localhost",
@@ -59,12 +61,12 @@ export async function proxyLocalApi(
   try {
     const target = new URL(pathname, config.apiUrl);
     target.search = req.nextUrl.search;
-    const headers = selectedHeaders(req.headers, REQUEST_HEADERS);
-    headers.set("authorization", `Bearer ${config.token}`);
-    const upstream = await fetch(target, {
-      method: req.method, headers, body, cache: "no-store",
-      redirect: "manual", signal: req.signal,
-    });
+    const upstream = await fetchWithCredentials(target, {
+      method: req.method, headers: selectedHeaders(req.headers, REQUEST_HEADERS), body,
+      cache: "no-store", redirect: "manual", signal: req.signal,
+    }, config.credentials);
+    if (upstream === null) return failure(502, "Local backend is unavailable");
+    if (upstream.status === 401) return rejectedResponse();
     if (upstream.status >= 300 && upstream.status < 400) {
       return failure(502, "Local upstream redirect rejected");
     }
@@ -109,12 +111,12 @@ function admitLocalRequest(req: NextRequest): NextResponse | null {
   return null;
 }
 
-function localConfig(): { apiUrl: URL; token: string } | NextResponse {
+function localConfig(): { apiUrl: URL; credentials: LocalCredential[] } | NextResponse {
   if (!localMcpAuthEnabled()) {
     return failure(401, "Local MCP authentication is disabled");
   }
-  const credential = resolveLocalCredential();
-  if (credential === null) {
+  const credentials = localCredentialCandidates();
+  if (credentials.length === 0) {
     logMissingCredentialOnce();
     return failure(
       401,
@@ -127,7 +129,7 @@ function localConfig(): { apiUrl: URL; token: string } | NextResponse {
         || apiUrl.username || apiUrl.password || apiUrl.search || apiUrl.hash) {
       return failure(503, "Local MCP upstream is not allowed");
     }
-    return { apiUrl, token: credential.token };
+    return { apiUrl, credentials };
   } catch {
     return failure(503, "Local MCP upstream is invalid");
   }
