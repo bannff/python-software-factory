@@ -12,6 +12,7 @@ from typing import Any
 from factory.mcp_utils.interface import build_event_publish_input
 
 logger = logging.getLogger(__name__)
+_warned = False
 
 
 def _get_invoker():
@@ -26,7 +27,17 @@ def _get_invoker():
             return invoker
     except Exception:
         pass
-    # Skip aggregator path in standalone mode — get_server() can block
+    # The API process builds the server before any game call, but only registers the
+    # service lazily; read the aggregator if it already exists. Never call
+    # get_server() here — it can block in standalone mode.
+    try:
+        import sys
+        interface = sys.modules.get("factory.mcp_server.interface")
+        aggregator = interface.get_aggregator() if interface is not None else None
+        if aggregator is not None:
+            return aggregator.invoke_tool
+    except Exception:
+        pass
     return None
 
 
@@ -34,7 +45,10 @@ def emit(event_type: str, payload: dict[str, Any]) -> None:
     """Publish a games event. No-ops if events brick unavailable."""
     invoker = _get_invoker()
     if invoker is None:
-        logger.debug("No event invoker available, skipping: %s", event_type)
+        global _warned
+        if not _warned:
+            _warned = True
+            logger.warning("No event invoker available; games events are dropped (first: %s)", event_type)
         return
     try:
         publish_input = build_event_publish_input(payload)
