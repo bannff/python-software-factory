@@ -33,6 +33,13 @@ describe("useFindings with the neutral finding shape", () => {
     expect(f.evidence).toBe("trace");
   });
 
+  it("reads rows from the ToolResult envelope the app's callTool really returns", async () => {
+    callTool.mockResolvedValue({ tool: "graph_get_recent_findings", result: { schema_version: "v1", ok: true, data: { rows: [neutral], count: 1 }, error: null } });
+    const { result } = renderHook(() => useFindings([]));
+    await waitFor(() => expect(result.current).toHaveLength(1));
+    expect(result.current[0].kind).toBe("eval");
+  });
+
   it("still maps a legacy row without row.finding", async () => {
     callTool.mockResolvedValue(ok([{ id: "g1", title: "Old", severity: "low", finding_type: "vulnerability", cwe: "CWE-79" }]));
     const { result } = renderHook(() => useFindings([]));

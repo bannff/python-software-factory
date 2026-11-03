@@ -2,6 +2,7 @@
 
 import { useMemo, useEffect, useState } from "react";
 import { callTool } from "@/lib/api";
+import { unwrapToolData } from "@/lib/tool-result-data";
 import type { Finding, FindingSeverity, ActiveToolCall } from "@/lib/types";
 
 /** Any tool may report findings; only the security brick returns a bare list. */
@@ -44,9 +45,10 @@ function parseFindings(items: unknown[], sourceId: string, sourceName: string): 
 
 /** Unwrap the typed graph_get_recent_findings envelope to a flat row list. */
 function unwrapTypedRows(raw: unknown): Record<string, unknown>[] {
-  const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-  const result = (parsed as Record<string, unknown>)?.result ?? parsed;
-  const rows = (result as Record<string, unknown>)?.rows;
+  let value: unknown;
+  try { value = unwrapToolData(raw); } catch { value = raw; }
+  const rows = (value as { rows?: unknown } | null)?.rows
+    ?? ((value as { result?: { rows?: unknown } } | null)?.result)?.rows;
   return Array.isArray(rows) ? (rows as Record<string, unknown>[]) : [];
 }
 
