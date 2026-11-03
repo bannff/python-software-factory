@@ -39,9 +39,10 @@ def recent_activity(
 
 
 def _entries(result: Any) -> list[Any]:
-    """Entries from a ToolResult, or from the plain payload dict the aggregator returns."""
+    """Entries from a ToolResult, the aggregator's ``{ok, data: {...}}`` dict, or a bare payload."""
     if isinstance(result, dict):
-        return list(result.get("entries") or [])
+        data = result.get("data") if "data" in result or "ok" in result else result
+        return list(data.get("entries") or []) if result.get("ok", True) and isinstance(data, dict) else []
     if result and result.ok and result.data is not None:
         return list(result.data.entries)
     return []
