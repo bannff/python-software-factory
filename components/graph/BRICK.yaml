@@ -69,6 +69,7 @@ mcp_tools:
   - graph_add_relationship
   - graph_delete_relationship
   - graph_set_finding_state
+  - graph_record_finding
   - graph_write_relationship
   - graph_tombstone_relationship
   - graph_rebuild

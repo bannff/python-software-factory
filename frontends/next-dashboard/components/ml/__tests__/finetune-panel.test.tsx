@@ -73,6 +73,25 @@ describe("FineTunePanel", () => {
       dataset_digest: DIGEST, view_name: "chat", view_schema_version: "1" }));
   });
 
+  it("creates a job from a registered dataset, sending only its id", async () => {
+    const dsRow = { dataset_id: "chat-v1", uri: "s3://d", manifest_uri: "s3://m", digest: "sha256:" + DIGEST, view_name: "chat", view_schema_version: "1", description: "", revision: 1 };
+    callTool.mockImplementation(async (name: string) => {
+      if (name === "ml_list_finetuning_jobs") return ok({ count: 0, jobs: [] });
+      if (name === "ml_list_finetuning_methods") return methods;
+      if (name === "ml_list_datasets") return ok({ count: 1, datasets: [dsRow] });
+      return ok({ id: "job-1", status: "pending" });
+    });
+    render(<FineTunePanel />);
+    fireEvent.click(await screen.findByRole("button", { name: "New job" }));
+    await screen.findByRole("option", { name: "chat-v1" });
+    fireEvent.change(screen.getByLabelText("Dataset"), { target: { value: "chat-v1" } });
+    fireEvent.change(screen.getByLabelText("Base model"), { target: { value: "llama-3" } });
+    expect(screen.queryByLabelText("Dataset URI")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Create job" }));
+    await waitFor(() => expect(callTool).toHaveBeenCalledWith("ml_create_finetuning_job",
+      { method: "lora", base_model: "llama-3", dataset_id: "chat-v1" }));
+  });
+
   it("shows empty dataset fields before sending anything", async () => {
     render(<FineTunePanel />);
     fireEvent.click(await screen.findByRole("button", { name: "New job" }));

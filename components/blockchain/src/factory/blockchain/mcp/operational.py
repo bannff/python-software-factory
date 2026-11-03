@@ -8,6 +8,7 @@ from factory.mcp_utils.interface import ToolResult, TypedToolFailure, operationa
 
 from .contracts.base import EmptyInput
 from .contracts.ledger import BountiesOutput, BountyOutput, TransactionOutput
+from .wallet_ids import resolve_wallet_id
 from .contracts.operational import (
     BountyIdInput, ClaimBountyInput, CreateWalletInput,
     CreateWalletOutput, ListBountiesInput, MintInput, MyWalletOutput,
@@ -61,12 +62,14 @@ def register(mcp: Any, get_runtime: Callable[[], "BlockchainRuntime"]) -> None:
     @mcp.tool()
     @operational(input_model=TransferInput, output_model=TransactionOutput)
     def blockchain_transfer(from_wallet: str, to_wallet: str, amount: float, memo: str = "") -> ToolResult[TransactionOutput]:
-        return _transaction(lambda: get_runtime().get_ledger().transfer(from_wallet, to_wallet, amount, memo))
+        ledger = get_runtime().get_ledger()
+        return _transaction(lambda: ledger.transfer(resolve_wallet_id(ledger, from_wallet), resolve_wallet_id(ledger, to_wallet), amount, memo))
 
     @mcp.tool()
     @operational(input_model=MintInput, output_model=TransactionOutput)
     def blockchain_mint(to_wallet: str, amount: float, memo: str = "") -> ToolResult[TransactionOutput]:
-        return _transaction(lambda: get_runtime().get_ledger().mint(to_wallet, amount, memo))
+        ledger = get_runtime().get_ledger()
+        return _transaction(lambda: ledger.mint(resolve_wallet_id(ledger, to_wallet), amount, memo))
 
     @mcp.tool()
     @operational(input_model=RewardEscrowInput, output_model=TransactionOutput)
@@ -91,12 +94,14 @@ def register(mcp: Any, get_runtime: Callable[[], "BlockchainRuntime"]) -> None:
     @mcp.tool()
     @operational(input_model=PostBountyInput, output_model=BountyOutput)
     def blockchain_post_bounty(poster_wallet: str, amount: float, description: str = "", criteria: dict | None = None) -> ToolResult[BountyOutput]:
-        return _bounty(lambda: get_runtime().get_ledger().post_bounty(poster_wallet, amount, description, criteria))
+        ledger = get_runtime().get_ledger()
+        return _bounty(lambda: ledger.post_bounty(resolve_wallet_id(ledger, poster_wallet), amount, description, criteria))
 
     @mcp.tool()
     @operational(input_model=ClaimBountyInput, output_model=TransactionOutput)
     def blockchain_claim_bounty(bounty_id: str, claimer_wallet: str) -> ToolResult[TransactionOutput]:
-        return _transaction(lambda: get_runtime().get_ledger().claim_bounty(bounty_id, claimer_wallet))
+        ledger = get_runtime().get_ledger()
+        return _transaction(lambda: ledger.claim_bounty(bounty_id, resolve_wallet_id(ledger, claimer_wallet)))
 
     @mcp.tool()
     @operational(input_model=BountyIdInput, output_model=TransactionOutput)

@@ -10,9 +10,10 @@ from .contracts.base import EmptyInput
 from .contracts.deterministic import (
     BalanceOutput, BlockOutput, CapabilitiesOutput, ConfigSchemaOutput,
     GetBlockInput, GetWalletOutput, HealthOutput, ListTransactionsInput,
-    VerifyChainOutput, WalletIdInput,
+    ListWalletsInput, VerifyChainOutput, WalletIdInput, WalletsOutput,
 )
 from .contracts.ledger import ChainInfoOutput, TransactionsOutput
+from .wallet_ids import resolve_wallet_id
 
 if TYPE_CHECKING:
     from ..runtime.runtime import BlockchainRuntime
@@ -45,17 +46,27 @@ def register(mcp: Any, get_runtime: Callable[[], "BlockchainRuntime"]) -> None:
     @deterministic(input_model=WalletIdInput, output_model=BalanceOutput)
     def blockchain_get_balance(wallet_id: str) -> ToolResult[BalanceOutput]:
         try:
-            return BalanceOutput(wallet_id=wallet_id, balance=get_runtime().get_ledger().get_balance(wallet_id))
+            ledger = get_runtime().get_ledger()
+            wallet_id = resolve_wallet_id(ledger, wallet_id)
+            return BalanceOutput(wallet_id=wallet_id, balance=ledger.get_balance(wallet_id))
         except ValueError as exc:
             return BalanceOutput(wallet_id=wallet_id, balance=None, found=False, error=str(exc))
 
     @mcp.tool()
     @deterministic(input_model=WalletIdInput, output_model=GetWalletOutput)
     def blockchain_get_wallet(wallet_id: str) -> ToolResult[GetWalletOutput]:
-        wallet = get_runtime().get_ledger().get_wallet(wallet_id)
+        ledger = get_runtime().get_ledger()
+        wallet_id = resolve_wallet_id(ledger, wallet_id)
+        wallet = ledger.get_wallet(wallet_id)
         if wallet is None:
             return GetWalletOutput(wallet_id=wallet_id, owner_id="", balance=0, created_at="", found=False, error="not_found")
         return GetWalletOutput.model_validate(wallet.model_dump(mode="json"))
+
+    @mcp.tool()
+    @deterministic(input_model=ListWalletsInput, output_model=WalletsOutput)
+    def blockchain_list_wallets(limit: int = 100) -> ToolResult[WalletsOutput]:
+        wallets = get_runtime().get_ledger().list_wallets(limit)
+        return WalletsOutput(count=len(wallets), wallets=[w.model_dump(mode="json") for w in wallets])
 
     @mcp.tool()
     @deterministic(input_model=ListTransactionsInput, output_model=TransactionsOutput)
