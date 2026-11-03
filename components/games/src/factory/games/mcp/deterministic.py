@@ -22,9 +22,11 @@ def register(mcp: Any, get_runtime: Callable[[], "GamesRuntime"]) -> None:
     @mcp.tool()
     @deterministic(input_model=EmptyInput, output_model=CapabilitiesOutput)
     def get_capabilities() -> ToolResult[CapabilitiesOutput]:
+        from ..runtime.game_catalog import HUMAN_PLAYABLE_GAME_TYPES
         from ..runtime.runtime import GamesRuntime
         return {"name": "games", "version": "1.0.0",
                 "game_types": GamesRuntime.available_game_types(),
+                "human_playable_game_types": list(HUMAN_PLAYABLE_GAME_TYPES),
                 "backends": GamesRuntime.available_backends(),
                 "features": ["game_sessions", "turn_based_play", "connect_four",
                 "rl_environment", "legal_move_validation", "game_history"]}
