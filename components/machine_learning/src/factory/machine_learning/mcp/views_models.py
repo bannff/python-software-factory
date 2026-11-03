@@ -46,7 +46,8 @@ def experiment_health() -> dict[str, Any]:
             "data_path": "$.experiments",
             "item_key": "experiment_name",
             "empty_icon": "cpu-chip",
-            "empty_message": "No training experiments yet. Run can_run_full_pipeline or ml_train_timeseries.",
+            "empty_message": "No training experiments yet.",
+            "empty_action": "Train a model on one of my datasets so the first experiment shows up here.",
             "header": {
                 "icon": "chart-bar",
                 "stats_tool": "ml_get_dashboard_summary",

@@ -13,7 +13,8 @@ from .authoring_contracts import (
 
 _training_defaults: dict[str, Any] = {}
 _model_registry: dict[str, dict[str, Any]] = {}
-_DISABLED = "Authoring tools disabled. Set ML_ENABLE_AUTHORING_TOOLS=1"
+# Stable public code; the UI maps it to "editing is turned off on this server".
+_DISABLED = "authoring_disabled"
 
 
 def _authoring_enabled() -> bool:

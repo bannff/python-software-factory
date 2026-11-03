@@ -51,7 +51,7 @@ def register(
     ) -> ToolResult[PassportPromotionOutput]:
         """Gated isolated verification of one exact registered candidate."""
         if not _authoring_enabled():
-            return fail("ML authoring tools are disabled")
+            return fail("authoring_disabled")
         try:
             ref = ExactPassportInput(
                 model_id=model_id, model_version=model_version,
@@ -75,7 +75,7 @@ def register(
     ) -> ToolResult[PassportPromotionOutput]:
         """Gated CAN-wide promotion for one exact native candidate."""
         if not _authoring_enabled():
-            return fail("ML authoring tools are disabled")
+            return fail("authoring_disabled")
         try:
             ref = ExactPassportInput(
                 model_id=model_id, model_version=model_version,

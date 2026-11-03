@@ -50,7 +50,7 @@ def overview_view() -> dict[str, Any]:
                 "id": "ml-overview-getting-started", "type": "card",
                 "props": {
                     "title": "Start the improvement loop",
-                    "description": "Create an immutable dataset artifact → train a model → evaluate it. Ask the assistant to run the relevant MCP operation.",
+                    "description": "Register a dataset, train a model, then evaluate it.",
                 },
             },
             {
