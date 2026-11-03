@@ -41,8 +41,11 @@ def register(mcp: Any, runtime: "SandboxRuntime") -> None:
     @mcp.tool(name="sandbox.list_environments")
     @deterministic(input_model=EmptyInput, output_model=SandboxEnvironmentListResult)
     @op_kind("read")
-    def list_environments() -> ToolResult[SandboxEnvironmentListResult]:
+    async def list_environments() -> ToolResult[SandboxEnvironmentListResult]:
         """List persisted and discovered sandbox environments."""
+        # A stored 'provisioning' status goes stale until someone asks the adapter.
+        for stale in [e for e in runtime.list_environments() if e.status.value == "provisioning"]:
+            await runtime.get_status(stale.env_id)
         environments = runtime.list_environments()
         return ok(SandboxEnvironmentListResult(
             environments=[to_mcp_environment(value) for value in environments],
