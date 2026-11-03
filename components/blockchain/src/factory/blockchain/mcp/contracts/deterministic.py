@@ -60,6 +60,8 @@ class BlockOutput(DTO):
 
 class VerifyChainOutput(DTO):
     valid: bool
+    blocks_checked: int = 0
+    errors: list[str] = []
     error: str | None = None
 
 

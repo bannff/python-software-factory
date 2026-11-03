@@ -68,8 +68,9 @@ class ReconcileInput(DTO):
 
 class ReconcileOutput(OperationOutput):
     wallet_id: str | None = None
-    expected_balance: float | None = None
-    actual_balance: float | None = None
+    stored: float | None = None
+    computed: float | None = None
+    drift: float | None = None
 
 
 __all__ = [
