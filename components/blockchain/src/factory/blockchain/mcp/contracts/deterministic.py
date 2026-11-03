@@ -1,8 +1,10 @@
 """DTOs for deterministic Blockchain MCP tools."""
 from __future__ import annotations
 
+from pydantic import Field
+
 from .base import DTO, JsonObject
-from .ledger import ChainInfoOutput, TransactionsOutput, WalletOutput
+from .ledger import ChainInfoOutput, TransactionsOutput, WalletData, WalletOutput
 
 
 class CapabilitiesOutput(DTO):
@@ -38,6 +40,15 @@ class GetWalletOutput(WalletOutput):
     pass
 
 
+class ListWalletsInput(DTO):
+    limit: int = Field(default=100, ge=1, le=1000)
+
+
+class WalletsOutput(DTO):
+    count: int
+    wallets: list[WalletData]
+
+
 class ListTransactionsInput(DTO):
     wallet_id: str | None = None
     limit: int = 50
@@ -60,11 +71,13 @@ class BlockOutput(DTO):
 
 class VerifyChainOutput(DTO):
     valid: bool
+    blocks_checked: int = 0
+    errors: list[str] = []
     error: str | None = None
 
 
 __all__ = [
     "BalanceOutput", "BlockOutput", "CapabilitiesOutput", "ChainInfoOutput",
     "ConfigSchemaOutput", "GetBlockInput", "GetWalletOutput", "HealthOutput",
-    "ListTransactionsInput", "TransactionsOutput", "VerifyChainOutput", "WalletIdInput",
+    "ListTransactionsInput", "ListWalletsInput", "WalletsOutput", "TransactionsOutput", "VerifyChainOutput", "WalletIdInput",
 ]

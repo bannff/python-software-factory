@@ -9,6 +9,7 @@ from .operational_core import register as register_core
 from .provenance import register as register_provenance
 from .projection import register as register_projection
 from .backup import register as register_backup
+from .finding_tools import register as register_findings
 
 if TYPE_CHECKING:
     from ..runtime.runtime import GraphRuntime
@@ -20,3 +21,4 @@ def register(mcp: Any, get_runtime: Callable[[], "GraphRuntime"]) -> None:
     register_provenance(mcp, get_runtime)
     register_projection(mcp, get_runtime)
     register_backup(mcp, get_runtime)
+    register_findings(mcp, get_runtime)

@@ -86,6 +86,10 @@ class LedgerPort(Protocol):
         """Get block by height."""
         ...
 
+    def list_wallets(self, limit: int = 100) -> list[Wallet]:
+        """List wallets, oldest first, up to ``limit``."""
+        ...
+
     def get_chain_info(self) -> ChainInfo:
         """Get summary of chain state."""
         ...

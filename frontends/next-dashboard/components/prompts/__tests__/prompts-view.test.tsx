@@ -10,6 +10,9 @@ vi.mock("../prompts-api", () => ({
   renderFactoryPrompt: (...args: unknown[]) => mocks.renderPrompt(...args),
 }));
 
+// This file is about registry prompts; the authored-prompts panel has its own tests and its async list must not outlive these.
+vi.mock("../authored-prompts-panel", () => ({ AuthoredPromptsPanel: () => null }));
+
 import PromptsView from "../prompts-view";
 
 const prompts = [

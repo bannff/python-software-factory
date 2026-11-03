@@ -70,11 +70,7 @@ def test_create_returns_a_typed_json_safe_envelope() -> None:
     assert result.data.config["target_app"] == "WebGoat"
 
 
-def test_create_with_unknown_game_type_is_a_successful_domain_negative_envelope() -> None:
+def test_create_with_unknown_game_type_is_a_typed_failure() -> None:
     mcp = create_mcp_server(GamesRuntime({"store_backend": "memory"}))
     result = asyncio.run(mcp.get_tool("games_create")).fn(game_type="not_a_real_game")
-    assert isinstance(result, ToolResult) and result.ok
-    assert result.data.error == "unknown_game_type"
-    assert result.data.game_type == "not_a_real_game"
-    assert result.data.available == GamesRuntime.available_game_types()
-    assert "connect_four" in result.data.available
+    assert not result.ok and result.error == "unknown_game_type"

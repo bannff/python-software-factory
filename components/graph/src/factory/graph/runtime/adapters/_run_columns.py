@@ -15,7 +15,7 @@ _FINDING_SCALAR_PROPS = (
     "affected_resource_arn", "finding_type", "category", "created_at",
     "file", "function", "line_start", "line_end", "agent_id", "vuln_class",
     # Verification oracle state (neutral; bd python-factory-216ti Contract B).
-    "state",
+    "state", "kind", "subject_type", "subject_id",
     # Human-as-labeler grade (domain-neutral; written by either cockpit).
     "human_verdict", "graded_by", "graded_at", "graded_source",
 )

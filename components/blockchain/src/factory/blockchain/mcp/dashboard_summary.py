@@ -43,9 +43,10 @@ def list_related_graph_entities(
 
 
 def _get_invoker():
-    try:
-        from factory.mcp_utils.interface import get_service
+    """Same lookup as the emitter, so reads can see what writes published."""
+    from ..runtime.event_emitter import _get_invoker as emitter_invoker
 
-        return get_service("tool_invoker")
+    try:
+        return emitter_invoker()
     except Exception:
         return None

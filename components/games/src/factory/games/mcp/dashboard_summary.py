@@ -70,6 +70,16 @@ def build_dashboard_summary(runtime: "GamesRuntime") -> dict[str, Any]:
     }
 
 
+def _entries(result: Any) -> list[Any]:
+    """Entries from a ToolResult, the aggregator's ``{ok, data: {...}}`` dict, or a bare payload."""
+    if isinstance(result, dict):
+        data = result.get("data") if "data" in result or "ok" in result else result
+        return list(data.get("entries") or []) if result.get("ok", True) and isinstance(data, dict) else []
+    if result and result.ok and result.data is not None:
+        return list(result.data.entries)
+    return []
+
+
 def list_recent_activity(limit: int = 20, game_id: str | None = None) -> list[dict[str, Any]]:
     """Return recent games activity from shared events history."""
     invoker = _get_invoker()
@@ -81,7 +91,7 @@ def list_recent_activity(limit: int = 20, game_id: str | None = None) -> list[di
             query_args["payload_key"] = "game_id"
             query_args["payload_value"] = game_id
         result = invoker("events_query_history", **query_args)
-        entries = [entry.model_dump(mode="json") if hasattr(entry, "model_dump") else entry for entry in (result.data.entries if result and result.ok and result.data is not None else [])]
+        entries = [entry.model_dump(mode="json") if hasattr(entry, "model_dump") else entry for entry in _entries(result)]
     except Exception:
         return []
     return [_activity_row(entry) for entry in entries if isinstance(entry, dict)][:limit]

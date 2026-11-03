@@ -5,6 +5,7 @@ import { Pencil, Plus, ScrollText, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { errorReason, withReason } from "@/lib/error-reason";
+import { useMounted } from "@/lib/hooks/use-mounted";
 import {
   addPrompt, deletePrompt, listAuthoredPrompts, updatePrompt, type AuthoredPrompt,
 } from "./authored-prompts-api";
@@ -21,12 +22,17 @@ export function AuthoredPromptsPanel() {
   const [errors, setErrors] = useState<PromptFormErrors>({});
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const mounted = useMounted();
 
   const refresh = useCallback(async () => {
-    try { setPrompts(await listAuthoredPrompts()); setNotice(null); }
-    catch (cause) { setNotice(withReason("Your prompts are unavailable.", errorReason(cause))); }
-    finally { setLoaded(true); }
-  }, []);
+    try {
+      const next = await listAuthoredPrompts();
+      if (!mounted.current) return;
+      setPrompts(next); setNotice(null);
+    } catch (cause) {
+      if (mounted.current) setNotice(withReason("Your prompts are unavailable.", errorReason(cause)));
+    } finally { if (mounted.current) setLoaded(true); }
+  }, [mounted]);
   useEffect(() => { void refresh(); }, [refresh]);
 
   const save = async () => {

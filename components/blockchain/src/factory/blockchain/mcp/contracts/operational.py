@@ -1,6 +1,8 @@
 """DTOs for operational Blockchain MCP tools."""
 from __future__ import annotations
 
+from pydantic import Field
+
 from .base import DTO, JsonObject
 from .ledger import BountiesOutput, BountyOutput, OperationOutput, TransactionOutput, WalletOutput
 
@@ -46,7 +48,9 @@ class PostBountyInput(DTO):
     poster_wallet: str
     amount: float
     description: str = ""
-    criteria: JsonObject | None = None
+    criteria: JsonObject | None = Field(
+        default=None, description="Free-form JSON object of claim criteria; pass {} for none.",
+    )
 
 
 class BountyIdInput(DTO):
@@ -68,8 +72,9 @@ class ReconcileInput(DTO):
 
 class ReconcileOutput(OperationOutput):
     wallet_id: str | None = None
-    expected_balance: float | None = None
-    actual_balance: float | None = None
+    stored: float | None = None
+    computed: float | None = None
+    drift: float | None = None
 
 
 __all__ = [

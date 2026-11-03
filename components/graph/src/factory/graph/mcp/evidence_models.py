@@ -43,6 +43,7 @@ class SummaryInput(RunInput):
 
 class RecentFindingsInput(_Input):
     severity: str = ""
+    kind: str = ""
     app: str = ""
     run_id: str = ""
     limit: int = 50

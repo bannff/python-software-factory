@@ -18,13 +18,14 @@ def server():
 
 
 @pytest.mark.asyncio
-async def test_public_graph_surface_has_exactly_35_typed_tools(server):
+async def test_public_graph_surface_has_exactly_36_typed_tools(server):
     # 34 -> 35 (2026-09-16): graph_import split into graph_import_begin +
     # graph_import_page (paged transfer, see backup.py's module docstring
     # for why a single-call inline transfer couldn't stay under the 16 MiB
     # typed-egress cap once the graph outgrows ~11 MB raw).
+    # 35 -> 36: graph_record_finding (hand-recorded neutral findings).
     tools = {tool.name: tool for tool in await server.list_tools()}
-    assert len(tools) == 35
+    assert len(tools) == 36
     retired = {"graph_query", "graph_record_run_findings", "graph_vector_search",
                "graph_hybrid_search", "graph_run_fastrp", "graph_create_vector_index"}
     assert not retired & tools.keys()

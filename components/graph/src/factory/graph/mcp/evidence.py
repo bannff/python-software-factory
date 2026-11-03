@@ -7,6 +7,7 @@ from typing import Any
 from factory.mcp_utils.interface import ToolResult, deterministic
 from factory.mcp_utils.registration import typed_tool
 
+from .finding_shape import neutral
 from ._deterministic_typed_helpers import coerce_edges, coerce_labels, resolve_target_app
 from .evidence_models import (
     CountsData, CountsInput, FindingsInput, LimitInput, RecentFindingsInput, RowsData,
@@ -123,7 +124,7 @@ def register(mcp: Any, get_runtime: Callable[[], "GraphRuntime"]) -> None:
 
     @typed_tool(mcp)
     @deterministic(input_model=RecentFindingsInput, output_model=RowsData)
-    def graph_get_recent_findings(severity: str = "", app: str = "", run_id: str = "",
+    def graph_get_recent_findings(severity: str = "", kind: str = "", app: str = "", run_id: str = "",
                                  limit: int = 50, taxonomy_edges: list[dict] | None = None,
                                  backend: str = "") -> ToolResult[RowsData]:
         runtime = get_runtime()
@@ -132,8 +133,9 @@ def register(mcp: Any, get_runtime: Callable[[], "GraphRuntime"]) -> None:
         if selected not in available:
             return RowsData(rows=[], count=0, error="unknown_backend", available=available)
         graph = runtime.get_graph(selected)
-        rows = list(graph.get_recent_findings(
-            severity, app, run_id, limit, taxonomy_edges=coerce_edges(taxonomy_edges)).raw or [])
+        rows = [{**row, "finding": neutral(row)} for row in graph.get_recent_findings(
+            severity, app, run_id, limit, taxonomy_edges=coerce_edges(taxonomy_edges)).raw or []]
+        rows = [row for row in rows if not kind or row["finding"]["kind"] == kind]
         return RowsData(rows=rows, count=len(rows))
 
     @typed_tool(mcp)
