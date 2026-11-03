@@ -77,7 +77,7 @@ async def test_service_mocks_have_nested_ingress_schema_and_typed_result(runtime
 
 @pytest.mark.asyncio
 async def test_list_and_cfn_are_deterministic_typed_results(runtime) -> None:
-    listed = (await _tool(runtime, "sandbox.list_environments")).fn()
+    listed = await (await _tool(runtime, "sandbox.list_environments")).fn()
     cfn = (await _tool(runtime, "sandbox.generate_cfn_from_recon")).fn(
         resources=[{"type": "S3", "name": "bucket"}, {"type": "unknown", "name": "x"}],
     )
