@@ -8,6 +8,7 @@ from factory.mcp_utils.interface import ToolResult, TypedToolFailure, operationa
 
 from .contracts.base import EmptyInput
 from .contracts.ledger import BountiesOutput, BountyOutput, TransactionOutput
+from ..runtime.errors import LedgerError
 from .wallet_ids import resolve_wallet_id
 from .contracts.operational import (
     BountyIdInput, ClaimBountyInput, CreateWalletInput,
@@ -28,6 +29,8 @@ def _my_wallet(get_runtime: Callable[[], "BlockchainRuntime"]) -> str:
 def _transaction(call: Callable[[], object]) -> TransactionOutput:
     try:
         return TransactionOutput.model_validate(call().model_dump(mode="json"))
+    except LedgerError as exc:
+        raise TypedToolFailure(exc.code, str(exc)) from exc
     except ValueError as exc:
         return TransactionOutput(success=False, error=str(exc))
 
@@ -35,6 +38,8 @@ def _transaction(call: Callable[[], object]) -> TransactionOutput:
 def _bounty(call: Callable[[], object]) -> BountyOutput:
     try:
         return BountyOutput.model_validate(call().model_dump(mode="json"))
+    except LedgerError as exc:
+        raise TypedToolFailure(exc.code, str(exc)) from exc
     except ValueError as exc:
         return BountyOutput(success=False, error=str(exc))
 

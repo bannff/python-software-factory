@@ -5,14 +5,19 @@ import uuid
 from typing import Any
 
 from ..models import Bounty, BountyStatus, Transaction, TransactionType
+from ..errors import LedgerError
 from .mock_core import commit_block, make_transaction
 from .mock_effects import LedgerEffects
 
 
 def post_bounty(ledger: Any, effects: LedgerEffects, poster_wallet: str, amount: float, description: str = "", criteria: dict | None = None) -> Bounty:
     poster = ledger._wallets.get(poster_wallet)
-    if not poster or amount <= 0 or poster.balance < amount:
-        raise ValueError(f"Invalid bounty: wallet={poster_wallet}, amount={amount}")
+    if not poster:
+        raise LedgerError("wallet_not_found", f"Invalid bounty: wallet={poster_wallet}, amount={amount}")
+    if amount <= 0:
+        raise LedgerError("invalid_amount", f"Invalid bounty: wallet={poster_wallet}, amount={amount}")
+    if poster.balance < amount:
+        raise LedgerError("insufficient_balance", f"Invalid bounty: wallet={poster_wallet}, amount={amount}")
     poster.balance -= amount
     escrow = make_transaction(ledger, effects, TransactionType.BOUNTY_ESCROW, poster_wallet, None, amount, "escrow")
     commit_block(ledger, effects, [escrow.tx_id])
@@ -27,12 +32,12 @@ def post_bounty(ledger: Any, effects: LedgerEffects, poster_wallet: str, amount:
 def claim_bounty(ledger: Any, effects: LedgerEffects, bounty_id: str, claimer_wallet: str) -> Transaction:
     bounty = ledger._bounties.get(bounty_id)
     if not bounty:
-        raise ValueError(f"Bounty not found: {bounty_id}")
+        raise LedgerError("bounty_not_found", f"Bounty not found: {bounty_id}")
     if bounty.status != BountyStatus.OPEN:
-        raise ValueError(f"Bounty not open: {bounty.status}")
+        raise LedgerError("bounty_not_open", f"Bounty not open: {bounty.status}")
     claimer = ledger._wallets.get(claimer_wallet)
     if not claimer:
-        raise ValueError(f"Claimer not found: {claimer_wallet}")
+        raise LedgerError("wallet_not_found", f"Claimer not found: {claimer_wallet}")
     claimer.balance += bounty.amount
     release = make_transaction(ledger, effects, TransactionType.BOUNTY_RELEASE, None, claimer_wallet, bounty.amount, f"bounty {bounty_id} claimed")
     commit_block(ledger, effects, [release.tx_id])
@@ -45,8 +50,10 @@ def claim_bounty(ledger: Any, effects: LedgerEffects, bounty_id: str, claimer_wa
 
 def cancel_bounty(ledger: Any, effects: LedgerEffects, bounty_id: str) -> Transaction:
     bounty = ledger._bounties.get(bounty_id)
-    if not bounty or bounty.status != BountyStatus.OPEN:
-        raise ValueError(f"Cannot cancel: {bounty_id}")
+    if not bounty:
+        raise LedgerError("bounty_not_found", f"Cannot cancel: {bounty_id}")
+    if bounty.status != BountyStatus.OPEN:
+        raise LedgerError("bounty_not_cancellable", f"Cannot cancel: {bounty_id}")
     poster = ledger._wallets.get(bounty.poster_wallet)
     if poster:
         poster.balance += bounty.amount

@@ -86,7 +86,7 @@ def test_resources_prompts_complete_view_and_representative_envelopes_are_frozen
         from_wallet="missing", to_wallet="wallet-treasury", amount=1,
     ).model_dump(mode="json")
     view = tools["blockchain_get_views"].fn().data.views
-    assert _digest(_normalize({"success": success, "missing": missing, "negative": negative})) == "d4ac4756c50109323ddd474a36363f7e8955cafbf50ff7131d16115110f15100"
+    assert _digest(_normalize({"success": success, "missing": missing, "negative": negative})) == "d09f7965bef57e92142c43300b08462c43597decd2aa65e8dd40d7d744cf8d34"
     assert _digest(view) == "7ebfe7661d3cb52d6c97dac0b142163038a931217f1f60e0acbe0d8e76dbf46f"
 
 
@@ -109,4 +109,4 @@ def test_normal_negative_envelopes_are_frozen(monkeypatch) -> None:
         "auto_wallet_failure": tools["blockchain_my_wallet"].fn().model_dump(mode="json"),
         "authoring_disabled": tools["blockchain_authoring_seed_economy"].fn().model_dump(mode="json"),
     }
-    assert _digest(_normalize(envelopes)) == "c4e9b518b6acce9d6c006793b449bb1d7884f47c4255d70f34e3d573d1ad3713"
+    assert _digest(_normalize(envelopes)) == "9ce640d9370a38b96a3d11d6a77518616cb25ac7869e0422b3e0bf268f29a898"
