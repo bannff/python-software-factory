@@ -4,7 +4,7 @@ from __future__ import annotations
 import uuid
 from typing import Any, Callable, TYPE_CHECKING
 
-from factory.mcp_utils.interface import ToolResult, deterministic, fail, get_service, operational
+from factory.mcp_utils.interface import ToolResult, TypedToolFailure, deterministic, fail, get_service, operational
 
 from .contracts.experiment_serialization import (
     EvaluatorsOutput, GenerateExperimentInput, GeneratedExperimentOutput,
@@ -12,6 +12,7 @@ from .contracts.experiment_serialization import (
     PersistenceOutput, RunExperimentInput, RunExperimentOutput, RunResultOutput,
     RunResultsOutput,
 )
+from ..runtime.adapters.model_resolver import DEFAULT_BEDROCK_MODEL, default_model_id, is_model_unavailable
 from ..runtime.run_record_contract import build_run_request
 
 if TYPE_CHECKING:
@@ -60,6 +61,8 @@ def register(mcp: Any, get_runtime: Callable[[], "EvalsRuntime"]) -> None:
             return RunExperimentOutput(run_id=run_id, record_run_request=record_run_request, persistence=_persist(record_run_request))
         from ..runtime.ports import EvalAgentConfig, EvalCase, ExperimentConfig
         effective_run_id = run_id or f"experiment-{uuid.uuid4().hex}"
+        if model_id == DEFAULT_BEDROCK_MODEL:  # caller left the default: honour COMPANION_X_EVAL_MODEL
+            model_id = default_model_id()
         if not cases:
             return fail("cases must not be empty")
         eval_cases = [
@@ -73,6 +76,10 @@ def register(mcp: Any, get_runtime: Callable[[], "EvalsRuntime"]) -> None:
             report = get_runtime().run_experiment(config)
         except (RuntimeError, ValueError) as exc:
             return fail(str(exc))
+        except Exception as exc:  # noqa: BLE001 - classify model reachability, re-raise the rest
+            if is_model_unavailable(exc):
+                raise TypedToolFailure("eval_model_unavailable", str(exc)) from exc
+            raise
         request = build_run_request(report, effective_run_id, {"model_id": model_id, "system_prompt_snippet": system_prompt[:80]}, "experiment", (time.perf_counter() - started) * 1000)
         return RunExperimentOutput(run_id=effective_run_id, name=report.experiment_name, case_results=report.case_results, summary=report.summary, evaluators_used=report.evaluator_names, record_run_request=request, persistence=_persist(request))
 

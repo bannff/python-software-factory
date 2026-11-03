@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..ports import EvalAgentConfig
+from .model_resolver import resolve_agent_model
 from .evaluator_factory import needs_trace, validate_evaluator_names
 
 
@@ -33,7 +34,7 @@ def build_agent_fn(agent_config: EvalAgentConfig | None, evaluator_names: list[s
             capture.clear()
         agent_kwargs: dict[str, Any] = {
             "system_prompt": config.system_prompt,
-            "model": config.model_id,
+            "model": resolve_agent_model(config.model_id),
             "callback_handler": None,
         }
         if trace:
