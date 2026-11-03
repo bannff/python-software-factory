@@ -21,6 +21,7 @@ const SandboxBanner = lazy(() => import("../sandbox/sandbox-banner").then((m) =>
 const GamesPanel = lazy(() => import("../games/games-panel").then((m) => ({ default: m.GamesPanel })));
 const BlockchainPanel = lazy(() => import("../blockchain/blockchain-panel").then((m) => ({ default: m.BlockchainPanel })));
 const FineTunePanel = lazy(() => import("../ml/finetune-panel").then((m) => ({ default: m.FineTunePanel })));
+const BaseModelsPanel = lazy(() => import("../ml/base-models-panel").then((m) => ({ default: m.BaseModelsPanel })));
 const DatasetsPanel = lazy(() => import("../ml/datasets-panel").then((m) => ({ default: m.DatasetsPanel })));
 const GraphBrickView = lazy(() => import("./graph-brick-view"));
 const RuntimeMetricsView = lazy(() => import("./runtime-metrics-view"));
@@ -114,7 +115,7 @@ export function Canvas(props: CanvasProps) {
           {props.activeView === "findings" && <FindingsView {...canvasState} />}
           {props.activeView === "evals" && <EvalsLeaderboardView onNavigate={props.onNavigate} />}
           {props.activeView === "metrics" && <RuntimeMetricsView onNavigate={props.onNavigate} />}
-          {props.activeView === "ml" && <><BrickViewRenderer viewTool="ml_get_views" /><DatasetsPanel /><FineTunePanel /></>}
+          {props.activeView === "ml" && <><BrickViewRenderer viewTool="ml_get_views" /><BaseModelsPanel /><DatasetsPanel /><FineTunePanel /></>}
           {props.activeView === "games" && <Refreshable label="games"><><GamesPanel /><GraphBrickView viewTool="games_get_views" defaultEntityType="GameSession" onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "blockchain" && <Refreshable label="blockchain"><><BlockchainPanel /><GraphBrickView viewTool="blockchain_get_views" defaultEntityType="Transaction" onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "sandbox" && <Refreshable label="sandbox"><><SandboxBanner /><GraphBrickView viewTool="sandbox_get_views" defaultEntityType="ToolInvocation" onNavigate={props.onNavigate} /></></Refreshable>}
