@@ -138,6 +138,20 @@ PROTECTED_KEY_EXPORTS="$(python3 "$FACTORY_ROOT/scripts/local_protected_keys.py"
     || { echo "ERROR: could not provision the local protected-content keys" >&2; exit 1; }
 eval "$PROTECTED_KEY_EXPORTS"
 
+# LightGBM training persists models under a root that must not contain symlinks
+# (macOS /tmp is one), so default to a real per-user directory and resolve it.
+if [[ -z "${ML_LIGHTGBM_MODEL_ROOT:-}" ]]; then
+    mkdir -p "$HOME/.local/share/companion-x/models"
+    export ML_LIGHTGBM_MODEL_ROOT="$(cd "$HOME/.local/share/companion-x/models" && pwd -P)"
+fi
+# Training libraries live in the optional `ml` dependency group. The API and its
+# native LightGBM worker run in this venv, so say so now rather than at train time.
+if [[ -x "$FACTORY_ROOT/.venv/bin/python" ]] \
+        && ! "$FACTORY_ROOT/.venv/bin/python" -c 'import lightgbm, sklearn, torch' >/dev/null 2>&1; then
+    echo "WARNING: ML training libraries are missing from .venv; model training will fail until you run:" >&2
+    echo "  uvx --from uv==0.12.0 uv sync --group ml --config-settings-package lightgbm:cmake.define.USE_OPENMP=OFF" >&2
+fi
+
 # Select the project-owned Workflow engine registry, independent of cwd.
 export WORKFLOW_CONFIG_DIR="${WORKFLOW_CONFIG_DIR:-$FACTORY_ROOT/projects/companion_x/config}"
 # Fresh clones have no live settings.yaml (projects/*/config/ is untracked
