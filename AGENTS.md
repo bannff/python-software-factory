@@ -74,4 +74,6 @@ A handbook revision becomes authoritative only when its Wiki revision is reviewe
 
 This first migration preserves host-specific loader/configuration files unchanged. The compatibility snapshot is source commit `3aaf541d3008670b4b05bc7f39cb822de9467416`, containing 145 tracked entries under `.kiro/`, `.github/copilot-instructions.md`, `.github/agents/`, `.github/hooks/`, `.opencode/`, `.vscode/`, and `opencode.json`; its `git ls-tree` manifest SHA-256 is `7185b6114b051916a9e083f710b3a21fe3c78b1dda618f0c5cc11b0c56265afa`.
 
+Repair note: the seven `.github/agents/*.agent.md` files were edited in source commit `62201a8bbc2a03a877f5268e3f73e6918e23c871` to repair a rename corruption (issue #125; originally #113). The manifest SHA-256 above describes the original snapshot and has not been recomputed: the manifest hash is pending owner review. (The same listing command run at that commit yields 54 entries, not 145, so the tracked set has also drifted since the snapshot.)
+
 This records compatibility material only. It does not establish loader/inclusion/conflict-resolution equivalence for Kiro, Copilot, OpenCode, Cursor, Zed, Claude Code, Codex, or any other host. Replacing or reducing host guidance requires a separate reviewed proof that preserves each host’s loading order, conflict handling, and unavailable-Wiki behavior.

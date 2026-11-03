@@ -2,7 +2,7 @@
 name: "Factory Meta-Architect"
 description: "Use when reviewing plans, validating architecture, deciding whether to extend or add a brick, checking repo tenets, or shaping MCP-first designs in the Python Factory."
 model: "opencode-go/deepseek-v4-pro"
-tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'the control-plane runtime/*', 'python-factory/*', todo]
+tools: [vscode, execute, read, agent, browser, betterthantomorrow.calva-backseat-driver, ms-azuretools.vscode-containers, edit, search, web, 'companion-x/*', 'python-factory/*', todo]
 argument-hint: "Describe the proposal, the goal, and the bricks or projects involved."
 user-invocable: false
 ---
