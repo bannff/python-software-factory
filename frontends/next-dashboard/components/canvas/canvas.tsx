@@ -4,6 +4,7 @@ import { Suspense, lazy } from "react";
 import { usePathname } from "next/navigation";
 import { PanelRight } from "lucide-react";
 import { CanvasTabs } from "./canvas-tabs";
+import { Refreshable } from "./refreshable";
 import { NavHistoryArrows } from "@/components/layout/nav-history-arrows";
 import { useWorkbenchContext } from "@/lib/workbench-context";
 import { useCopilotCanvasState } from "@/lib/hooks/use-copilot-state";
@@ -112,9 +113,9 @@ export function Canvas(props: CanvasProps) {
           {props.activeView === "evals" && <EvalsLeaderboardView onNavigate={props.onNavigate} />}
           {props.activeView === "metrics" && <RuntimeMetricsView onNavigate={props.onNavigate} />}
           {props.activeView === "ml" && <><BrickViewRenderer viewTool="ml_get_views" /><DatasetsPanel /><FineTunePanel /></>}
-          {props.activeView === "games" && <><GamesPanel /><GraphBrickView viewTool="games_get_views" defaultEntityType="GameSession" onNavigate={props.onNavigate} /></>}
-          {props.activeView === "blockchain" && <GraphBrickView viewTool="blockchain_get_views" defaultEntityType="Transaction" onNavigate={props.onNavigate} />}
-          {props.activeView === "sandbox" && <GraphBrickView viewTool="sandbox_get_views" defaultEntityType="ToolInvocation" onNavigate={props.onNavigate} />}
+          {props.activeView === "games" && <Refreshable label="games"><><GamesPanel /><GraphBrickView viewTool="games_get_views" defaultEntityType="GameSession" onNavigate={props.onNavigate} /></></Refreshable>}
+          {props.activeView === "blockchain" && <Refreshable label="blockchain"><GraphBrickView viewTool="blockchain_get_views" defaultEntityType="Transaction" onNavigate={props.onNavigate} /></Refreshable>}
+          {props.activeView === "sandbox" && <Refreshable label="sandbox"><GraphBrickView viewTool="sandbox_get_views" defaultEntityType="ToolInvocation" onNavigate={props.onNavigate} /></Refreshable>}
           {props.activeView === "capabilities" && <AgentCapabilitiesView />}
           {props.activeView === "sessions" && <SessionsCanvas pathname={pathname}
             chatOpen={props.chatOpen} onToggleChat={props.onToggleChat} />}
