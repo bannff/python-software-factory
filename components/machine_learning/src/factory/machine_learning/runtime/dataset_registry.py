@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from dataclasses import dataclass, replace
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from threading import Lock
 from typing import Iterable
@@ -15,6 +15,7 @@ from typing import Iterable
 from factory.mcp_utils.interface import TypedToolFailure
 
 from .models import DatasetTrainingInput
+from .persistent_dict import PersistentDict
 
 ID_PATTERN = re.compile(r"^[a-z][a-z0-9_-]{1,63}$")
 _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -54,7 +55,8 @@ def verify_digest(uri: str, digest: str) -> None:
 
 class DatasetRegistry:
     def __init__(self) -> None:
-        self._items: dict[str, DatasetRecord] = {}
+        self._items: dict[str, DatasetRecord] = PersistentDict(
+            "datasets", encode=asdict, decode=lambda row: DatasetRecord(**row))
         self._lock = Lock()
 
     def register(self, record: DatasetRecord) -> DatasetRecord:
