@@ -18,6 +18,7 @@ const EvalsLeaderboardView = lazy(() => import("./evals-leaderboard-view"));
 const FindingsView = lazy(() => import("./findings-view"));
 const BrickViewRenderer = lazy(() => import("./brick-view-renderer"));
 const MlControls = lazy(() => import("../ml/ml-controls").then((m) => ({ default: m.MlControls })));
+const EnvironmentsPanel = lazy(() => import("../sandbox/environments-panel").then((m) => ({ default: m.EnvironmentsPanel })));
 const SandboxBanner = lazy(() => import("../sandbox/sandbox-banner").then((m) => ({ default: m.SandboxBanner })));
 const GamesPanel = lazy(() => import("../games/games-panel").then((m) => ({ default: m.GamesPanel })));
 const BountiesPanel = lazy(() => import("../blockchain/bounties-panel").then((m) => ({ default: m.BountiesPanel })));
@@ -117,7 +118,7 @@ export function Canvas(props: CanvasProps) {
           {props.activeView === "ml" && <Refreshable label="ml"><BrickViewRenderer viewTool="ml_get_views" /><MlControls /></Refreshable>}
           {props.activeView === "games" && <Refreshable label="games"><><GamesPanel /><GraphBrickView viewTool="games_get_views" defaultEntityType="GameSession" onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "blockchain" && <Refreshable label="blockchain"><><BlockchainPanel /><BountiesPanel /><GraphBrickView viewTool="blockchain_get_views" defaultEntityType="Transaction" onNavigate={props.onNavigate} /></></Refreshable>}
-          {props.activeView === "sandbox" && <Refreshable label="sandbox"><><SandboxBanner /><GraphBrickView viewTool="sandbox_get_views" defaultEntityType="ToolInvocation" onNavigate={props.onNavigate} /></></Refreshable>}
+          {props.activeView === "sandbox" && <Refreshable label="sandbox"><><SandboxBanner /><EnvironmentsPanel /><GraphBrickView viewTool="sandbox_get_views" defaultEntityType="ToolInvocation" onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "capabilities" && <AgentCapabilitiesView />}
           {props.activeView === "sessions" && <SessionsCanvas pathname={pathname}
             chatOpen={props.chatOpen} onToggleChat={props.onToggleChat} />}
