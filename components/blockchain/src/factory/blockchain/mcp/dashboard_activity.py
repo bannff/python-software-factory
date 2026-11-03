@@ -24,7 +24,7 @@ def recent_activity(
         result = invoker("events_query_history", source="blockchain", limit=limit)
         entries = [
             entry.model_dump(mode="json") if hasattr(entry, "model_dump") else entry
-            for entry in (result.data.entries if result and result.ok and result.data is not None else [])
+            for entry in _entries(result)
         ]
     except Exception:
         return []
@@ -36,6 +36,15 @@ def recent_activity(
     if wallet_id:
         rows = [row for row in rows if wallet_id in _wallet_ids(row)]
     return rows[:limit]
+
+
+def _entries(result: Any) -> list[Any]:
+    """Entries from a ToolResult, or from the plain payload dict the aggregator returns."""
+    if isinstance(result, dict):
+        return list(result.get("entries") or [])
+    if result and result.ok and result.data is not None:
+        return list(result.data.entries)
+    return []
 
 
 def _wallet_ids(row: dict[str, Any]) -> set[str]:
