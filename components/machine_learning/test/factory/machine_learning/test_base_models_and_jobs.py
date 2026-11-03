@@ -49,3 +49,10 @@ def test_invalid_job_input_is_typed_not_opaque(tools) -> None:
         method="nope", base_model="b", dataset_uri="s3://b/d", manifest_uri="s3://b/m",
         dataset_digest=DIGEST, view_name="v", view_schema_version="1")
     assert bad.error == "finetuning_input_invalid"
+
+
+def test_authoring_off_is_a_typed_code(tools, monkeypatch) -> None:
+    monkeypatch.delenv("ML_ENABLE_AUTHORING_TOOLS", raising=False)
+    assert tools["ml_register_base_model"](name="b", model_id="m").error == "authoring_disabled"
+    assert tools["ml_update_base_model"](name="b", description="d").error == "authoring_disabled"
+    assert tools["ml_delete_base_model"](name="b").error == "authoring_disabled"
