@@ -60,7 +60,11 @@ export default function EmbeddingsCard() {
       </div>
       <p className={`mt-2 text-sm ${status.isSemantic ? "text-emerald-400" : "text-amber-400"}`}>{label}</p>
       {status.isGraphBackend && (
-        <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
+        <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+          <div className="rounded-md border border-border/30 px-3 py-2">
+            <dt className="text-[10px] text-muted-foreground">Backend</dt>
+            <dd className="m-0 truncate font-mono text-[11px]">{status.backend}</dd>
+          </div>
           <div className="rounded-md border border-border/30 px-3 py-2">
             <dt className="text-[10px] text-muted-foreground">Model path</dt>
             <dd className="m-0 truncate font-mono text-[11px]" title={status.modelPath}>{status.modelPath || "(none configured)"}</dd>
@@ -74,7 +78,9 @@ export default function EmbeddingsCard() {
       {status.loadError && status.loadError !== "not_graph_backend" && (
         <p className="mt-2 text-[11px] text-muted-foreground">Reason: {status.loadError}</p>
       )}
-      <p className="mt-3 text-[11px] text-muted-foreground">To change: {status.changeHint}</p>
+      {!status.isSemantic && status.changeHint && (
+        <p className="mt-3 text-[11px] text-muted-foreground">To change: {status.changeHint}</p>
+      )}
     </section>
   );
 }

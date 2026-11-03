@@ -7,6 +7,7 @@ Uses the EmbeddingProvider protocol — no hardcoded backends.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any, Protocol
 
 logger = logging.getLogger(__name__)
@@ -59,7 +60,15 @@ class LLMGatewayEmbedder:
     @property
     def label(self) -> str:
         """Human-readable provider/model for status displays."""
-        return f"{self._backend or 'gateway default'}/{self._model or 'default model'}"
+        backend = self._backend or os.environ.get("FACTORY_LLM_EMBEDDING_ADAPTER") or "gateway default"
+        model = self._model or self._provider_model() or "default model"
+        return f"{backend}/{model}"
+
+    def _provider_model(self) -> str:
+        try:
+            return str(getattr(self._get_provider(), "model_name", "") or "")
+        except Exception:  # noqa: BLE001 - a status label must never raise
+            return ""
 
     @property
     def dimensions(self) -> int:

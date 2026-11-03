@@ -5,6 +5,7 @@ import { Brain, Play, Plus, Square } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { errorReason, withReason } from "@/lib/error-reason";
 import { createJob, listJobs, listMethods, startJob, stopJob, type FineTuneJob, type FineTuneMethod, type JobInput } from "./finetune-api";
+import { listBaseModels, type BaseModel } from "./base-models-api";
 import { listDatasets, type Dataset } from "./datasets-api";
 import { FineTuneForm } from "./finetune-form";
 import { validateJobForm, type JobFormErrors } from "./finetune-validation";
@@ -17,6 +18,7 @@ export function FineTunePanel() {
   const [jobs, setJobs] = useState<FineTuneJob[]>([]);
   const [methods, setMethods] = useState<FineTuneMethod[]>([]);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [baseModels, setBaseModels] = useState<BaseModel[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [form, setForm] = useState<JobInput | null>(null);
   const [errors, setErrors] = useState<JobFormErrors>({});
@@ -38,6 +40,7 @@ export function FineTunePanel() {
       catch (cause) { setNotice(withReason("Fine-tuning methods are unavailable.", errorReason(cause))); return; }
     }
     setDatasets(await listDatasets().catch(() => []));
+    setBaseModels(await listBaseModels().catch(() => []));
     setForm({ ...BLANK, method: available[0]?.name ?? "" });
   };
   const run = async (action: () => Promise<void>, failure: string) => {
@@ -62,7 +65,7 @@ export function FineTunePanel() {
           <Plus className="h-3.5 w-3.5" aria-hidden /> New job</button>}
       </div>
       {notice && <p role="alert" className="text-xs text-destructive">{notice}</p>}
-      {form && <FineTuneForm form={form} errors={errors} methods={methods} datasets={datasets} busy={busy}
+      {form && <FineTuneForm form={form} errors={errors} methods={methods} datasets={datasets} baseModels={baseModels} busy={busy}
         onChange={setForm} onSave={() => void save()} onCancel={() => setForm(null)} />}
       {loaded && jobs.length === 0 && !form && !notice && (
         <EmptyState icon={Brain} title="No fine-tuning jobs yet" hint="Create one from a dataset to adapt a base model." />

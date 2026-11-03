@@ -2,6 +2,7 @@
 
 import type { FineTuneMethod, JobInput } from "./finetune-api";
 import type { Dataset } from "./datasets-api";
+import type { BaseModel } from "./base-models-api";
 import type { JobFormErrors } from "./finetune-validation";
 
 const FIELD = "w-full rounded-md border bg-background/50 px-3 py-2 text-sm";
@@ -10,8 +11,8 @@ const TEXT: [keyof JobInput, string][] = [
   ["dataset_digest", "Dataset digest"], ["view_name", "View name"], ["view_schema_version", "View schema version"],
 ];
 
-export function FineTuneForm({ form, errors, methods, datasets, busy, onChange, onSave, onCancel }: {
-  form: JobInput; errors: JobFormErrors; methods: FineTuneMethod[]; datasets: Dataset[]; busy: boolean;
+export function FineTuneForm({ form, errors, methods, datasets, baseModels, busy, onChange, onSave, onCancel }: {
+  form: JobInput; errors: JobFormErrors; methods: FineTuneMethod[]; datasets: Dataset[]; baseModels: BaseModel[]; busy: boolean;
   onChange: (next: JobInput) => void; onSave: () => void; onCancel: () => void;
 }) {
   return (
@@ -23,7 +24,14 @@ export function FineTuneForm({ form, errors, methods, datasets, busy, onChange, 
         {errors.method && <span role="alert" className="text-[11px] text-destructive">{errors.method}</span>}
       </label>
       <label className="grid gap-1 text-xs"><span>Base model</span>
-        <input aria-label="Base model" className={FIELD} value={form.base_model} onChange={(e) => onChange({ ...form, base_model: e.target.value })} />
+        {baseModels.length > 0 ? (
+          <select aria-label="Base model" className={FIELD} value={form.base_model} onChange={(e) => onChange({ ...form, base_model: e.target.value })}>
+            <option value="">Choose…</option>
+            {baseModels.map((b) => <option key={b.name} value={b.model_id} title={b.model_id}>{b.name}</option>)}
+          </select>
+        ) : (
+          <input aria-label="Base model" className={FIELD} value={form.base_model} onChange={(e) => onChange({ ...form, base_model: e.target.value })} />
+        )}
         {errors.base_model && <span role="alert" className="text-[11px] text-destructive">{errors.base_model}</span>}
       </label>
       {datasets.length > 0 && (

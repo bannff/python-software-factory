@@ -98,14 +98,24 @@ function readTokenFile(file: string): string | null {
   }
 }
 
-/** Environment variable first, then the launcher-persisted file. */
-export function resolveLocalCredential(): LocalCredential | null {
+/**
+ * Every usable credential, ambient environment first, then the launcher file,
+ * without repeating a token. The environment can go stale when the API is
+ * restarted from another shell, so callers that get a 401 try the next one.
+ */
+export function localCredentialCandidates(): LocalCredential[] {
+  const candidates: LocalCredential[] = [];
   const ambient = process.env.MCP_LOCAL_AUTH_TOKEN ?? "";
-  if (LOCAL_TOKEN_PATTERN.test(ambient)) return { token: ambient, source: "environment" };
+  if (LOCAL_TOKEN_PATTERN.test(ambient)) candidates.push({ token: ambient, source: "environment" });
   const file = localTokenFilePath();
-  if (file === null) return null;
-  const token = readTokenFile(file);
-  return token === null ? null : { token, source: "file" };
+  const fromFile = file === null ? null : readTokenFile(file);
+  if (fromFile !== null && fromFile !== ambient) candidates.push({ token: fromFile, source: "file" });
+  return candidates;
+}
+
+/** The highest-precedence credential, or `null` when none is configured. */
+export function resolveLocalCredential(): LocalCredential | null {
+  return localCredentialCandidates()[0] ?? null;
 }
 
 /**

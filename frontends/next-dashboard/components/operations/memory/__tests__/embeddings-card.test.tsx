@@ -47,6 +47,29 @@ describe("EmbeddingsCard", () => {
     expect(screen.getByText("1024")).toBeTruthy();
   });
 
+  it("does not tell a working setup how to change it, and names the backend", async () => {
+    mocks.callTool.mockResolvedValueOnce(ok({
+      backend: "neo4j", is_graph_backend: true, embedder_configured: true,
+      is_semantic: true, load_error: null, model_path: "nomic-embed-text", dimensions: 768,
+      change_hint: CHANGE_HINT,
+    }));
+    render(<EmbeddingsCard />);
+    expect(await screen.findByText("Semantic (local model)")).toBeTruthy();
+    expect(screen.queryByText(/To change:/)).toBeNull();
+    expect(screen.getByText("neo4j")).toBeTruthy();
+  });
+
+  it("still explains how to enable embeddings when they are not semantic", async () => {
+    mocks.callTool.mockResolvedValueOnce(ok({
+      backend: "neo4j", is_graph_backend: true, embedder_configured: false,
+      is_semantic: false, load_error: "embedding provider unreachable", model_path: "", dimensions: 0,
+      change_hint: CHANGE_HINT,
+    }));
+    render(<EmbeddingsCard />);
+    await screen.findByText("Keyword fallback (no model loaded)");
+    expect(screen.getByText(/To change:/)).toBeTruthy();
+  });
+
   it("shows retry-safe error copy without a raw exception", async () => {
     mocks.callTool.mockRejectedValueOnce(new Error("boom"));
     render(<EmbeddingsCard />);
