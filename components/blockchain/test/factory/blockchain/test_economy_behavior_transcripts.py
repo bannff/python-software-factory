@@ -34,7 +34,7 @@ def test_mock_economy_transcript_including_normal_negatives_and_auto_wallet(monk
     duplicate = tools["blockchain_create_wallet"](owner_id="alice").data
     missing = tools["blockchain_get_wallet"](wallet_id="missing").data
     transfer = tools["blockchain_transfer"](from_wallet=alice.wallet_id, to_wallet=bob.wallet_id, amount=25).data
-    rejected = tools["blockchain_transfer"](from_wallet=alice.wallet_id, to_wallet=bob.wallet_id, amount=100).data
+    rejected = tools["blockchain_transfer"](from_wallet=alice.wallet_id, to_wallet=bob.wallet_id, amount=100)
     minted = tools["blockchain_mint"](to_wallet=bob.wallet_id, amount=5).data
     bounty = tools["blockchain_post_bounty"](poster_wallet=alice.wallet_id, amount=20, description="review").data
     claimed = tools["blockchain_claim_bounty"](bounty_id=bounty.bounty_id, claimer_wallet=bob.wallet_id).data
@@ -45,7 +45,7 @@ def test_mock_economy_transcript_including_normal_negatives_and_auto_wallet(monk
     transcript = {
         "genesis": (chain.height, chain.wallet_count, chain.tx_count),
         "wallets": (alice.wallet_id, bob.wallet_id, duplicate.found, missing.error),
-        "transfers": (transfer.success, rejected.success, minted.tx_type),
+        "transfers": (transfer.success, rejected.error, minted.tx_type),
         "bounties": (bounty.status, claimed.tx_type, cancelled.tx_type),
         "integrity": (runtime.get_ledger().verify_chain()["valid"], runtime.get_ledger().reconcile(alice.wallet_id)["drift"]),
         "automatic": automatic.wallet_id,
@@ -53,7 +53,7 @@ def test_mock_economy_transcript_including_normal_negatives_and_auto_wallet(monk
     }
     assert transcript == {
         "genesis": (1, 1, 1), "wallets": ("wallet-alice", "wallet-bob", False, "not_found"),
-        "transfers": (True, False, "mint"), "bounties": ("open", "bounty_release", "bounty_release"),
+        "transfers": (True, "insufficient_balance", "mint"), "bounties": ("open", "bounty_release", "bounty_release"),
         "integrity": (True, 0.0), "automatic": "wallet-kiro-agent", "authoring": "authoring_disabled",
     }
     assert all(_id(value) == "<dynamic>" for value in (transfer.tx_id, minted.tx_id, bounty.bounty_id, claimed.tx_id, cancelled.tx_id))
