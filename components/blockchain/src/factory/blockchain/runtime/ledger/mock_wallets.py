@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..models import Transaction, TransactionType, Wallet
+from ..errors import LedgerError
 from .mock_core import TREASURY_ID, commit_block, make_transaction
 from .mock_effects import LedgerEffects
 
@@ -23,11 +24,13 @@ def create_wallet(ledger: Any, effects: LedgerEffects, owner_id: str, initial_ba
 def transfer(ledger: Any, effects: LedgerEffects, from_wallet: str, to_wallet: str, amount: float, memo: str = "") -> Transaction:
     sender, receiver = ledger._wallets.get(from_wallet), ledger._wallets.get(to_wallet)
     if not sender:
-        raise ValueError(f"Sender not found: {from_wallet}")
+        raise LedgerError("wallet_not_found", f"Sender not found: {from_wallet}")
     if not receiver:
-        raise ValueError(f"Receiver not found: {to_wallet}")
-    if amount <= 0 or sender.balance < amount:
-        raise ValueError(f"Invalid transfer: balance={sender.balance}, amount={amount}")
+        raise LedgerError("wallet_not_found", f"Receiver not found: {to_wallet}")
+    if amount <= 0:
+        raise LedgerError("invalid_amount", f"Invalid transfer: balance={sender.balance}, amount={amount}")
+    if sender.balance < amount:
+        raise LedgerError("insufficient_balance", f"Invalid transfer: balance={sender.balance}, amount={amount}")
     sender.balance -= amount
     receiver.balance += amount
     effects.sync_wallet(sender)
@@ -41,9 +44,9 @@ def transfer(ledger: Any, effects: LedgerEffects, from_wallet: str, to_wallet: s
 def mint(ledger: Any, effects: LedgerEffects, to_wallet: str, amount: float, memo: str = "") -> Transaction:
     receiver = ledger._wallets.get(to_wallet)
     if not receiver:
-        raise ValueError(f"Wallet not found: {to_wallet}")
+        raise LedgerError("wallet_not_found", f"Wallet not found: {to_wallet}")
     if amount <= 0:
-        raise ValueError("Amount must be positive")
+        raise LedgerError("invalid_amount", "Amount must be positive")
     receiver.balance += amount
     effects.sync_wallet(receiver)
     tx = make_transaction(ledger, effects, TransactionType.MINT, None, to_wallet, amount, memo)
