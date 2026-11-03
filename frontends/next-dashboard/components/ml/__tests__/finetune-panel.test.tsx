@@ -92,6 +92,26 @@ describe("FineTunePanel", () => {
       { method: "lora", base_model: "llama-3", dataset_id: "chat-v1" }));
   });
 
+  it("offers registered base models and sends the chosen model id", async () => {
+    callTool.mockImplementation(async (name: string) => {
+      if (name === "ml_list_finetuning_jobs") return ok({ count: 0, jobs: [] });
+      if (name === "ml_list_finetuning_methods") return methods;
+      if (name === "ml_list_base_models") return ok({ count: 1, models: [{ name: "tiny", model_id: "org/tiny-llama", description: "", recommended_method: "lora" }] });
+      if (name === "ml_list_datasets") return ok({ count: 0, datasets: [] });
+      return ok({ id: "job-1", status: "pending" });
+    });
+    render(<FineTunePanel />);
+    fireEvent.click(await screen.findByRole("button", { name: "New job" }));
+    await screen.findByRole("option", { name: "tiny" });
+    fireEvent.change(screen.getByLabelText("Base model"), { target: { value: "org/tiny-llama" } });
+    for (const [label, value] of [["Dataset URI", "s3://d"], ["Manifest URI", "s3://m"], ["Dataset digest", DIGEST], ["View name", "chat"], ["View schema version", "1"]]) {
+      fireEvent.change(screen.getByLabelText(label), { target: { value } });
+    }
+    fireEvent.click(screen.getByRole("button", { name: "Create job" }));
+    await waitFor(() => expect(callTool).toHaveBeenCalledWith("ml_create_finetuning_job",
+      expect.objectContaining({ base_model: "org/tiny-llama" })));
+  });
+
   it("shows empty dataset fields before sending anything", async () => {
     render(<FineTunePanel />);
     fireEvent.click(await screen.findByRole("button", { name: "New job" }));
