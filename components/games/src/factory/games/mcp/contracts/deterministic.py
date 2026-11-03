@@ -8,6 +8,7 @@ class CapabilitiesOutput(DTO):
     name: str
     version: str
     game_types: list[str]
+    human_playable_game_types: list[str] = []
     backends: list[str]
     features: list[str]
 
