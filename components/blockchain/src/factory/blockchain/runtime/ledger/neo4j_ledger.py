@@ -1,7 +1,6 @@
 """Neo4j-backed ledger via MCP aggregator pattern."""
 from __future__ import annotations
 
-import logging
 import uuid
 from typing import Any
 
@@ -11,7 +10,6 @@ from ..models import (
 )
 from .chain_ops import _GENESIS_PREV, make_block, verify_blocks
 
-logger = logging.getLogger(__name__)
 _TREASURY_ID = "wallet-treasury"
 
 
@@ -159,13 +157,8 @@ class Neo4jLedger:
         return tx
 
     def list_wallets(self, limit: int = 100) -> list[Wallet]:
-        r = _invoke("graph_graph_find_entities", entity_type="Wallet", limit=limit)
-        return [
-            Wallet(wallet_id=e["id"], owner_id=e.get("properties", {}).get("owner_id", ""),
-                   balance=float(e.get("properties", {}).get("balance", 0)),
-                   created_at=e.get("properties", {}).get("created_at", ""))
-            for e in (r or {}).get("entities", [])
-        ]
+        from .neo4j_wallets import list_wallets
+        return list_wallets(_invoke, limit)
 
     def get_balance(self, wallet_id: str) -> float:
         props = self._get_wallet_props(wallet_id)
