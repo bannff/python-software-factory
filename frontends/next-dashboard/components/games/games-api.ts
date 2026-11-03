@@ -3,6 +3,7 @@ import { unwrapToolData } from "@/lib/tool-result-data";
 
 export interface Game {
   game_id: string; game_type: string; status: string; current_player: number; winner: number | null; cols: number;
+  board: number[][]; moves: { player: number; column: number }[];
 }
 
 function gameFrom(raw: unknown): Game | null {
@@ -11,7 +12,9 @@ function gameFrom(raw: unknown): Game | null {
   const cols = (v.config as { cols?: unknown } | undefined)?.cols;
   return { game_id: v.game_id, game_type: v.game_type, status: typeof v.status === "string" ? v.status : "",
     current_player: typeof v.current_player === "number" ? v.current_player : 0,
-    winner: typeof v.winner === "number" ? v.winner : null, cols: typeof cols === "number" ? cols : 7 };
+    winner: typeof v.winner === "number" ? v.winner : null, cols: typeof cols === "number" ? cols : 7,
+    board: Array.isArray(v.board) ? v.board.filter(Array.isArray).map((row) => (row as unknown[]).map((c) => (typeof c === "number" ? c : 0))) : [],
+    moves: Array.isArray(v.move_history) ? v.move_history.flatMap((m) => { const x = m as Record<string, unknown>; return typeof x?.player === "number" && typeof x?.column === "number" ? [{ player: x.player, column: x.column }] : []; }) : [] };
 }
 
 export async function listGames(): Promise<Game[]> {

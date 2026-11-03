@@ -6,6 +6,7 @@ import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { EmptyState } from "@/components/ui/empty-state";
 import { createGame, deleteGame, listGames, listGameTypes, moveInColumn, resetGame, type Game } from "./games-api";
 import { gameFailure } from "./game-errors";
+import { GameBoard } from "./game-board";
 
 /** Start, play, reset and delete games, driven by the games_* tools. */
 export function GamesPanel() {
@@ -76,6 +77,12 @@ export function GamesPanel() {
               onConfirm={() => void run(() => deleteGame(g.game_id), "Game could not be removed.")}
               className="rounded-md p-1.5 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></ConfirmDelete>
           </div>
+          {g.board.length > 0 && <GameBoard board={g.board} />}
+          {g.moves.length > 0 && (
+            <p className="truncate text-[11px] text-muted-foreground">
+              {g.moves.slice(-8).map((m) => `P${m.player} → ${m.column + 1}`).join("  ·  ")}
+            </p>
+          )}
           {g.game_type === "connect_four" && g.status === "active" && (
             <div className="flex gap-1">
               {Array.from({ length: g.cols }, (_, c) => (
