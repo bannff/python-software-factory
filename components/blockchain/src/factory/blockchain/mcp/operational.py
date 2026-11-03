@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from typing import Any
-from factory.mcp_utils.interface import ToolResult, operational
+from factory.mcp_utils.interface import ToolResult, TypedToolFailure, operational
 
 from .contracts.base import EmptyInput
 from .contracts.ledger import BountiesOutput, BountyOutput, TransactionOutput
@@ -115,4 +115,4 @@ def register(mcp: Any, get_runtime: Callable[[], "BlockchainRuntime"]) -> None:
         try:
             return ReconcileOutput.model_validate(get_runtime().get_ledger().reconcile(wallet_id))
         except ValueError as exc:
-            return ReconcileOutput(success=False, wallet_id=wallet_id, error=str(exc))
+            raise TypedToolFailure("wallet_not_found", str(exc)) from exc
