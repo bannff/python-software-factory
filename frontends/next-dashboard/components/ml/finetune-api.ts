@@ -8,6 +8,8 @@ export interface FineTuneMethod { name: string; description: string }
 export interface JobInput {
   method: string; base_model: string; dataset_uri: string; manifest_uri: string;
   dataset_digest: string; view_name: string; view_schema_version: string;
+  /** A registered dataset; when set the five explicit dataset fields are not sent. */
+  dataset_id?: string;
 }
 
 function jobFrom(raw: unknown): FineTuneJob | null {
@@ -34,7 +36,10 @@ export async function listMethods(): Promise<FineTuneMethod[]> {
 }
 
 export async function createJob(input: JobInput): Promise<void> {
-  unwrapToolData(await callTool("ml_create_finetuning_job", { ...input }));
+  const { dataset_id, ...explicit } = input;
+  unwrapToolData(await callTool("ml_create_finetuning_job", dataset_id
+    ? { method: input.method, base_model: input.base_model, dataset_id }
+    : explicit));
 }
 export async function startJob(jobId: string): Promise<void> {
   unwrapToolData(await callTool("ml_start_finetuning_job", { job_id: jobId }));
