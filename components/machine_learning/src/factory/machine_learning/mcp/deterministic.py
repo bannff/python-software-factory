@@ -8,6 +8,7 @@ from factory.mcp_utils.interface import ToolResult, deterministic, fail, ok
 
 from ..runtime.learning_projection import _find_learning_run, _load_learning_runs, _timeline_line
 from ..runtime.runtime import TrackingRuntime
+from ..runtime.time_series_ports import TimeSeriesModelType
 from .deterministic_dtos import (
     CapabilitiesOutput, ConfigSchemaOutput, EmptyInput, ExperimentIdInput,
     ExperimentOutput, ExperimentsOutput, HealthOutput, LearningArtifactsOutput,
@@ -29,7 +30,8 @@ def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
             finetuning_backends=TrackingRuntime.available_finetuning_backends(),
             features=["experiments", "runs", "metrics", "params", "artifacts",
                 "finetuning", "lora", "qlora", "model_export",
-                "training_objectives", "checkpoint_lifecycle"])
+                "training_objectives", "checkpoint_lifecycle"],
+            timeseries_model_types=[item.value for item in TimeSeriesModelType])
 
     @mcp.tool(name="ml_health_check")
     @deterministic(input_model=EmptyInput, output_model=HealthOutput)

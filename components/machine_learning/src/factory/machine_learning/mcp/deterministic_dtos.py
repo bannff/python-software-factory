@@ -39,6 +39,7 @@ class CapabilitiesOutput(_DTO):
     backends: list[str]
     finetuning_backends: list[str]
     features: list[str]
+    timeseries_model_types: list[str] = []
 
 
 class HealthTrackerOutput(_DTO):
