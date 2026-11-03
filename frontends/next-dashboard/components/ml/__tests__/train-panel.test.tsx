@@ -89,6 +89,10 @@ describe("TrainPanel", () => {
     ["timeseries_config_invalid", /training settings/i],
     ["training_data_unreadable", /locations exist and can be read/i],
     ["training_failed", /training failed/i],
+    ["training_data_shape_invalid", /wrong shape/i],
+    ["model_root_not_configured", /no folder/i],
+    ["symlink_path_rejected", /real path/i],
+    ["native_dependency_missing", /training packages/i],
   ])("maps the typed code %s to a plain sentence", async (code, expected) => {
     render(<TrainPanel />);
     await open();
