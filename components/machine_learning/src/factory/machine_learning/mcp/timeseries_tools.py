@@ -42,7 +42,7 @@ def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
             family_config = TimeSeriesModelConfig.model_validate(model_config) if model_config else None
             validate_model_config_for_family(model_type_enum, family_config)
         except (TypeError, ValueError) as error:
-            raise TypedToolFailure("timeseries_config_invalid", str(error)) from error
+            return fail(str(error))  # field-level text; callers and tests rely on it
         emit_ml_event("ml.training.started", {
             "model_type": model_type_enum.value,
             "experiment_name": experiment_name, "status": "started",

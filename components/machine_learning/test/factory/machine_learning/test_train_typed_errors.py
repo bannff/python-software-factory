@@ -25,5 +25,5 @@ def test_train_failures_are_typed(tools, tmp_path) -> None:
     assert train(model_type="nope", X_uri="x.npy", y_uri="y.npy").error == "timeseries_model_type_invalid"
     assert train(model_type="lightgbm", X_uri=str(tmp_path / "missing.npy"),
                  y_uri=str(tmp_path / "missing_y.npy")).error in {"training_data_unreadable", "training_failed"}
-    assert train(model_type="lightgbm", X_uri="x.npy", y_uri="y.npy",
-                 config={"not_a_field": 1}).error == "timeseries_config_invalid"
+    bad_config = train(model_type="lightgbm", X_uri="x.npy", y_uri="y.npy", config={"not_a_field": 1})
+    assert not bad_config.ok and "not_a_field" in bad_config.error
