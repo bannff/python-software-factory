@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Coins, Plus, ShieldCheck } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { errorReason, withReason } from "@/lib/error-reason";
-import { createWallet, listWallets, mint, transfer, verifyChain, type ChainCheck, type Wallet } from "./blockchain-api";
+import { createWallet, ledgerFailure, listWallets, mint, transfer, verifyChain, type ChainCheck, type Wallet } from "./blockchain-api";
 import { MoneyForm } from "./money-form";
 
 type Mode = "wallet" | "transfer" | "mint" | null;
@@ -32,7 +32,7 @@ export function BlockchainPanel() {
   const run = async (action: () => Promise<void>, failure: string) => {
     setBusy(true); setNotice(null);
     try { await action(); setMode(null); await refresh(); }
-    catch (cause) { setNotice(withReason(failure, errorReason(cause))); }
+    catch (cause) { setNotice(ledgerFailure(failure, cause)); }
     finally { setBusy(false); }
   };
   const open = (next: Mode) => { setNotice(null); setMode(next); };
