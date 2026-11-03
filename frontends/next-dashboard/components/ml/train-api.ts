@@ -18,10 +18,16 @@ export async function trainModel(input: TrainInput): Promise<TrainResult> {
   return { job_id: typeof data?.job_id === "string" ? data.job_id : "", status: typeof data?.status === "string" ? data.status : "", metrics };
 }
 
-/** Training raises on unreadable data (opaque) and leaks a Python enum message for a bad type; say it plainly. */
+/** Typed training failures in plain words, with the older untyped strings kept as a fallback. */
+const FAILURES: [RegExp, string][] = [
+  [/timeseries_model_type_invalid|is not a valid TimeSeriesModelType/i, "That model type isn't available on this server."],
+  [/timeseries_config_invalid/, "Those training settings aren't valid."],
+  [/training_data_unreadable|tool_execution_failed/, "Training could not run. Check that both dataset locations exist and can be read, then try again."],
+  [/training_failed/, "Training failed while running. Try again, or check the server log."],
+];
+
 export function trainFailure(cause: unknown): string {
   const reason = errorReason(cause) ?? "";
-  if (/is not a valid TimeSeriesModelType/i.test(reason)) return "That model type isn't available on this server.";
-  if (/tool_execution_failed/.test(reason)) return "Training could not run. Check that both dataset locations exist and can be read, then try again.";
-  return withReason("Training could not start.", reason || undefined);
+  const known = FAILURES.find(([pattern]) => pattern.test(reason));
+  return known ? known[1] : withReason("Training could not start.", reason || undefined);
 }

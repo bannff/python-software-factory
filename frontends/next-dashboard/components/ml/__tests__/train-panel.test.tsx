@@ -81,4 +81,25 @@ describe("TrainPanel", () => {
     expect(alert.textContent).toMatch(/could not run/i);
     expect(alert.textContent).not.toMatch(/tool_execution_failed/);
   });
+
+  it.each([
+    ["timeseries_model_type_invalid", /model type isn't available/i],
+    ["timeseries_config_invalid", /training settings/i],
+    ["training_data_unreadable", /locations exist and can be read/i],
+    ["training_failed", /training failed/i],
+  ])("maps the typed code %s to a plain sentence", async (code, expected) => {
+    render(<TrainPanel />);
+    await open();
+    await screen.findByRole("option", { name: "tcn" });
+    fireEvent.change(screen.getByLabelText("Model type"), { target: { value: "tcn" } });
+    fill();
+    callTool.mockImplementation(async (name: string) => {
+      if (name === "ml_train_timeseries") throw Object.assign(new Error(code), { reason: code });
+      return ok({});
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Start training" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toMatch(expected);
+    expect(alert.textContent).not.toContain(code);
+  });
 });
