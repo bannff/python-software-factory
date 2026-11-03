@@ -158,6 +158,15 @@ class Neo4jLedger:
         self._commit_block([tx.tx_id])
         return tx
 
+    def list_wallets(self, limit: int = 100) -> list[Wallet]:
+        r = _invoke("graph_graph_find_entities", entity_type="Wallet", limit=limit)
+        return [
+            Wallet(wallet_id=e["id"], owner_id=e.get("properties", {}).get("owner_id", ""),
+                   balance=float(e.get("properties", {}).get("balance", 0)),
+                   created_at=e.get("properties", {}).get("created_at", ""))
+            for e in (r or {}).get("entities", [])
+        ]
+
     def get_balance(self, wallet_id: str) -> float:
         props = self._get_wallet_props(wallet_id)
         if not props:

@@ -13,7 +13,7 @@ from factory.blockchain.runtime.runtime import BlockchainRuntime
 from factory.blockchain.server import create_mcp_server
 
 _EXPECTED = {
-    "deterministic": 13,
+    "deterministic": 14,
     "operational": 11,
     "authoring": 2,
 }
@@ -72,7 +72,7 @@ def test_complete_tool_catalog_and_concrete_dto_schemas_are_frozen() -> None:
             "input": tool.fn._mcp_input_model.model_json_schema(mode="validation"),
             "output": output.model_json_schema(),
         }
-    assert _digest(snapshot) == "bfd5609e0b69709a4f300ff31f00be101aba55c31283cbc9ec827b8f38dad5fa"
+    assert _digest(snapshot) == "fd9037650e8d6e1e1fcca23a38b9ac0d0f337ba9e87d6389cd61fc6597c763b8"
 
 
 def test_resources_prompts_complete_view_and_representative_envelopes_are_frozen() -> None:
