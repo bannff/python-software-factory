@@ -155,6 +155,13 @@ class MemoryFineTuningAdapter:
             if cp.checkpoint_type == CheckpointType.stage_artifact
         ]
 
+    def delete_job(self, job_id: str) -> None:
+        """Forget a job that is not running; its checkpoints are left to cleanup."""
+        job = self._require_job(job_id)
+        if job.status.value == "running":
+            raise ValueError("job_running")
+        del self._jobs[job_id]
+
     def _require_job(self, job_id: str) -> FineTuningJob:
         job = self._jobs.get(job_id)
         if not job:

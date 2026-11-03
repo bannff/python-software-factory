@@ -56,3 +56,35 @@ class RegisterBaseModelOutput(_Output):
     ok: bool
     model: BaseModelEntry
     total_models: int
+
+
+class BaseModelNameInput(_Input):
+    name: StrictStr
+
+
+class UpdateBaseModelInput(_Input):
+    name: StrictStr
+    model_id: StrictStr | None = None
+    description: StrictStr | None = None
+    recommended_method: StrictStr | None = None
+
+
+class BaseModelEntry(_Input):
+    name: StrictStr
+    model_id: StrictStr
+    description: StrictStr
+    recommended_method: StrictStr
+
+
+class BaseModelsOutput(_Input):
+    count: int
+    models: list[BaseModelEntry]
+
+
+class BaseModelOutput(_Input):
+    model: BaseModelEntry
+
+
+class BaseModelDeletedOutput(_Input):
+    name: StrictStr
+    deleted: bool
