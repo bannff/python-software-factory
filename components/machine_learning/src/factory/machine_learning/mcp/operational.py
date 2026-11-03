@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Callable
 from typing import Any
-from factory.mcp_utils.interface import ToolResult, operational
+from factory.mcp_utils.interface import ToolResult, TypedToolFailure, operational
 from ..runtime.models import DatasetTrainingInput, FineTuningMethod, LoRAConfig, TrainingConfig, TrainingObjective
 from ..runtime.runtime import TrackingRuntime
 from .operational_contracts import (
@@ -49,11 +49,14 @@ def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
     @mcp.tool()
     @operational(input_model=CreateFineTuningJobInput, output_model=FineTuningJobOutput)
     def ml_create_finetuning_job(method: str, base_model: str, dataset_uri: str, manifest_uri: str, dataset_digest: str, view_name: str, view_schema_version: str, training_objective: str | None = None, batch_size: int = 4, learning_rate: float = 1e-4, max_iters: int | None = None, epochs: int | None = None, max_seq_length: int = 512, lora_rank: int = 8, lora_alpha: int = 16, lora_dropout: float = 0.05, quantization_bits: int | None = None) -> ToolResult[FineTuningJobOutput]:
-        ft_method = FineTuningMethod(method)
+        try:
+            ft_method = FineTuningMethod(method)
+            training = DatasetTrainingInput(dataset_uri=dataset_uri, manifest_uri=manifest_uri, dataset_digest=dataset_digest, view_name=view_name, view_schema_version=view_schema_version)
+            objective = TrainingObjective(training_objective) if training_objective else None
+        except ValueError as exc:
+            raise TypedToolFailure("finetuning_input_invalid", str(exc)) from exc
         lora = LoRAConfig(rank=lora_rank, alpha=lora_alpha, dropout=lora_dropout, quantization_bits=quantization_bits) if ft_method in {FineTuningMethod.lora, FineTuningMethod.adalora, FineTuningMethod.mlx_lora} else None
         config = TrainingConfig(batch_size=batch_size, learning_rate=learning_rate, max_iters=max_iters, epochs=epochs, max_seq_length=max_seq_length)
-        training = DatasetTrainingInput(dataset_uri=dataset_uri, manifest_uri=manifest_uri, dataset_digest=dataset_digest, view_name=view_name, view_schema_version=view_schema_version)
-        objective = TrainingObjective(training_objective) if training_objective else None
         backend = "mlx" if ft_method == FineTuningMethod.mlx_lora else "memory"
         job = get_runtime().get_finetuner(backend).create_job(ft_method, base_model, training, config, lora, objective)
         return FineTuningJobOutput(id=job.id, status=job.status.value, method=job.method.value, training_objective=job.training_objective.value if job.training_objective else None, training_input=_serialize_training_input(job.training_input))

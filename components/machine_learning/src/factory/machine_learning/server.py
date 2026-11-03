@@ -7,7 +7,7 @@ from factory.mcp_utils.server import make_lazy_runner
 
 from .runtime.runtime import get_runtime, TrackingRuntime
 from .mcp import (
-    can_pipeline_tool, can_lifecycle_tools, dataset_tools, deterministic, operational, authoring,
+    can_pipeline_tool, can_lifecycle_tools, dataset_tools, ml_catalog_tools, deterministic, operational, authoring,
     resources, prompts, views, finetuning_tools, timeseries_tools, inference_tools,
     passport_tools, dashboard_summary, observatory_tools, supervision_tools,
 )
@@ -44,6 +44,7 @@ def _register_tools(
     operational.register(registry, get_current)
     authoring.register(registry, get_current)
     dataset_tools.register(registry, get_current)
+    ml_catalog_tools.register(registry, get_current)
     dashboard_summary.register(registry)
     observatory_tools.register(registry, get_current)
     views.register(registry)
