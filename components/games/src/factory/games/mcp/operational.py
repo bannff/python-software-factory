@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable
 
-from factory.mcp_utils.interface import ToolResult, make_serializable, operational
+from factory.mcp_utils.interface import ToolResult, TypedToolFailure, make_serializable, operational
 
 from .contracts.deterministic import GameIdInput
 from .contracts.operational import (
@@ -17,9 +17,19 @@ if TYPE_CHECKING:
     from ..runtime.runtime import GamesRuntime
 
 
+def _refusal_code(message: str) -> str:
+    """Map the rules engines' free-text refusals to stable public codes."""
+    text = (message or "").lower()
+    if "not found" in text:
+        return "game_not_found"
+    if "turn" in text:
+        return "not_your_turn"
+    return "illegal_move"
+
+
 def _move_result(result: Any) -> dict[str, Any]:
     if not result.valid:
-        return {"valid": False, "error": result.error}
+        raise TypedToolFailure(_refusal_code(result.error), result.error or "")
     return {"valid": True, "state": result.state.to_dict() if result.state else None,
             "reward": result.reward, "terminal": result.terminal, "info": result.info}
 
@@ -35,12 +45,7 @@ def register(mcp: Any, get_runtime: Callable[[], "GamesRuntime"]) -> None:
         runtime = get_runtime()
         available = runtime.available_game_types()
         if game_type not in available:
-            return {
-                "game_id": "", "game_type": game_type, "board": [], "current_player": 0,
-                "status": "", "move_history": [], "players": {}, "config": {},
-                "created_at": "", "updated_at": "", "move_count": 0,
-                "error": "unknown_game_type", "available": available,
-            }
+            raise TypedToolFailure("unknown_game_type", ", ".join(available))
         game_config = config or {}
         if game_type == "connect_four":
             game_config.setdefault("rows", rows); game_config.setdefault("cols", cols)
@@ -62,10 +67,7 @@ def register(mcp: Any, get_runtime: Callable[[], "GamesRuntime"]) -> None:
     def games_reset(game_id: str) -> ToolResult[ResetGameOutput]:
         runtime = get_runtime(); old = runtime.get_game(game_id)
         if old is None:
-            return {"game_id": game_id, "game_type": "", "board": [], "current_player": 0,
-                    "status": "", "move_history": [], "players": {}, "config": {},
-                    "created_at": "", "updated_at": "", "move_count": 0,
-                    "error": f"Game {game_id} not found"}
+            raise TypedToolFailure("game_not_found", game_id)
         state = runtime.get_rules(old.game_type).create_initial_state(game_id, old.config)
         state.players = old.players; runtime.get_store().save(state)
         return make_serializable(state.to_dict())
