@@ -16,6 +16,7 @@ const TimelineViewV2 = lazy(() => import("./timeline-view-v2"));
 const EvalsLeaderboardView = lazy(() => import("./evals-leaderboard-view"));
 const FindingsView = lazy(() => import("./findings-view"));
 const BrickViewRenderer = lazy(() => import("./brick-view-renderer"));
+const BlockchainPanel = lazy(() => import("../blockchain/blockchain-panel").then((m) => ({ default: m.BlockchainPanel })));
 const FineTunePanel = lazy(() => import("../ml/finetune-panel").then((m) => ({ default: m.FineTunePanel })));
 const GraphBrickView = lazy(() => import("./graph-brick-view"));
 const RuntimeMetricsView = lazy(() => import("./runtime-metrics-view"));
@@ -111,7 +112,7 @@ export function Canvas(props: CanvasProps) {
           {props.activeView === "metrics" && <RuntimeMetricsView onNavigate={props.onNavigate} />}
           {props.activeView === "ml" && <><BrickViewRenderer viewTool="ml_get_views" /><FineTunePanel /></>}
           {props.activeView === "games" && <GraphBrickView viewTool="games_get_views" defaultEntityType="GameSession" onNavigate={props.onNavigate} />}
-          {props.activeView === "blockchain" && <GraphBrickView viewTool="blockchain_get_views" defaultEntityType="Transaction" onNavigate={props.onNavigate} />}
+          {props.activeView === "blockchain" && <><BlockchainPanel /><GraphBrickView viewTool="blockchain_get_views" defaultEntityType="Transaction" onNavigate={props.onNavigate} /></>}
           {props.activeView === "sandbox" && <GraphBrickView viewTool="sandbox_get_views" defaultEntityType="ToolInvocation" onNavigate={props.onNavigate} />}
           {props.activeView === "capabilities" && <AgentCapabilitiesView />}
           {props.activeView === "sessions" && <SessionsCanvas pathname={pathname}
