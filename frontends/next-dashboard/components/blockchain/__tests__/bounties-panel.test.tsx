@@ -68,6 +68,20 @@ describe("BountiesPanel", () => {
     expect(screen.queryByRole("button", { name: "Claim bounty bounty-2" })).toBeNull();
   });
 
+  it("understands the typed codes the ledger now returns", async () => {
+    bounties = [bounty("bounty-1", "open")];
+    callTool.mockImplementation(async (name: string) => {
+      if (name === "blockchain_list_wallets") return ok({ count: 2, wallets });
+      if (name === "blockchain_list_bounties") return ok({ count: 1, bounties });
+      throw Object.assign(new Error("insufficient_balance"), { reason: "insufficient_balance" });
+    });
+    render(<BountiesPanel />);
+    fireEvent.click(await screen.findByRole("button", { name: "Claim bounty bounty-1" }));
+    fireEvent.change(screen.getByLabelText("Claim as wallet"), { target: { value: "wallet-b" } });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm claim of 4 as wallet-b" }));
+    expect((await screen.findByRole("alert")).textContent).toMatch(/enough balance/i);
+  });
+
   it("turns the ledger's refusals into plain sentences", async () => {
     bounties = [bounty("bounty-1", "open")];
     callTool.mockImplementation(async (name: string) => {

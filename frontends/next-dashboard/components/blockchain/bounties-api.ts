@@ -1,5 +1,4 @@
 import { callTool } from "@/lib/api";
-import { errorReason, withReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import { refuseIfFailed } from "./blockchain-api";
 
@@ -32,16 +31,4 @@ export async function cancelBounty(bountyId: string): Promise<void> {
   refuseIfFailed(unwrapToolData(await callTool("blockchain_cancel_bounty", { bounty_id: bountyId })));
 }
 
-/** The ledger refuses in free text (and leaks enum names); say it in plain words. */
-const REFUSALS: [RegExp, string][] = [
-  [/bounty not open/i, "This bounty has already been claimed or closed."],
-  [/bounty not found/i, "This bounty no longer exists."],
-  [/cannot cancel/i, "Only an open bounty can be cancelled."],
-  [/invalid bounty/i, "That wallet can't fund this amount. Check its balance."],
-];
-
-export function bountyFailure(prose: string, cause: unknown): string {
-  const reason = errorReason(cause) ?? "";
-  const known = REFUSALS.find(([pattern]) => pattern.test(reason));
-  return known ? known[1] : withReason(prose, reason || undefined);
-}
+export { ledgerFailure as bountyFailure } from "./blockchain-api";
