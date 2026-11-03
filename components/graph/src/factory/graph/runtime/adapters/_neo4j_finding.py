@@ -24,7 +24,8 @@ _FINDING_BASE_RETURN = (
     "f.line_end AS line_end, f.agent_id AS agent_id, "
     "f.vuln_class AS vuln_class, "
     # Verification oracle state (neutral; bd python-factory-216ti Contract B).
-    "f.state AS state, "
+    "f.state AS state, f.kind AS kind, "
+    "f.subject_type AS subject_type, f.subject_id AS subject_id, "
     # Human-as-labeler grade (domain-neutral; written by either cockpit).
     "f.human_verdict AS human_verdict, f.graded_by AS graded_by, "
     "f.graded_at AS graded_at, f.graded_source AS graded_source"
