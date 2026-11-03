@@ -16,7 +16,7 @@ beforeEach(() => {
   callTool.mockReset(); games = [];
   callTool.mockImplementation(async (name: string) => {
     if (name === "games_list") return ok({ games, count: games.length });
-    if (name === "games_get_capabilities") return ok({ game_types: ["connect_four", "finding_triage"] });
+    if (name === "games_get_capabilities") return ok({ game_types: ["connect_four", "finding_triage"], human_playable_game_types: ["connect_four", "finding_triage"] });
     if (name === "games_delete") return ok({ game_id: "g1", deleted: true });
     return ok(game("g-new"));
   });
@@ -99,5 +99,43 @@ describe("GamesPanel", () => {
     render(<GamesPanel />);
     await screen.findByText("g2");
     expect(screen.queryAllByRole("img", { name: /^Column/i })).toHaveLength(0);
+  });
+
+  it("offers only the human-playable game types when starting a game", async () => {
+    callTool.mockImplementation(async (name: string) => {
+      if (name === "games_list") return ok({ games: [], count: 0 });
+      if (name === "games_get_capabilities") return ok({ game_types: ["connect_four", "ctf_challenge", "finding_triage"], human_playable_game_types: ["connect_four"] });
+      return ok({});
+    });
+    render(<GamesPanel />);
+    fireEvent.click(await screen.findByRole("button", { name: "New game" }));
+    await screen.findByRole("option", { name: "connect_four" });
+    expect(screen.queryByRole("option", { name: "ctf_challenge" })).toBeNull();
+    expect(screen.queryByRole("option", { name: "finding_triage" })).toBeNull();
+  });
+
+  it("offers every type when the server does not say which are human-playable", async () => {
+    callTool.mockImplementation(async (name: string) => {
+      if (name === "games_list") return ok({ games: [], count: 0 });
+      if (name === "games_get_capabilities") return ok({ game_types: ["connect_four", "ctf_challenge"] });
+      return ok({});
+    });
+    render(<GamesPanel />);
+    fireEvent.click(await screen.findByRole("button", { name: "New game" }));
+    expect(await screen.findByRole("option", { name: "ctf_challenge" })).toBeTruthy();
+  });
+
+  it("lists agent-driven games read-only under Agent scenarios", async () => {
+    callTool.mockImplementation(async (name: string) => {
+      if (name === "games_list") return ok({ games: [game("g1"), { ...game("g9"), game_type: "ctf_challenge", board: [[0]] }], count: 2 });
+      if (name === "games_get_capabilities") return ok({ game_types: ["connect_four", "ctf_challenge"], human_playable_game_types: ["connect_four"] });
+      return ok({});
+    });
+    render(<GamesPanel />);
+    expect(await screen.findByText("Agent scenarios")).toBeTruthy();
+    expect(screen.getByText("g9")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Reset game g1" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Reset game g9" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Delete game g9" })).toBeNull();
   });
 });
