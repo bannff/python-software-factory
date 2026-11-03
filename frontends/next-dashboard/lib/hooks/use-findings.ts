@@ -50,21 +50,40 @@ function unwrapTypedRows(raw: unknown): Record<string, unknown>[] {
   return Array.isArray(rows) ? (rows as Record<string, unknown>[]) : [];
 }
 
+const str = (v: unknown): string | undefined => (v === undefined || v === null || v === "" ? undefined : String(v));
+
+function taxonomyFrom(raw: unknown): Finding["taxonomy"] {
+  if (!Array.isArray(raw)) return undefined;
+  const items = raw.flatMap((t) => {
+    const x = t as Record<string, unknown>;
+    return typeof x?.scheme === "string" && typeof x?.id === "string"
+      ? [{ scheme: x.scheme, id: x.id, label: typeof x.label === "string" ? x.label : "" }] : [];
+  });
+  return items.length > 0 ? items : undefined;
+}
+
+/** Prefers the neutral `row.finding` shape; falls back to the legacy flat columns. */
 function rowToFinding(r: Record<string, unknown>, idx: number): Finding {
-  const arn = r.affected_resource_arn ? String(r.affected_resource_arn) : undefined;
-  const cwe = r.cwe ? String(r.cwe) : r.cwe_id ? String(r.cwe_id) : undefined;
+  const n = (r.finding ?? {}) as Record<string, unknown>;
+  const subject = (n.subject ?? {}) as Record<string, unknown>;
+  const arn = str(r.affected_resource_arn);
+  const kind = str(n.kind) ?? str(r.finding_type) ?? "other";
   return {
-    id: (r.id as string) ?? `graph-finding-${idx}`,
-    severity: parseSeverity(r.severity),
-    title: r.title ? String(r.title).slice(0, 80) : "Finding",
-    resource: arn ?? "unknown",
+    id: str(n.id) ?? str(r.id) ?? `graph-finding-${idx}`,
+    severity: parseSeverity(n.severity ?? r.severity),
+    title: (str(n.title) ?? str(r.title) ?? "Finding").slice(0, 80),
+    resource: arn ?? str(subject.id) ?? str(subject.location) ?? "unknown",
     affected_resource_arn: arn,
-    type: r.finding_type ? String(r.finding_type) : "other",
-    description: (r.description ?? "") as string,
-    cwe,
-    category: r.category ? String(r.category) : undefined,
-    remediation: r.remediation ? String(r.remediation) : undefined,
-    run_id: r.run_id ? String(r.run_id) : undefined,
+    type: kind,
+    kind,
+    state: str(n.state) ?? str(r.state),
+    description: str(n.description) ?? str(r.description) ?? "",
+    evidence: str(n.evidence) ?? str(r.evidence),
+    cwe: str(r.cwe) ?? str(r.cwe_id),
+    category: str(n.category) ?? str(r.category),
+    remediation: str(n.remediation) ?? str(r.remediation),
+    taxonomy: taxonomyFrom(n.taxonomy),
+    run_id: str(r.run_id) ?? str((n.source as Record<string, unknown> | undefined)?.run_id),
     timestamp: Date.now(),
     source: "graph" as const,
   };
@@ -76,8 +95,22 @@ function rowToFinding(r: Record<string, unknown>, idx: number): Finding {
  * 2. The graph brick's typed graph_get_recent_findings tool (on mount).
  *    Rows are flat dicts with CWE/OCSF taxonomy already joined.
  */
+export const FINDINGS_CHANGED = "companion-x:findings-changed";
+
+/** Tell every open Findings view to reload after a finding is recorded or its state changes. */
+export function notifyFindingsChanged(): void {
+  if (typeof window !== "undefined") window.dispatchEvent(new Event(FINDINGS_CHANGED));
+}
+
 export function useFindings(toolCalls: ActiveToolCall[]): Finding[] {
   const [mcpFindings, setMcpFindings] = useState<Finding[]>([]);
+  const [version, setVersion] = useState(0);
+
+  useEffect(() => {
+    const bump = () => setVersion((v) => v + 1);
+    window.addEventListener(FINDINGS_CHANGED, bump);
+    return () => window.removeEventListener(FINDINGS_CHANGED, bump);
+  }, []);
 
   useEffect(() => {
     callTool("graph_get_recent_findings", {
@@ -88,7 +121,7 @@ export function useFindings(toolCalls: ActiveToolCall[]): Finding[] {
         setMcpFindings(rows.map(rowToFinding));
       })
       .catch(() => { /* no-op — graph may not be available */ });
-  }, []);
+  }, [version]);
 
   // Parse findings from chat tool call results
   const chatFindings = useMemo(() => {
