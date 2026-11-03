@@ -8,6 +8,7 @@ import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { cn } from "@/lib/utils";
 import type { Finding } from "@/lib/types";
 import { FindingLinks } from "./finding-links";
+import { FindingState } from "./finding-state";
 
 interface FindingDetailProps {
   finding: Finding;
@@ -122,7 +123,19 @@ export function FindingDetail({ finding }: FindingDetailProps) {
           </div>
         </div>
 
-        <FindingLinks runId={finding.run_id} />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {finding.source === "graph" ? <FindingState findingId={finding.id} state={finding.state} /> : <span />}
+          <FindingLinks runId={finding.run_id} />
+        </div>
+        {finding.taxonomy && (
+          <div className="flex flex-wrap gap-1">
+            {finding.taxonomy.map((t) => (
+              <span key={`${t.scheme}:${t.id}`} title={t.label} className="rounded bg-muted/40 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
+                {t.scheme} {t.id}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Description */}
         {finding.description && <p className="text-sm text-foreground/80">{finding.description}</p>}

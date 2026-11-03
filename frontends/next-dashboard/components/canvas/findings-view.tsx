@@ -2,13 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ListChecks, Play } from "lucide-react";
+import { ListChecks, Play, Plus } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { cn } from "@/lib/utils";
 import { useFindings } from "@/lib/hooks/use-findings";
 import { ComponentTree } from "@companion-x/shared-renderer";
 import { FindingDetail } from "./finding-detail";
 import { FindingRow } from "./finding-row";
+import { FindingForm } from "./finding-form";
 import { kindCounts } from "./finding-kinds";
 import {
   usePaintedComponents,
@@ -32,6 +33,7 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterSev, setFilterSev] = useState<FindingSeverity | "all">("all");
   const [filterKind, setFilterKind] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
 
   /* Carrier #2: when the agent paints `state.canvas.findings` with an
    * A2UI components tree, render that tree directly (lossless A2UI
@@ -75,6 +77,9 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
         {/* Row 1: severity distribution bar */}
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-medium text-muted-foreground shrink-0 mr-1">{findings.length}</span>
+          {!adding && <button type="button" aria-label="Add finding" title="Add finding" onClick={() => setAdding(true)}
+            className="shrink-0 rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent/40 hover:text-foreground">
+            <Plus className="h-3.5 w-3.5" aria-hidden /></button>}
           <div className="flex flex-1 h-5 rounded-md overflow-hidden gap-px">
             {SEV_ORDER.map((sev, i) => {
               const pct = (counts[sev] / total) * 100;
@@ -132,6 +137,8 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
           </div>
         )}
       </div>
+
+      {adding && <div className="border-b border-border/50 p-4"><FindingForm kinds={kinds.map(([k]) => k)} onDone={() => setAdding(false)} /></div>}
 
       {/* Findings list */}
       <div className="flex-1 overflow-auto p-4">

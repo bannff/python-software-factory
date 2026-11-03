@@ -72,6 +72,11 @@ export interface Finding {
   analysis_target?: string;
   /** The workflow run that produced this finding, for links to Timeline and Graph. */
   run_id?: string;
+  /** Open vocabulary (security, eval, performance, other, ...); mirrors `type` for graph rows. */
+  kind?: string;
+  /** Verification oracle state: candidate | verifying | verified | refuted. */
+  state?: string;
+  taxonomy?: { scheme: string; id: string; label: string }[];
   source?: "graph" | "live";
 }
 
