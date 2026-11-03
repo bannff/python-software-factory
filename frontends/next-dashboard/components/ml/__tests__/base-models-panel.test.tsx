@@ -56,6 +56,18 @@ describe("BaseModelsPanel", () => {
     expect(alert.textContent).not.toMatch(/ML_ENABLE_AUTHORING_TOOLS/);
   });
 
+  it("also recognises the typed authoring_disabled code", async () => {
+    models = [model];
+    render(<BaseModelsPanel />);
+    fireEvent.click(await screen.findByRole("button", { name: "Delete base model tiny" }));
+    callTool.mockImplementation(async (name: string) => {
+      if (name === "ml_list_base_models") return ok({ count: 1, models });
+      throw typed("authoring_disabled");
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Confirm delete base model tiny" }));
+    expect((await screen.findByRole("alert")).textContent).toMatch(/turned off on this server/i);
+  });
+
   it("edits a base model and deletes it after confirmation", async () => {
     models = [model];
     render(<BaseModelsPanel />);

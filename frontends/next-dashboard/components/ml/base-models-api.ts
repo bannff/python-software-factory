@@ -28,7 +28,7 @@ export async function deleteBaseModel(name: string): Promise<void> {
 /** Typed refusals and the authoring switch in words; anything else keeps the server's reason. */
 export function baseModelFailure(prose: string, cause: unknown): string {
   const reason = errorReason(cause) ?? "";
-  if (/authoring tools disabled/i.test(reason)) return "Base-model editing is turned off on this server.";
+  if (reason.includes("authoring_disabled") || /authoring tools disabled/i.test(reason)) return "Base-model editing is turned off on this server.";
   if (reason.includes("base_model_in_use")) return "This base model is used by a fine-tuning job. Delete that job first.";
   if (reason.includes("base_model_not_found")) return "This base model no longer exists.";
   return withReason(prose, reason || undefined);
