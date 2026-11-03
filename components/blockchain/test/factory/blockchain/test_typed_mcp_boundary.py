@@ -13,7 +13,7 @@ from factory.mcp_utils.interface import ToolResult
 
 
 EXPECTED = {
-    "deterministic": {"blockchain_get_capabilities", "blockchain_health_check", "blockchain_describe_config_schema", "blockchain_get_chain_info", "blockchain_get_balance", "blockchain_get_wallet", "blockchain_list_transactions", "blockchain_get_block", "blockchain_verify_chain", "blockchain_get_dashboard_summary", "blockchain_get_activity", "blockchain_get_entity_graph_context", "blockchain_get_views"},
+    "deterministic": {"blockchain_get_capabilities", "blockchain_health_check", "blockchain_describe_config_schema", "blockchain_get_chain_info", "blockchain_get_balance", "blockchain_get_wallet", "blockchain_list_wallets", "blockchain_list_transactions", "blockchain_get_block", "blockchain_verify_chain", "blockchain_get_dashboard_summary", "blockchain_get_activity", "blockchain_get_entity_graph_context", "blockchain_get_views"},
     "operational": {"blockchain_my_wallet", "blockchain_create_wallet", "blockchain_transfer", "blockchain_mint", "blockchain_reward_escrow", "blockchain_reward_release", "blockchain_post_bounty", "blockchain_claim_bounty", "blockchain_cancel_bounty", "blockchain_list_bounties", "blockchain_reconcile"},
     "authoring": {"blockchain_authoring_get_status", "blockchain_authoring_seed_economy"},
 }
@@ -24,12 +24,12 @@ def _tools():
     return {tool.name: tool for tool in asyncio.run(server.list_tools())}
 
 
-def test_fresh_server_has_exact_typed_26_tool_catalog() -> None:
+def test_fresh_server_has_exact_typed_27_tool_catalog() -> None:
     tools = _tools()
     expected = set().union(*EXPECTED.values())
     actual = {name for name in tools if name.startswith("blockchain_")}
     assert actual == expected
-    assert sum(map(len, EXPECTED.values())) == 26
+    assert sum(map(len, EXPECTED.values())) == 27
     for category, names in EXPECTED.items():
         for name in names:
             fn = tools[name].fn

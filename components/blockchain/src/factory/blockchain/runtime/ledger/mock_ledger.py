@@ -51,6 +51,9 @@ class MockLedger:
     def get_wallet(self, wallet_id: str) -> Wallet | None:
         return self._wallets.get(wallet_id)
 
+    def list_wallets(self, limit: int = 100) -> list[Wallet]:
+        return list(self._wallets.values())[:limit]
+
     def transfer(self, from_wallet: str, to_wallet: str, amount: float, memo: str = "") -> Transaction:
         return transfer(self, self._effects(), from_wallet, to_wallet, amount, memo)
 
