@@ -5,7 +5,8 @@ const PIECE = ["bg-muted/30", "bg-violet-500", "bg-amber-400"];
 /** A drop-board: one dot per cell, coloured by who holds it. Cell 0 is empty. */
 export function GameBoard({ board }: { board: number[][] }) {
   const cols = board[0]?.length ?? 0;
-  if (cols === 0) return null;
+  // The security games return a 1x1 placeholder; a one-cell "board" is not a board.
+  if (cols < 2 || board.length < 2) return null;
   return (
     <div className="grid gap-1 rounded-lg border border-border/40 bg-card/30 p-2" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
       {board.map((row, r) => row.map((cell, c) => (

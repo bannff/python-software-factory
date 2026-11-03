@@ -87,6 +87,13 @@ describe("GamesPanel", () => {
     expect(screen.getByText(/P2 → 5/)).toBeTruthy();
   });
 
+  it("shows no board for the 1x1 placeholder the security games return", async () => {
+    games = [{ ...game("g3"), game_type: "ctf_challenge", board: [[0]] }];
+    render(<GamesPanel />);
+    await screen.findByText("g3");
+    expect(screen.queryAllByRole("img", { name: /^Column/i })).toHaveLength(0);
+  });
+
   it("shows no board for a game type without one", async () => {
     games = [{ ...game("g2"), game_type: "ctf_challenge", board: [] }];
     render(<GamesPanel />);
