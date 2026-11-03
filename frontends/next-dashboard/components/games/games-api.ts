@@ -19,7 +19,7 @@ export async function listGames(): Promise<Game[]> {
   return Array.isArray(data?.games) ? data.games.map(gameFrom).filter((g): g is Game => g !== null) : [];
 }
 export async function listGameTypes(): Promise<string[]> {
-  const data = unwrapToolData(await callTool("get_capabilities")) as { game_types?: unknown };
+  const data = unwrapToolData(await callTool("games_get_capabilities")) as { game_types?: unknown };
   return Array.isArray(data?.game_types) ? data.game_types.filter((t): t is string => typeof t === "string") : [];
 }
 export async function createGame(gameType: string): Promise<void> {

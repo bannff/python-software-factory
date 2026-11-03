@@ -15,7 +15,7 @@ beforeEach(() => {
   callTool.mockReset(); games = [];
   callTool.mockImplementation(async (name: string) => {
     if (name === "games_list") return ok({ games, count: games.length });
-    if (name === "get_capabilities") return ok({ game_types: ["connect_four", "finding_triage"] });
+    if (name === "games_get_capabilities") return ok({ game_types: ["connect_four", "finding_triage"] });
     if (name === "games_delete") return ok({ game_id: "g1", deleted: true });
     return ok(game("g-new"));
   });
@@ -59,7 +59,7 @@ describe("GamesPanel", () => {
     games = [game("g1")];
     callTool.mockImplementation(async (name: string) => {
       if (name === "games_list") return ok({ games, count: 1 });
-      if (name === "get_capabilities") return ok({ game_types: ["connect_four"] });
+      if (name === "games_get_capabilities") return ok({ game_types: ["connect_four"] });
       throw typed("not_your_turn");
     });
     render(<GamesPanel />);
