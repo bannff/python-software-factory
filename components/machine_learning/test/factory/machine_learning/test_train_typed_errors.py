@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import asyncio
 
-import numpy as np
 import pytest
 
 from factory.machine_learning.runtime.runtime import TrackingRuntime
@@ -27,5 +26,5 @@ def test_train_failures_are_typed(tools, tmp_path) -> None:
                  y_uri=str(tmp_path / "missing_y.npy")).error in {
         "training_data_unreadable", "training_failed", "model_root_not_configured", "native_dependency_missing",
     }
-    assert train(model_type="lightgbm", X_uri="x.npy", y_uri="y.npy",
-                 config={"not_a_field": 1}).error == "timeseries_config_invalid"
+    bad_config = train(model_type="lightgbm", X_uri="x.npy", y_uri="y.npy", config={"not_a_field": 1})
+    assert not bad_config.ok and "not_a_field" in bad_config.error
