@@ -40,7 +40,7 @@ class SecurityMoveInput(GameIdInput):
 class MoveOutput(DTO):
     valid: bool
     state: GameStateOutput | None = None
-    reward: dict[int, float] = {}
+    reward: dict[str, float] = {}  # JSON object keys are strings on the wire
     terminal: bool = False
     info: JsonObject = {}
     error: str | None = None
