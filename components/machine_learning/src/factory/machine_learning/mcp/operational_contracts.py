@@ -38,11 +38,12 @@ class LogMetricsInput(_Input):
 class CreateFineTuningJobInput(_Input):
     method: StrictStr
     base_model: StrictStr
-    dataset_uri: StrictStr
-    manifest_uri: StrictStr
-    dataset_digest: StrictStr
-    view_name: StrictStr
-    view_schema_version: StrictStr
+    dataset_id: StrictStr | None = None
+    dataset_uri: StrictStr | None = None
+    manifest_uri: StrictStr | None = None
+    dataset_digest: StrictStr | None = None
+    view_name: StrictStr | None = None
+    view_schema_version: StrictStr | None = None
     training_objective: StrictStr | None = None
     batch_size: StrictInt = 4
     learning_rate: StrictFloat = 1e-4
