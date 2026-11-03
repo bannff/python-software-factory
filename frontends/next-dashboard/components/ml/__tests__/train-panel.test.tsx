@@ -78,8 +78,10 @@ describe("TrainPanel", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Start training" }));
     const alert = await screen.findByRole("alert");
-    expect(alert.textContent).toMatch(/could not run/i);
+    expect(alert.textContent).toMatch(/could not run on the server/i);
+    expect(alert.textContent).toMatch(/server log/i);
     expect(alert.textContent).not.toMatch(/tool_execution_failed/);
+    expect(alert.textContent).not.toMatch(/dataset locations exist/i);
   });
 
   it.each([

@@ -22,7 +22,8 @@ export async function trainModel(input: TrainInput): Promise<TrainResult> {
 const FAILURES: [RegExp, string][] = [
   [/timeseries_model_type_invalid|is not a valid TimeSeriesModelType/i, "That model type isn't available on this server."],
   [/timeseries_config_invalid/, "Those training settings aren't valid."],
-  [/training_data_unreadable|tool_execution_failed/, "Training could not run. Check that both dataset locations exist and can be read, then try again."],
+  [/training_data_unreadable/, "Training could not run. Check that both dataset locations exist and can be read, then try again."],
+  [/tool_execution_failed/, "Training could not run on the server. The data may be unreadable or the server may need setup; the server log has the details."],
   [/training_failed/, "Training failed while running. Try again, or check the server log."],
 ];
 

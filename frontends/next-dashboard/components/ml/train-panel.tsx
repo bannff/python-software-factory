@@ -48,7 +48,7 @@ export function TrainPanel() {
         <p role="status" className="text-xs text-emerald-400">
           Training {result.status || "finished"} · job {result.job_id}
           {Object.entries(result.metrics).slice(0, 3).map(([k, v]) => ` · ${k} ${typeof v === "number" ? v.toFixed(3) : v}`).join("")}
-          . Refresh to see it under Experiments.
+          . Use the refresh icon to see it under Experiments.
         </p>
       )}
       {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
