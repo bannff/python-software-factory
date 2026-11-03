@@ -47,3 +47,27 @@ def test_digest_is_checked_against_a_local_file(tools, tmp_path) -> None:
     assert add(**_args(uri=str(f), digest=good)).ok
     assert add(**_args(name="d2", digest="bad")).error == "dataset_digest_mismatch"
     assert add(**_args(name="BAD NAME")).error == "dataset_invalid"
+
+
+def test_dataset_in_use_by_a_job_cannot_be_deleted(tools) -> None:
+    tools["ml_register_dataset"].fn(**_args(uri="s3://b/used"))
+    job = tools["ml_create_finetuning_job"].fn(
+        method="lora", base_model="b", dataset_uri="s3://b/used", manifest_uri="s3://b/m.json",
+        dataset_digest="a" * 64, view_name="v", view_schema_version="1")
+    assert job.ok
+    assert tools["ml_delete_dataset"].fn(dataset_id="d1").error == "dataset_in_use"
+    assert tools["ml_delete_finetuning_job"].fn(job_id=job.data.id).ok
+    assert tools["ml_delete_dataset"].fn(dataset_id="d1").data.deleted
+
+
+def test_job_accepts_dataset_id_and_prefixed_digest(tools) -> None:
+    tools["ml_register_dataset"].fn(**_args(uri="s3://b/by-id", digest="sha256:" + "b" * 64))
+    job = tools["ml_create_finetuning_job"].fn(method="lora", base_model="b", dataset_id="d1")
+    assert job.ok and job.data.training_input["dataset_digest"] == "b" * 64
+    prefixed = tools["ml_create_finetuning_job"].fn(
+        method="lora", base_model="b", dataset_uri="s3://b/x", manifest_uri="s3://b/m",
+        dataset_digest="sha256:" + "c" * 64, view_name="v", view_schema_version="1")
+    assert prefixed.ok
+    assert tools["ml_create_finetuning_job"].fn(method="lora", base_model="b").error == "finetuning_input_invalid"
+    assert tools["ml_create_finetuning_job"].fn(
+        method="lora", base_model="b", dataset_id="nope").error == "dataset_not_found"
