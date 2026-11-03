@@ -15,6 +15,7 @@ const WelcomeView = lazy(() => import("./welcome-view"));
 const GraphView = lazy(() => import("./graph-view"));
 const TimelineViewV2 = lazy(() => import("./timeline-view-v2"));
 const EvalsLeaderboardView = lazy(() => import("./evals-leaderboard-view"));
+const EvalsRunPanel = lazy(() => import("@/components/evals/evals-run-panel").then((m) => ({ default: m.EvalsRunPanel })));
 const FindingsView = lazy(() => import("./findings-view"));
 const BrickViewRenderer = lazy(() => import("./brick-view-renderer"));
 const MlControls = lazy(() => import("../ml/ml-controls").then((m) => ({ default: m.MlControls })));
@@ -112,7 +113,7 @@ export function Canvas(props: CanvasProps) {
           {props.activeView === "graph" && <GraphView {...canvasState} />}
           {props.activeView === "timeline-v2" && <TimelineViewV2 {...canvasState} />}
           {props.activeView === "findings" && <FindingsView {...canvasState} />}
-          {props.activeView === "evals" && <EvalsLeaderboardView onNavigate={props.onNavigate} />}
+          {props.activeView === "evals" && <Refreshable label="evals"><><EvalsRunPanel /><EvalsLeaderboardView onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "metrics" && <RuntimeMetricsView onNavigate={props.onNavigate} />}
           {props.activeView === "ml" && <Refreshable label="ml"><BrickViewRenderer viewTool="ml_get_views" /><MlControls /></Refreshable>}
           {props.activeView === "games" && <Refreshable label="games"><><GamesPanel /><GraphBrickView viewTool="games_get_views" defaultEntityType="GameSession" onNavigate={props.onNavigate} /></></Refreshable>}
