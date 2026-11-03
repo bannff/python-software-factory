@@ -84,6 +84,11 @@ class OpenAIEmbedder:
         self._default_model, self._base_url = model, base_url
         self._client: Any = None
 
+    @property
+    def model_name(self) -> str:
+        """The model used when a caller does not name one (for status displays)."""
+        return self._default_model
+
     def _get_client(self) -> Any:
         if self._client is None:
             try:
