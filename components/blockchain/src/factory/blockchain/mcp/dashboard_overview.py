@@ -21,7 +21,7 @@ def dashboard_summary(
     by_tx, by_bounty = _activity_indexes(activities)
     tx_rows = [transaction_row(tx, by_tx.get(str(tx.get("tx_id", "")), [])) for tx in transactions]
     bounty_rows = [bounty_row(item, by_bounty.get(str(item.get("bounty_id", "")), [])) for item in bounties]
-    counts = Counter(str(tx.get("tx_type", "transfer")) for tx in tx_rows)
+    counts = Counter(_tx_type(tx) for tx in tx_rows)
     health = ledger.health_check()
     return {
         "overview": {"height": int(info.get("height", 0)), "wallets": int(info.get("wallet_count", 0)),
@@ -32,6 +32,12 @@ def dashboard_summary(
         "transactions": tx_rows, "bounties": bounty_rows, "recent_activity": activities,
         "related_graph_entities": graph_entities,
     }
+
+
+def _tx_type(row: dict[str, Any]) -> str:
+    """Plain value of the row's type; ``str(Enum)`` would give ``TransactionType.MINT``."""
+    value = row.get("tx_type", "transfer")
+    return str(getattr(value, "value", value))
 
 
 def _activity_indexes(activities: list[dict[str, Any]]) -> tuple[dict[str, list[dict[str, Any]]], dict[str, list[dict[str, Any]]]]:
