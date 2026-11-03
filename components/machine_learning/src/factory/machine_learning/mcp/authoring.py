@@ -5,14 +5,15 @@ from typing import Any, Callable
 from factory.mcp_utils.interface import ToolResult, authoring as authoring_decorator, fail
 from ..runtime.authoring_policy import authoring_enabled
 from ..runtime.chronos_acquisition import acquire_chronos2_backbone
+from ..runtime.persistent_dict import PersistentDict
 from ..runtime.runtime import TrackingRuntime
 from .authoring_contracts import (
     ChronosAcquisitionOutput, ConfigureTrainingDefaultsInput, EmptyInput,
     RegisterBaseModelInput, RegisterBaseModelOutput, TrainingDefaultsOutput,
 )
 
-_training_defaults: dict[str, Any] = {}
-_model_registry: dict[str, dict[str, Any]] = {}
+_training_defaults: dict[str, Any] = PersistentDict("training_defaults")
+_model_registry: dict[str, dict[str, Any]] = PersistentDict("base_models")
 _DISABLED = "Authoring tools disabled. Set ML_ENABLE_AUTHORING_TOOLS=1"
 
 
