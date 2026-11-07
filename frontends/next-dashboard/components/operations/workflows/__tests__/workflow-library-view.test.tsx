@@ -28,8 +28,8 @@ beforeEach(() => {
 describe("WorkflowLibraryView states", () => {
   it("shows a truthful loading state then the empty state", async () => {
     route({
-      "workflow.get_workflow_registry": async () => wrap({ workflows: [] }),
-      "workflow.list_runs": async () => wrap({ runs: [] }),
+      "workflow_get_workflow_registry": async () => wrap({ workflows: [] }),
+      "workflow_list_runs": async () => wrap({ runs: [] }),
     });
     render(<WorkflowLibraryView />);
     expect(screen.getByText(/Loading workflow library/i)).toBeTruthy();
@@ -40,10 +40,10 @@ describe("WorkflowLibraryView states", () => {
   });
 
   it("only invites creating a workflow when authoring is available", async () => {
-    mocks.listTools.mockResolvedValue({ tools: ["workflow.authoring.upsert_workflow_definition"], count: 1 });
+    mocks.listTools.mockResolvedValue({ tools: ["workflow_authoring_upsert_workflow_definition"], count: 1 });
     route({
-      "workflow.get_workflow_registry": async () => wrap({ workflows: [] }),
-      "workflow.list_runs": async () => wrap({ runs: [] }),
+      "workflow_get_workflow_registry": async () => wrap({ workflows: [] }),
+      "workflow_list_runs": async () => wrap({ runs: [] }),
     });
     render(<WorkflowLibraryView />);
     await screen.findByText(/No workflows yet/i);
@@ -52,20 +52,20 @@ describe("WorkflowLibraryView states", () => {
   });
 
   it("renders retry copy without a raw error and re-fetches", async () => {
-    route({ "workflow.get_workflow_registry": async () => { throw new Error("boom"); } });
+    route({ "workflow_get_workflow_registry": async () => { throw new Error("boom"); } });
     render(<WorkflowLibraryView />);
     const alert = await screen.findByText(/Workflow library unavailable right now/i);
     expect(alert.parentElement?.textContent).not.toContain("boom");
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     await waitFor(() =>
-      expect(mocks.callTool.mock.calls.filter((c) => c[0] === "workflow.get_workflow_registry").length).toBeGreaterThan(1),
+      expect(mocks.callTool.mock.calls.filter((c) => c[0] === "workflow_get_workflow_registry").length).toBeGreaterThan(1),
     );
   });
 
   it("renders definitions and runs", async () => {
     route({
-      "workflow.get_workflow_registry": async () => wrap({ workflows: [def1] }),
-      "workflow.list_runs": async () => wrap({ runs: [run1] }),
+      "workflow_get_workflow_registry": async () => wrap({ workflows: [def1] }),
+      "workflow_list_runs": async () => wrap({ runs: [run1] }),
     });
     render(<WorkflowLibraryView />);
     expect(await screen.findByText("Daily digest")).toBeTruthy();
@@ -77,8 +77,8 @@ describe("WorkflowLibraryView states", () => {
 
   it("hides authoring controls when the authoring tool is not in the catalog", async () => {
     route({
-      "workflow.get_workflow_registry": async () => wrap({ workflows: [def1] }),
-      "workflow.list_runs": async () => wrap({ runs: [] }),
+      "workflow_get_workflow_registry": async () => wrap({ workflows: [def1] }),
+      "workflow_list_runs": async () => wrap({ runs: [] }),
     });
     render(<WorkflowLibraryView />);
     await screen.findByText("Daily digest");
@@ -87,12 +87,12 @@ describe("WorkflowLibraryView states", () => {
   });
 
   it("shows authoring controls and creates a definition when the tool is available", async () => {
-    mocks.listTools.mockResolvedValue({ tools: ["workflow.authoring.upsert_workflow_definition"], count: 1 });
+    mocks.listTools.mockResolvedValue({ tools: ["workflow_authoring_upsert_workflow_definition"], count: 1 });
     let created = false;
     route({
-      "workflow.get_workflow_registry": async () => wrap({ workflows: created ? [def1] : [] }),
-      "workflow.list_runs": async () => wrap({ runs: [] }),
-      "workflow.authoring.upsert_workflow_definition": async (args) => {
+      "workflow_get_workflow_registry": async () => wrap({ workflows: created ? [def1] : [] }),
+      "workflow_list_runs": async () => wrap({ runs: [] }),
+      "workflow_authoring_upsert_workflow_definition": async (args) => {
         created = true;
         expect((args as { id: string }).id).toBe("daily-digest");
         return wrap({ ok: true, path: "/x/daily-digest.yaml" });
@@ -104,15 +104,15 @@ describe("WorkflowLibraryView states", () => {
     fireEvent.change(screen.getByLabelText("ID"), { target: { value: "daily-digest" } });
     fireEvent.change(screen.getByLabelText("Definition (YAML)"), { target: { value: "name: Daily digest\nsteps: []" } });
     fireEvent.click(screen.getByRole("button", { name: "Save definition" }));
-    await waitFor(() => expect(mocks.callTool.mock.calls.some((c) => c[0] === "workflow.authoring.upsert_workflow_definition")).toBe(true));
+    await waitFor(() => expect(mocks.callTool.mock.calls.some((c) => c[0] === "workflow_authoring_upsert_workflow_definition")).toBe(true));
     await screen.findByText("Daily digest");
   });
 
   it("starts a run from a saved definition", async () => {
     route({
-      "workflow.get_workflow_registry": async () => wrap({ workflows: [def1] }),
-      "workflow.list_runs": async () => wrap({ runs: [] }),
-      "workflow.start_run": async (args) => {
+      "workflow_get_workflow_registry": async () => wrap({ workflows: [def1] }),
+      "workflow_list_runs": async () => wrap({ runs: [] }),
+      "workflow_start_run": async (args) => {
         expect((args as { workflow_name_or_id: string }).workflow_name_or_id).toBe("daily-digest");
         return wrap({ run_id: "run_new", status: "pending" });
       },
@@ -120,15 +120,15 @@ describe("WorkflowLibraryView states", () => {
     render(<WorkflowLibraryView />);
     await screen.findByText("Daily digest");
     fireEvent.click(screen.getByRole("button", { name: "Run workflow daily-digest" }));
-    await waitFor(() => expect(mocks.callTool.mock.calls.some((c) => c[0] === "workflow.start_run")).toBe(true));
+    await waitFor(() => expect(mocks.callTool.mock.calls.some((c) => c[0] === "workflow_start_run")).toBe(true));
   });
 
   it("cancels a running run", async () => {
     let cancelled = false;
     route({
-      "workflow.get_workflow_registry": async () => wrap({ workflows: [] }),
-      "workflow.list_runs": async () => wrap({ runs: cancelled ? [] : [run1] }),
-      "workflow.cancel_run": async () => { cancelled = true; return wrap({ ok: true, status: "cancelled" }); },
+      "workflow_get_workflow_registry": async () => wrap({ workflows: [] }),
+      "workflow_list_runs": async () => wrap({ runs: cancelled ? [] : [run1] }),
+      "workflow_cancel_run": async () => { cancelled = true; return wrap({ ok: true, status: "cancelled" }); },
     });
     render(<WorkflowLibraryView />);
     await screen.findByText("run_1");
@@ -142,9 +142,9 @@ describe("WorkflowLibraryView states", () => {
     it("says why a run could not start, on the row, and clears it on retry", async () => {
       let fail = true;
       route({
-        "workflow.get_workflow_registry": async () => wrap({ workflows: [def1] }),
-        "workflow.list_runs": async () => wrap({ runs: [] }),
-        "workflow.start_run": async () => (fail ? reject("tool_execution_failed")() : wrap({ run_id: "r2", status: "pending" })),
+        "workflow_get_workflow_registry": async () => wrap({ workflows: [def1] }),
+        "workflow_list_runs": async () => wrap({ runs: [] }),
+        "workflow_start_run": async () => (fail ? reject("tool_execution_failed")() : wrap({ run_id: "r2", status: "pending" })),
       });
       render(<WorkflowLibraryView />);
       await screen.findByText("Daily digest");
@@ -158,24 +158,25 @@ describe("WorkflowLibraryView states", () => {
     });
 
     it("says why a delete failed and keeps the definition listed", async () => {
-      mocks.listTools.mockResolvedValue({ tools: ["workflow.authoring.upsert_workflow_definition"], count: 1 });
+      mocks.listTools.mockResolvedValue({ tools: ["workflow_authoring_upsert_workflow_definition"], count: 1 });
       route({
-        "workflow.get_workflow_registry": async () => wrap({ workflows: [def1] }),
-        "workflow.list_runs": async () => wrap({ runs: [] }),
-        "workflow.authoring.delete_workflow_definition": async () => ({ tool: "t", result: { ok: true, data: { ok: false } } }),
+        "workflow_get_workflow_registry": async () => wrap({ workflows: [def1] }),
+        "workflow_list_runs": async () => wrap({ runs: [] }),
+        "workflow_authoring_delete_workflow_definition": async () => ({ tool: "t", result: { ok: true, data: { ok: false } } }),
       });
       render(<WorkflowLibraryView />);
       await screen.findByText("Daily digest");
       fireEvent.click(screen.getByRole("button", { name: "Delete workflow definition daily-digest" }));
+      fireEvent.click(screen.getByRole("button", { name: "Confirm delete workflow definition daily-digest" }));
       expect((await screen.findByRole("alert")).textContent).toMatch(/delete/i);
       expect(screen.getByText("Daily digest")).toBeTruthy();
     });
 
     it("says why a cancel failed and keeps the run listed", async () => {
       route({
-        "workflow.get_workflow_registry": async () => wrap({ workflows: [] }),
-        "workflow.list_runs": async () => wrap({ runs: [run1] }),
-        "workflow.cancel_run": reject("no such run"),
+        "workflow_get_workflow_registry": async () => wrap({ workflows: [] }),
+        "workflow_list_runs": async () => wrap({ runs: [run1] }),
+        "workflow_cancel_run": reject("no such run"),
       });
       render(<WorkflowLibraryView />);
       await screen.findByText("run_1");
