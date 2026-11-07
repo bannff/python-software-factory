@@ -47,7 +47,9 @@ async def dispatch_call(
         return project_result(result, text_content)
     except (SchemaMigrationError, ValidationError):
         return invalid_arguments(item.name, text_content)
-    except Exception:
+    except Exception as exc:
+        from .tool_failure import log_dispatch_failure
+        log_dispatch_failure(item.name, exc)
         return generic_failure(text_content)
     finally:
         _reset(token)
