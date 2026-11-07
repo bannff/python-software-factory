@@ -1,30 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Trash2 } from "lucide-react";
-import { callTool, listTools } from "@/lib/api";
+import { callTool } from "@/lib/api";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { errorReason, withReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import type { Crew } from "./crew-types";
 
 /**
- * Revision-fenced crew delete. `agent_delete_crew` is authoring-gated and the
- * gate removes it from the tool list when denied, so the control is offered
- * only when the server actually exposes the tool.
+ * Revision-fenced crew delete behind an inline confirm. Authorization lives in
+ * the server's authoring gate; a denial surfaces as the typed reason below
+ * instead of the control silently disappearing.
  */
 export function CrewDelete({ crew, onDeleted }: { crew: Crew; onDeleted: () => void }) {
-  const [available, setAvailable] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let live = true;
-    listTools().then(({ tools }) => { if (live) setAvailable(tools.includes("agent_delete_crew")); })
-      .catch(() => { if (live) setAvailable(false); });
-    return () => { live = false; };
-  }, []);
-
-  if (!available) return null;
 
   const remove = async () => {
     setError(null);
