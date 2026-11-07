@@ -11,19 +11,25 @@ export function useStartCrewSession() {
   const [startingId, setStartingId] = useState<string | null>(null);
   const [outcome, setOutcome] = useState<StartOutcome | null>(null);
 
-  const start = useCallback(async (crew: Crew) => {
+  const start = useCallback(async (crew: Crew): Promise<StartOutcome> => {
     setStartingId(crew.id);
     setOutcome(null);
     try {
       await startCrewSession(crew.id);
-      setOutcome({ kind: "started", message: `Session started with ${crew.name}. Find it under Sessions.` });
+      const started: StartOutcome = { kind: "started", message: `Session started with ${crew.name}. Find it under Sessions.` };
+      setOutcome(started);
+      return started;
     } catch (error) {
       const reason = error instanceof Error ? error.message : "Unknown error";
-      setOutcome({ kind: "failed", message: `Could not start a session with ${crew.name}: ${reason}` });
+      const failed: StartOutcome = { kind: "failed", message: `Could not start a session with ${crew.name}: ${reason}` };
+      setOutcome(failed);
+      return failed;
     } finally {
       setStartingId(null);
     }
   }, []);
 
-  return { startingId, outcome, start };
+  const clear = useCallback(() => setOutcome(null), []);
+
+  return { startingId, outcome, start, clear };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { Cpu, Database, FolderGit2, Loader2, Play, Sparkles, Users } from "lucide-react";
+import { CrewDelete } from "./crew-delete";
 import type { Crew } from "./crew-types";
 
 function SummaryRow({ icon: Icon, label, value, hint }: {
@@ -22,8 +23,8 @@ function SummaryRow({ icon: Icon, label, value, hint }: {
  * materialized summaries (persona, project, model, memory scope) so a
  * first-time user understands what the Crew binds without opening it.
  */
-export function CrewCard({ crew, isDefault, starting, onOpen, onStart }: {
-  crew: Crew; isDefault: boolean; starting: boolean; onOpen: () => void; onStart: () => void;
+export function CrewCard({ crew, isDefault, starting, onOpen, onStart, onDeleted }: {
+  crew: Crew; isDefault: boolean; starting: boolean; onOpen: () => void; onStart: () => void; onDeleted: () => void;
 }) {
   return (
     <div className="group relative flex min-w-0 flex-col rounded-xl border border-border/60 bg-card/30 transition-all hover:-translate-y-0.5 hover:border-violet-500/40 hover:bg-card/60 hover:shadow-lg hover:shadow-violet-500/5">
@@ -61,6 +62,9 @@ export function CrewCard({ crew, isDefault, starting, onOpen, onStart }: {
           hint="Which saved context this crew can recall" />
       </dl>
     </button>
+    <div className="absolute bottom-3 left-4 right-14 flex flex-wrap items-center gap-2">
+      <CrewDelete crew={crew} onDeleted={onDeleted} />
+    </div>
     <button
       type="button"
       onClick={onStart}

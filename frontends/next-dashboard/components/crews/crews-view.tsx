@@ -18,9 +18,15 @@ type Panel = { mode: "create" } | { mode: "edit"; crew: Crew } | null;
  * library visual language.
  */
 export default function CrewsView() {
-  const { crews, defaultId, loading, error, refresh } = useCrews();
+  const { crews, defaultId, loading, error, refresh: reload } = useCrews();
   const [panel, setPanel] = useState<Panel>(null);
-  const { startingId, outcome, start } = useStartCrewSession();
+  const { startingId, outcome, start, clear } = useStartCrewSession();
+  // A reload supersedes the last start outcome, which described the old roster.
+  const refresh = () => { clear(); void reload(); };
+  // A refused start may mean the roster changed under us: reconcile, keeping the banner.
+  const startAndReconcile = async (crew: Crew) => {
+    if ((await start(crew)).kind === "failed") void reload();
+  };
 
   useEffect(() => {
     const parts = window.location.pathname.split("/").filter(Boolean);
@@ -82,7 +88,8 @@ export default function CrewsView() {
               crew={crew}
               isDefault={crew.id === defaultId}
               starting={startingId === crew.id}
-              onStart={() => void start(crew)}
+              onStart={() => void startAndReconcile(crew)}
+              onDeleted={refresh}
               onOpen={() => setPanel({ mode: "edit", crew })}
             />
           ))}

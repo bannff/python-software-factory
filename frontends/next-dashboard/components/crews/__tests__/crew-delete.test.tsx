@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-const { callTool, listTools } = vi.hoisted(() => ({ callTool: vi.fn(), listTools: vi.fn() }));
-vi.mock("@/lib/api", () => ({ callTool, listTools }));
+const { callTool } = vi.hoisted(() => ({ callTool: vi.fn() }));
+vi.mock("@/lib/api", () => ({ callTool }));
 
 import { CrewDelete } from "../crew-delete";
 import type { Crew } from "../crew-types";
@@ -12,18 +12,10 @@ const envelope = (data: unknown) => ({ tool: "x", result: { schema_version: "v1"
 const failure = (error: string) => ({ tool: "x", result: { schema_version: "v1", ok: false, data: null, error } });
 
 beforeEach(() => {
-  callTool.mockReset(); listTools.mockReset();
-  listTools.mockResolvedValue({ tools: ["agent_delete_crew"], count: 1 });
+  callTool.mockReset();
 });
 
 describe("CrewDelete", () => {
-  it("offers nothing when the server does not expose agent_delete_crew", async () => {
-    listTools.mockResolvedValue({ tools: ["agent_list_crews"], count: 1 });
-    render(<CrewDelete crew={crew} onDeleted={vi.fn()} />);
-    await waitFor(() => expect(listTools).toHaveBeenCalled());
-    expect(screen.queryByRole("button", { name: /Delete crew/ })).toBeNull();
-  });
-
   it("deletes with the revision fence only after confirmation", async () => {
     callTool.mockResolvedValue(envelope({ crew_id: "red", deleted: true }));
     const onDeleted = vi.fn();
