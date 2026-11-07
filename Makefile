@@ -21,7 +21,7 @@ help:
 # --- Infrastructure ---
 
 dev:
-	docker compose up -d postgres redis neo4j keycloak chromadb seaweedfs phoenix dagster
+	docker compose up -d postgres redis neo4j keycloak seaweedfs phoenix dagster
 
 stop:
 	docker compose -f projects/$(PROJECT)/docker-compose.yml down 2>/dev/null || true
