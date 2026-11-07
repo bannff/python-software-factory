@@ -231,7 +231,7 @@ workbench layout (ActivityBar | Canvas with tabbed views | collapsible ChatSideb
 AG-UI SSE streams agent work into the chat sidebar; A2UI pushes rich views into the canvas.
 Uses Next.js Route Handlers to proxy API requests, eliminating CORS without Python changes.
 
-**Local dev runs with zero containers.** Bricks use lightweight adapters: ChromaDB for KB and memory (persists to disk), networkx for graph (ephemeral, CWE/OCSF taxonomy auto-seeds), SQLite for events, and in-memory adapters for cache/worker/storage. See `projects/companion_x/README.md` → "Local Dev (No Containers)" for the full adapter table.
+**Local dev runs with zero containers.** Bricks use lightweight adapters: Neo4j for KB and memory when it is up, in-process/graph adapters otherwise, networkx for graph (ephemeral, CWE/OCSF taxonomy auto-seeds), SQLite for events, and in-memory adapters for cache/worker/storage. See `projects/companion_x/README.md` → "Local Dev (No Containers)" for the full adapter table.
 
 ### Companion X Local Boot Notes
 

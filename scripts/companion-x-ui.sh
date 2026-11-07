@@ -4,9 +4,9 @@
 # Usage: ~/workplace/python-factory/scripts/companion-x-ui.sh
 # (or alias it: alias companion-ui='~/workplace/python-factory/scripts/companion-x-ui.sh')
 #
-# All adapters are container-free (ChromaDB, SQLite, networkx, memory). The
-# script always runs from the factory root so file-based storage (ChromaDB
-# ./chroma_data, ./chroma_memory, events.db) writes to the correct location.
+# All adapters are container-free (SQLite, networkx, in-process memory). The
+# script always runs from the factory root so file-based storage (events.db,
+# .storage/) writes to the correct location.
 #
 # Ctrl-C stops both processes.
 
@@ -243,7 +243,7 @@ echo "  Dashboard:  http://localhost:$NEXT_PORT"
 echo "              Open that origin. Only its dev-origin allowlist hydrates:"
 echo "              localhost, 127.0.0.1, [::1] (GH #142)."
 echo "  API:        http://localhost:$API_PORT"
-echo "  Adapters:   container-free (ChromaDB, SQLite, networkx, memory)"
+echo "  Adapters:   container-free (SQLite, networkx, memory)"
 echo "  Ctrl-C to stop."
 echo ""
 

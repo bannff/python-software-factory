@@ -18,8 +18,8 @@ All bricks use lightweight file-based or in-memory adapters.
 
 | Brick | Adapter | Env Var | Persistence |
 |-------|---------|---------|-------------|
-| KB | ChromaDB PersistentClient | `FACTORY_KB_ADAPTER=chromadb` | `./chroma_data/` (disk) |
-| Memory | ChromaDB A-MEM | `FACTORY_MEMORY_ADAPTER=amem` | `./chroma_memory/` (disk) |
+| KB | Neo4j HNSW vector store | `FACTORY_KB_ADAPTER=neo4j` + `KB_BACKEND=neo4j` | Neo4j |
+| Memory | Neo4j (in-process `memory` fallback) | `FACTORY_MEMORY_ADAPTER=neo4j` + `MEMORY_BACKEND=neo4j` | Neo4j |
 | Graph | persistent NetworkX | `FACTORY_GRAPH_ADAPTER=persistent_networkx` | Integrity-checked snapshot in local Storage blob store |
 | Events | SQLite shared file | `EVENTS_BACKEND=sqlite` | Durable event history with configured retention |
 | Telemetry | SQLite document store | `TELEMETRY_SQLITE_PATH=.storage/telemetry.db` | Dedicated raw window + daily rollups |
@@ -29,7 +29,7 @@ All bricks use lightweight file-based or in-memory adapters.
 | Blockchain | mock_ledger | `BLOCKCHAIN_ADAPTER=mock_ledger` | Ephemeral |
 | Dataset | csv_can_ingest | `FACTORY_DATASET_ADAPTER=csv_can_ingest` | File-based (CSV/TXT) |
 
-KB and Memory both use ChromaDB's built-in `all-MiniLM-L6-v2` sentence-transformers model for embeddings — no external embedding API needed.
+KB and Memory embeddings go through the configured LLM gateway embedder; memory evolution also uses the chat profile (`COMPANION_X_CHAT_MODEL`).
 
 ### Run
 
@@ -72,7 +72,7 @@ cd frontends/next-dashboard && npm run dev
 The `.env` in `projects/companion_x/` now matches the lightweight local stack:
 
 - `persistent_networkx` graph (integrity-checked snapshots in the local blob store) and telemetry isolated in its own `.storage/telemetry.db` with a Scheduler-owned daily retention job, so Timeline stays live and the general document store stays small
-- `chromadb` KB and `amem` memory persisted locally on disk
+- KB and memory on Neo4j (the ChromaDB / A-MEM adapters were retired in #353)
 - `openrouter` as the default chat provider (`COMPANION_X_CHAT_MODEL=openrouter`, `OPENROUTER_MODEL=<vendor>/<model>`); `ollama/<model>` and bare Bedrock ids remain selectable
 - `FACTORY_API_PORT=8000`, matching the default local API port
 - Companion X chat runs on the Strands Agents SDK over MCP v2 (route-flipped back from LangGraph in #89 — Strands regained MCP v2 support); the LangChain/LangGraph runtime is dormant, selectable via `AGENT_RUNTIME_ADAPTER=langchain` with deps in the `langgraph-legacy` group, and reaches MCP through the platform tool invoker with a curated tool set
@@ -218,7 +218,6 @@ Additional backends can be enabled via `docker-compose.optional.yml` and the cor
 
 | Container | Image | Ports | Enable by setting |
 |-----------|-------|-------|-------------------|
-| chromadb | `chromadb/chroma:latest` | 18100:8000 | `FACTORY_KB_ADAPTER=chromadb` + `KB_BACKEND=chromadb` |
 | dagster | `dagster/dagster-celery-k8s:latest` | 13000:3000 | `FACTORY_WORKER_BACKEND=dagster` |
 | keycloak | `quay.io/keycloak/keycloak:24.0` | 18080:8080 | `FACTORY_AUTH_ADAPTER=keycloak` |
 | postgres | `postgres:16-alpine` | 15432:5432 | `FACTORY_STORAGE_ADAPTER=postgres` |

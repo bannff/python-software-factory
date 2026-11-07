@@ -28,9 +28,8 @@ BRICK_ENV_VARS: dict[str, list[tuple[str, str]]] = {
         ("NEO4J_PASSWORD", "password"),
     ],
     "kb": [
-        ("FACTORY_KB_ADAPTER", "local"),
-        ("CHROMA_HOST", "localhost"),
-        ("CHROMA_PORT", "8100"),
+        ("FACTORY_KB_ADAPTER", "neo4j"),
+        ("KB_BACKEND", "neo4j"),
     ],
     "storage": [
         ("FACTORY_STORAGE_ADAPTER", "memory"),

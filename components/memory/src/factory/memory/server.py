@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import Any
 
@@ -18,6 +19,8 @@ from factory.memory.mcp import (
 )
 from factory.mcp_utils.server import make_lazy_runner
 
+logger = logging.getLogger(__name__)
+
 
 def _default_runtime() -> MemoryRuntime:
     """Create runtime with backend from config brick layered resolution."""
@@ -25,10 +28,15 @@ def _default_runtime() -> MemoryRuntime:
     backend = get_infra("memory.backend", "memory")
     if backend == "neo4j":
         return _neo4j_runtime()
-    if backend == "amem":
-        return _amem_runtime()
     if backend == "graph":
         return _graph_runtime()
+    if backend != "memory":
+        # Fail loudly for a typo or a retired backend (e.g. "amem") instead of
+        # silently running on the in-process store.
+        logger.error(
+            "unsupported memory.backend %r; using the in-process store "
+            "(expected one of graph, memory, neo4j)", backend,
+        )
     return MemoryRuntime()
 
 
@@ -62,15 +70,6 @@ def _neo4j_runtime() -> MemoryRuntime:
     return MemoryRuntime(store=base)
 
 
-def _amem_runtime() -> MemoryRuntime:
-    """Create A-MEM runtime with ChromaDB + LLM evolution."""
-    from factory.memory.runtime.adapters.amem import AMemStore
-
-    llm_complete = _get_llm_complete()
-    store = AMemStore(llm_complete=llm_complete)
-    return MemoryRuntime(store=store)
-
-
 def _get_llm_complete():
     """Return the configured gateway completion callback for memory evolution.
 
@@ -78,21 +77,18 @@ def _get_llm_complete():
     default ``openrouter``) via ``factory.llm_gateway.interface.resolve_chat_profile``
     + an official LangChain integration — NOT ``LLMRuntime().get_provider()``,
     whose ``FACTORY_LLM_ADAPTER`` default is ``bedrock`` regardless of what the
-    product is actually configured for. That mismatch meant A-MEM content
-    evolution silently required AWS credentials on an OpenRouter-configured
-    deployment (P1 item 14, owner smoke #2 18:35) — memory evolution is an
-    optional enrichment step, never a reason to depend on a provider the rest
-    of the product doesn't use. ``AMEM_LLM_MODEL`` scopes an explicit model
-    override to A-MEM only; leaving it unset uses the same model chat uses.
+    product is actually configured for. That mismatch meant memory evolution
+    silently required AWS credentials on an OpenRouter-configured deployment
+    (P1 item 14, owner smoke #2 18:35) — memory evolution is an optional
+    enrichment step, never a reason to depend on a provider the rest of the
+    product doesn't use.
     """
     try:
         from factory.llm_gateway.interface import resolve_chat_profile
 
         from .runtime.adapters.langchain_completion import build_langchain_complete
 
-        model_id = os.environ.get("AMEM_LLM_MODEL") or os.environ.get(
-            "COMPANION_X_CHAT_MODEL", "openrouter",
-        )
+        model_id = os.environ.get("COMPANION_X_CHAT_MODEL", "openrouter")
         resolve_chat_profile(model_id)  # fail fast on an unresolvable profile
         return build_langchain_complete(model_id)
     except Exception:
@@ -126,7 +122,7 @@ def get_capabilities() -> dict[str, Any]:
     return {
         "name": "memory",
         "version": "1.0.0",
-        "backends": ["memory", "mem0", "agentcore", "zep", "cognee", "neo4j", "amem", "graph"],
+        "backends": ["memory", "mem0", "agentcore", "zep", "cognee", "neo4j", "graph"],
         "features": ["semantic_memory", "short_term_memory", "long_term_memory", "memory_consolidation", "graph_memory", "memory_evolution"],
     }
 
@@ -141,7 +137,7 @@ def describe_config_schema() -> dict[str, Any]:
     return {
         "type": "object",
         "properties": {
-            "backend": {"type": "string", "enum": ["memory", "mem0", "agentcore", "zep", "cognee", "neo4j", "amem", "graph"]},
+            "backend": {"type": "string", "enum": ["memory", "mem0", "agentcore", "zep", "cognee", "neo4j", "graph"]},
             "max_memories": {"type": "integer", "description": "Max memories per agent"},
         },
     }

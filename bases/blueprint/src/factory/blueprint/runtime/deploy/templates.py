@@ -32,10 +32,6 @@ INFRA_ENV_VARS: dict[str, list[tuple[str, str, str]]] = {
     "seaweedfs": [
         ("FACTORY_SEAWEED_URL", "http://seaweedfs:9333", "Object Storage"),
     ],
-    "chromadb": [
-        ("FACTORY_CHROMA_HOST", "chromadb", "Vector DB"),
-        ("FACTORY_CHROMA_PORT", "8000", ""),
-    ],
     "phoenix": [
         ("FACTORY_PHOENIX_URL", "http://phoenix:6006", "LLM Telemetry"),
     ],

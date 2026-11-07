@@ -17,7 +17,7 @@ from factory.mcp_utils.runtime.tool_result import ToolResult
 def mcp(temp_config_dir):
     runtime = MagicMock()
     runtime._vector_store = None
-    runtime.backend_name = "chroma"
+    runtime.backend_name = "neo4j"
     runtime.get_collection_registry.return_value.list_all.return_value = []
     runtime.get_collection_stats.return_value = CollectionStats(
         collection_id="default", document_count=1, total_size_bytes=21,
@@ -60,4 +60,4 @@ def test_ingest_roundtrip(mcp):
     assert ingested.ok and fetched.ok and searched.ok
     assert fetched.data.found is True
     assert searched.data.total == 1
-    assert searched.data.backend == "chroma"
+    assert searched.data.backend == "neo4j"

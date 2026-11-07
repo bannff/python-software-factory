@@ -53,7 +53,7 @@ These are the modernization primitives. They are captured here with engineering-
 
 8. **Polyglot storage, four roles, unified by MCP.** Blob (large immutable artifacts — documents, code, reports, model weights), graph (relationships, optionally embedded via `neo4j_embedding`), KB (semantic/vector recall of facts), chain (integrity anchors/provenance over the other three). Separate by *role*, unified by *interface*, polymorphic adapters throughout. `graph-as-KB` is viable only for entity-attached facts; broad semantic recall still wants a dedicated vector KB. `blockchain-as-storage` means anchors only. (The distilled LoRA adapter from #5 is itself a blob artifact anchored by a chain hash — closing #4↔#5↔#6.)
 
-9. **Engineering excellence — polymorphic tools, taxonomies as data.** Every brick is ports + adapters (networkx↔neo4j, chromadb↔neo4j_embedding, mock_ledger↔real chain, ollama↔bedrock). Per-domain taxonomies are data (graph brick's taxonomy registry + `graph://schemas/taxonomy/{domain}`). Polymorphism is what lets a domain swap its backend without touching logic — the tenet that holds #1–#8 together.
+9. **Engineering excellence — polymorphic tools, taxonomies as data.** Every brick is ports + adapters (networkx↔neo4j, tinydb↔postgres, mock_ledger↔real chain, ollama↔bedrock). Per-domain taxonomies are data (graph brick's taxonomy registry + `graph://schemas/taxonomy/{domain}`). Polymorphism is what lets a domain swap its backend without touching logic — the tenet that holds #1–#8 together.
 
 ## The three-layer tool model
 

@@ -253,7 +253,7 @@ should_extract = extract_entities if extract_entities is not None else cfg.extra
 | Extraction hangs | Nested event loop deadlock | Fixed: `ThreadPoolExecutor` pattern avoids nested `asyncio.run()` |
 | `ImportError: neo4j` | Neo4j driver not installed | `pip install neo4j` |
 | Fallback path used unexpectedly | `neo4j-graphrag` not installed | `pip install neo4j-graphrag>=1.0.0` for preferred pipeline |
-| `extraction_status` is `None` | Vector store is not Neo4j (e.g., Chroma) | Entity extraction only runs on `Neo4jVectorStore` |
+| `extraction_status` is `None` | Vector store is not Neo4j (e.g., graph or Bedrock) | Entity extraction only runs on `Neo4jVectorStore` |
 
 ## API Reference
 

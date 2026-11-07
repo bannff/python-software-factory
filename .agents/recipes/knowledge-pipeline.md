@@ -3,7 +3,7 @@
 Validates the RAG (Retrieval-Augmented Generation) pipeline.
 
 ## Bricks Used
-- `kb` - Knowledge base with vector search (Neo4j or Chroma — all storage via `VectorStore` ABC)
+- `kb` - Knowledge base with vector search (Neo4j HNSW, graph, or Bedrock KB — all storage via `VectorStore` ABC)
 - `llm_gateway` - LLM completions and embeddings
 - `memory` - Agent memory for context
 

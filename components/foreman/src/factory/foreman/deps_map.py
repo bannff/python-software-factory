@@ -19,7 +19,6 @@ IMPORT_TO_PACKAGE: dict[str, str] = {
     "cantools": "cantools>=42.0.0",
     "cedarpy": "cedarpy>=0.4.0",
     "celery": "celery>=5.6.2",
-    "chromadb": "chromadb>=1.4.1",
     "click": "click>=8.0.0",
     "cognee": "cognee>=0.1.0",
     "cryptography": "cryptography>=44.0.0",

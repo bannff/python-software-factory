@@ -86,7 +86,7 @@ Start with kb search, then formulate the answer."""
 Please:
 1. Run health_check to get overall status
 2. Check collection statistics
-3. Verify ChromaDB connectivity
+3. Verify Neo4j connectivity
 4. Report any issues found
 
 Start with the health_check tool."""

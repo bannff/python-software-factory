@@ -8,7 +8,7 @@ The KB brick provides document storage and vector search for the Python Factory.
 
 - Document ingestion and storage
 - Collection management
-- Vector search with ChromaDB or Neo4j HNSW
+- Vector search with Neo4j HNSW (plus graph and Bedrock KB backends)
 - Graph-RAG entity extraction (Neo4j backend — auto-builds knowledge graph on ingest)
 - Metadata filtering
 - Context envelope support
@@ -19,7 +19,7 @@ The KB brick provides document storage and vector search for the Python Factory.
 kb/
 ├── runtime/
 │   ├── runtime.py, collections.py, models.py, envelope.py
-│   └── retrieval/  # chroma.py, neo4j_vector.py, entity_extraction.py
+│   └── retrieval/  # neo4j_vector.py, graph.py, bedrock.py, entity_extraction.py
 └── mcp/tools/
 ```
 
@@ -39,15 +39,15 @@ Collections group related documents. Each collection has:
 
 ### Context Envelopes
 Envelopes wrap search results with context for LLM consumption."""
-CHROMADB_GUIDE = """# ChromaDB Integration
+NEO4J_GUIDE = """# Neo4j Vector Integration
 
-The KB brick uses ChromaDB for vector storage and similarity search.
+The KB brick stores documents and embeddings in Neo4j and searches them with
+HNSW cosine similarity. ChromaDB was retired in #353.
 
 ## Configuration
 
-Set the persistence directory:
 ```bash
-export KB_CHROMA_DIR="./chroma_data"
+export KB_BACKEND=neo4j   # neo4j | graph | bedrock; anything else fails closed
 ```
 
 ## Features
@@ -71,9 +71,8 @@ results = kb.search(
 
 ## Best Practices
 
-1. Use meaningful collection names
-2. Add rich metadata for filtering
-3. Chunk large documents appropriately
+Use meaningful collection names, add rich metadata for filtering, and chunk
+large documents appropriately.
 4. Monitor collection sizes"""
 COLLECTIONS_GUIDE = """# Collection Management
 

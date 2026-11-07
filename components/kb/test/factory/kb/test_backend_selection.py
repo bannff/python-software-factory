@@ -1,8 +1,9 @@
-"""KB backend selection must fail closed on an unknown ``kb.backend``.
+"""KB backend selection accept exactly three backends and fails closed otherwise.
 
-Chroma is a retired backend: it stays reachable only when asked for by name.
-Before this, any unknown value (a typo, ``local``, an old ``chromadb`` alias)
-fell through to Chroma and silently re-enabled it.
+ChromaDB was retired in #353: its adapters and the ``chromadb`` dependency are
+gone. Any value outside ``neo4j``/``graph``/``bedrock`` — a typo, ``local``, or
+the old ``chromadb``/``chroma`` aliases — must configure no store at all rather
+than silently selecting one.
 """
 from __future__ import annotations
 
@@ -14,27 +15,35 @@ import factory.config.interface as config_interface
 from factory.kb.runtime import vector_store_selection as selection
 from factory.kb.runtime.runtime import KBRuntime
 
+SUPPORTED_BACKENDS = {"neo4j", "graph", "bedrock"}
+
 
 def _patch_backend(monkeypatch, value: str | None) -> None:
     monkeypatch.setattr(
         config_interface, "get_infra",
         lambda key, default=None: value if value is not None else default,
     )
-    monkeypatch.setattr(config_interface, "get_neo4j_config", lambda: {"uri": "bolt://stub"})
+    monkeypatch.setattr(
+        config_interface, "get_neo4j_config", lambda: {"uri": "bolt://stub"},
+    )
 
 
 def _record(monkeypatch) -> dict[str, str]:
     calls: dict[str, str] = {}
 
-    def fake_neo4j(runtime: KBRuntime, get_neo4j_config) -> None:
-        calls["neo4j"] = "neo4j"
+    def recorder(name):
+        def fake(runtime: KBRuntime, *args) -> None:
+            calls[name] = name
+        return fake
 
-    def fake_chroma(runtime: KBRuntime, get_infra) -> None:
-        calls["chroma"] = "chroma"
-
-    monkeypatch.setattr(selection, "_configure_neo4j", fake_neo4j)
-    monkeypatch.setattr(selection, "_configure_chroma", fake_chroma)
+    monkeypatch.setattr(selection, "_configure_neo4j", recorder("neo4j"))
+    monkeypatch.setattr(selection, "_configure_graph", recorder("graph"))
+    monkeypatch.setattr(selection, "_configure_bedrock", recorder("bedrock"))
     return calls
+
+
+def test_only_the_three_backends_are_known() -> None:
+    assert set(selection._KNOWN_BACKENDS) == SUPPORTED_BACKENDS
 
 
 def test_default_backend_is_neo4j(monkeypatch, tmp_path) -> None:
@@ -46,18 +55,18 @@ def test_default_backend_is_neo4j(monkeypatch, tmp_path) -> None:
     assert calls == {"neo4j": "neo4j"}
 
 
-@pytest.mark.parametrize("value", ["chromadb", "chroma"])
-def test_chroma_is_reachable_only_by_explicit_name(monkeypatch, tmp_path, value) -> None:
+@pytest.mark.parametrize("value", sorted(SUPPORTED_BACKENDS))
+def test_supported_backends_configure_their_store(monkeypatch, tmp_path, value) -> None:
     _patch_backend(monkeypatch, value)
     calls = _record(monkeypatch)
 
     selection.configure_vector_store(KBRuntime(tmp_path))
 
-    assert calls == {"chroma": "chroma"}
+    assert calls == {value: value}
 
 
-@pytest.mark.parametrize("value", ["chroma2", "local", "nope", ""])
-def test_unknown_backend_fails_closed(monkeypatch, tmp_path, caplog, value) -> None:
+@pytest.mark.parametrize("value", ["chromadb", "chroma", "chroma2", "local", "nope", ""])
+def test_unsupported_backend_fails_closed(monkeypatch, tmp_path, caplog, value) -> None:
     _patch_backend(monkeypatch, value)
     calls = _record(monkeypatch)
     runtime = KBRuntime(tmp_path)
@@ -65,6 +74,7 @@ def test_unknown_backend_fails_closed(monkeypatch, tmp_path, caplog, value) -> N
     with caplog.at_level(logging.ERROR):
         selection.configure_vector_store(runtime)
 
-    assert calls == {}, "an unknown backend must not configure a store"
+    assert calls == {}, "an unsupported backend must not configure a store"
     assert runtime.backend_name is None
     assert "unsupported kb.backend" in caplog.text
+    assert "bedrock, graph, neo4j" in caplog.text

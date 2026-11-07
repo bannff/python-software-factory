@@ -21,7 +21,7 @@ adapters:
 - zep
 - cognee
 - neo4j
-- amem
+- graph
 adapter_infra:
   neo4j:
     services:
@@ -46,7 +46,6 @@ mcp_prompts:
 - debug_memory
 - optimize_retrieval
 pip_packages:
-- chromadb>=1.4.1
 - cognee>=0.1.0
 - mcp[cli]==2.1.1
 - neo4j>=6.1.0

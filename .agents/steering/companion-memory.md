@@ -59,7 +59,7 @@ call_brick_tool(
 ## Key facts
 
 - **Full stack backend:** Neo4j with 1024-dim Bedrock Titan embeddings
-- **Local dev backend:** ChromaDB A-MEM (`FACTORY_MEMORY_ADAPTER=amem`), persists to `./chroma_memory/` on disk — no containers needed. Uses ChromaDB's built-in `all-MiniLM-L6-v2` sentence-transformers model for embeddings, so no external embedding API is required for local dev.
+- **Local dev backend:** in-process memory (`MEMORY_BACKEND=memory`) or the persistent NetworkX graph store (`MEMORY_BACKEND=graph`) — no containers needed. The ChromaDB A-MEM adapter was retired in #353.
 - Fail-fast: store is atomic — embedding + keywords + tags all succeed or the memory is rolled back
 - Graph edges: EVOLVED_FROM, RELATED_TO, FOLLOWED_BY, HAS_MEMORY
 - AWS creds must be active for writes and semantic search when using the Neo4j backend (see Troubleshooting below)
@@ -71,12 +71,12 @@ When using the **Neo4j backend** (full stack / Docker):
 - SEMANTIC READS (need Bedrock): `memory_retrieve`, `memory_hybrid_search` — the MCP server embeds the query vector via Bedrock before searching Neo4j
 - PURE NEO4J READS (no Bedrock): `memory_get`, `memory_search_by_time`, `memory_stats`, `memory_delete`, `memory_delete_user` — these query Neo4j directly
 
-When using the **ChromaDB A-MEM backend** (local dev): embeddings are handled locally by ChromaDB's built-in `all-MiniLM-L6-v2` model. No Bedrock calls needed for any operation.
+When using the **in-process or graph backend** (local dev): embeddings use the local keyword-hash embedder unless `MEMORY_LOCAL_EMBED_MODEL` names a GGUF file. No Bedrock calls needed for any operation.
 
 ## Troubleshooting empty results
 
-**ChromaDB A-MEM backend (local dev):**
-- Data persists to `./chroma_memory/`. If results are empty, check the directory exists and has data.
+**In-process / graph backend (local dev):**
+- `MEMORY_BACKEND=memory` loses data on restart by design; `MEMORY_BACKEND=graph` persists to the local Storage blob store snapshot.
 - No AWS creds or Docker restarts needed.
 
 **Neo4j backend (full stack / Docker):**
@@ -92,7 +92,7 @@ When using the Neo4j backend (full stack / Docker):
 - All AWS accounts in this workspace have Bedrock access — do not assume otherwise
 - The Docker containers read `AWS_PROFILE` from `projects/companion_x/.env` and mount `~/.aws:/root/.aws:ro`
 
-When using ChromaDB A-MEM (local dev): no AWS creds needed for memory operations.
+When using the in-process or graph backend (local dev): no AWS creds needed for memory operations.
 
 ### Refresh commands
 

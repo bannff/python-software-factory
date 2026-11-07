@@ -1,7 +1,7 @@
 """Documentation for knowledge base module."""
 
 from factory.kb.mcp.docs_content import (
-    CHROMADB_GUIDE,
+    NEO4J_GUIDE,
     COLLECTIONS_GUIDE,
     GRAPH_RAG_GUIDE,
     KB_OVERVIEW,
@@ -10,7 +10,7 @@ from factory.kb.mcp.docs_content import (
 
 DOCS = {
     "overview": KB_OVERVIEW,
-    "chromadb": CHROMADB_GUIDE,
+    "neo4j": NEO4J_GUIDE,
     "collections": COLLECTIONS_GUIDE,
     "search": SEARCH_GUIDE,
     "graph_rag": GRAPH_RAG_GUIDE,
