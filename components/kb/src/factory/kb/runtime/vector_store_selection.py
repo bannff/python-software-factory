@@ -1,8 +1,8 @@
 """Pick the KB vector-store backend from configuration.
 
 Split out of ``server.py`` so the MCP surface stays a transport shell. Chroma
-is a retired backend: it is reachable only when asked for by name, never as a
-fallback, so a typo cannot silently re-enable it.
+was retired in #353: its adapters and the ``chromadb`` dependency are gone, and
+an unknown ``kb.backend`` fails closed instead of silently selecting a backend.
 """
 from __future__ import annotations
 
@@ -14,14 +14,13 @@ from .runtime import KBRuntime
 
 logger = logging.getLogger(__name__)
 
-_CHROMA_BACKENDS = frozenset({"chromadb", "chroma"})
-_KNOWN_BACKENDS = frozenset({"neo4j", "graph", "bedrock"}) | _CHROMA_BACKENDS
+_KNOWN_BACKENDS = frozenset({"neo4j", "graph", "bedrock"})
 
 
 def configure_vector_store(runtime: KBRuntime) -> None:
     """Attempt to configure a vector store backend on the runtime.
 
-    Tries config brick first (Neo4j / Chroma). If no config brick is
+    Tries config brick first (Neo4j / graph / Bedrock). If no config brick is
     available or initialization fails, logs an error — the runtime will
     raise on operations that require a vector store.
     """
@@ -39,11 +38,9 @@ def configure_vector_store(runtime: KBRuntime) -> None:
             _configure_neo4j(runtime, get_neo4j_config)
         elif kb_backend == "graph":
             _configure_graph(runtime)
-        elif kb_backend in _CHROMA_BACKENDS:
-            _configure_chroma(runtime, get_infra)
         else:
-            # Fail closed: an unknown value used to fall through to Chroma,
-            # silently re-enabling a retired backend on a typo.
+            # Fail closed: an unknown value (a typo, or a retired backend such
+            # as "chromadb") must never silently select a store.
             raise ValueError(
                 f"unsupported kb.backend {kb_backend!r}; expected one of "
                 f"{', '.join(sorted(_KNOWN_BACKENDS))}"
@@ -115,18 +112,3 @@ def configure_remote_store(runtime: KBRuntime) -> None:
         logger.info("KB remote store configured: Bedrock KB %s", kb_id)
     except Exception as e:
         logger.debug("KB remote store init skipped: %s", e)
-
-
-def _configure_chroma(runtime: KBRuntime, get_infra: Any) -> None:
-    chroma_mode = get_infra("kb.chroma.mode", "embedded")
-    if chroma_mode == "server":
-        from .retrieval.chroma_server import ChromaServerVectorStore, ChromaServerConfig
-        cfg = ChromaServerConfig(
-            host=get_infra("kb.chroma.host", "localhost"),
-            port=int(get_infra("kb.chroma.port", "8000")),
-        )
-        runtime.set_vector_store(ChromaServerVectorStore(cfg))
-    else:
-        from .retrieval.chroma import ChromaVectorStore, ChromaConfig
-        chroma_dir = get_infra("kb.chroma.dir", "./chroma_data")
-        runtime.set_vector_store(ChromaVectorStore(ChromaConfig(persist_directory=chroma_dir)))

@@ -62,5 +62,4 @@ All settings use `FACTORY_` prefix:
 - `FACTORY_NEO4J_URL` - Neo4j bolt URL
 - `FACTORY_REDIS_URL` - Redis connection
 - `FACTORY_KEYCLOAK_URL` - Keycloak auth server
-- `FACTORY_CHROMA_HOST/PORT` - ChromaDB vector store
 """

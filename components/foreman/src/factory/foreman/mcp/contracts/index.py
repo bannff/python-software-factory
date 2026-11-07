@@ -19,8 +19,6 @@ class AdapterInfrastructureMap(DTO):
     authlib_keycloak: AdapterInfrastructure | None = None
     aws: AdapterInfrastructure | None = None
     redis: AdapterInfrastructure | None = None
-    chroma: AdapterInfrastructure | None = None
-    chroma_server: AdapterInfrastructure | None = None
     neo4j: AdapterInfrastructure | None = None
     bedrock: AdapterInfrastructure | None = None
     s3: AdapterInfrastructure | None = None

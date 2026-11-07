@@ -6,25 +6,12 @@ caller's principal. Both numbers are now reported, each labelled.
 """
 from __future__ import annotations
 
-import tempfile
-
-import pytest
-
 from factory.memory.runtime.adapters.memory import InMemoryStore
 from factory.memory.runtime.runtime import MemoryRuntime
 
 
-def _stores():
-    yield "memory", lambda: InMemoryStore()
-    chromadb = pytest.importorskip("chromadb")
-    assert chromadb
-    from factory.memory.runtime.adapters.amem import AMemStore
-    yield "amem", lambda: AMemStore(storage_path=tempfile.mkdtemp(), llm_complete=None)
-
-
-@pytest.mark.parametrize("make", [make for _, make in _stores()], ids=[name for name, _ in _stores()])
-def test_health_reports_collection_and_caller_scopes_that_match_the_read_path(make) -> None:
-    rt = MemoryRuntime(store=make())
+def test_health_reports_collection_and_caller_scopes_that_match_the_read_path() -> None:
+    rt = MemoryRuntime(store=InMemoryStore())
     rt.store(user_id="kiro-agent", content="a")
     rt.store(user_id="kiro-agent", content="b")
     rt.store(user_id="local-operator", content="c")

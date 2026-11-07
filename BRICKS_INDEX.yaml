@@ -819,7 +819,8 @@ bricks:
   - name: kb
     type: component
     namespace: factory.kb
-    description: Vector-powered document storage and semantic search (ChromaDB, Neo4j HNSW)
+    description: Vector-powered document storage and semantic search (Neo4j HNSW, graph,
+      Bedrock KB)
     mcp_enabled: true
     features:
     - knowledge_base
@@ -852,18 +853,10 @@ bricks:
     - authoring.delete_collection
     - kb_get_views
     adapters:
-    - chroma
-    - chroma_server
     - bm25
     - neo4j
     - bedrock
     adapter_infra:
-      chroma:
-        services:
-        - chromadb
-      chroma_server:
-        services:
-        - chromadb
       neo4j:
         services:
         - neo4j
@@ -872,7 +865,6 @@ bricks:
     brick_deps: []
     pip_packages:
     - boto3>=1.35.0
-    - chromadb>=1.4.1
     - mcp[cli]==2.1.1
     - neo4j-graphrag>=1.0.0
     - neo4j>=6.1.0
@@ -1121,7 +1113,7 @@ bricks:
     - zep
     - cognee
     - neo4j
-    - amem
+    - graph
     adapter_infra:
       neo4j:
         services:
@@ -1146,7 +1138,6 @@ bricks:
     - debug_memory
     - optimize_retrieval
     pip_packages:
-    - chromadb>=1.4.1
     - cognee>=0.1.0
     - mcp[cli]==2.1.1
     - neo4j>=6.1.0

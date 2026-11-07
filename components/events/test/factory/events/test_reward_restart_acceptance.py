@@ -1,29 +1,27 @@
-"""M5.5 durable Memory/Evals reward restart acceptance."""
+"""M5.5 durable Memory/Evals reward restart acceptance.
+
+Durability comes from the memory brick's persistent graph adapter (a committed
+snapshot per mutation behind the storage blob port) plus the SQLite eval store;
+both are re-opened from disk by the second harness, which is what makes this a
+restart test rather than an in-process re-run.
+"""
 from __future__ import annotations
 
 import asyncio
-import gc
-
-import pytest
-
-chromadb = pytest.importorskip("chromadb")
 
 from factory.evals.mcp.run_record_tools import register as register_run_record
 from factory.events.runtime.learning_handlers.memory import handle_memory_learning
 from factory.events.runtime.learning_handlers.reward import _bridge_reward_to_evals
 from factory.events.runtime.models import Event
-from factory.memory.runtime.adapters.amem import AMemStore
+from factory.graph.runtime.runtime import GraphRuntime
+from factory.memory.runtime.adapters.graph_store import GraphMemoryStore
+from factory.memory.runtime.embedding_local import LlamaCppEmbedder
 from factory.memory.runtime.runtime import MemoryRuntime
 from factory.memory.server import create_mcp_server as create_memory_server
 from factory.mcp_utils.interface import get_service, set_service
 from factory.mcp_utils.runtime.tool_catalog import ToolCatalog
+from factory.storage.runtime.adapters.blob_local import LocalBlobStore
 from factory.storage.runtime.adapters.doc_sqlite import SQLiteDocumentStore
-
-
-def _release_chroma() -> None:
-    gc.collect()
-    from chromadb.api.shared_system_client import SharedSystemClient
-    SharedSystemClient.clear_system_cache()
 
 
 def _tool(catalog, name: str):
@@ -60,9 +58,11 @@ def _payload(identity: str) -> dict:
     }
 
 
-def _harness(memory_path, eval_path):
-    runtime = MemoryRuntime(AMemStore(
-        storage_path=str(memory_path), llm_complete=None,
+def _harness(blob_path, eval_path):
+    runtime = MemoryRuntime(GraphMemoryStore(
+        runtime=GraphRuntime(),
+        embedder=LlamaCppEmbedder(model_path=""),
+        backend="persistent_networkx",
     ))
     memory_store = _tool(create_memory_server(runtime), "memory_store")
     eval_store = SQLiteDocumentStore(str(eval_path))
@@ -83,17 +83,18 @@ def _harness(memory_path, eval_path):
 
 
 def test_reward_memory_and_evals_dedupe_across_real_restart(tmp_path) -> None:
-    memory_path, eval_path = tmp_path / "memory", tmp_path / "evals.db"
+    blob_path, eval_path = tmp_path / "blobs", tmp_path / "evals.db"
     previous_invoker = get_service("tool_invoker")
     previous_factory = get_service("tool_invoker_for_caller")
+    previous_blob_store = get_service("blob_store")
     set_service(
         "tool_invoker_for_caller",
         lambda caller: lambda *args, **kwargs: {"ok": True},
     )
+    set_service("blob_store", LocalBlobStore(str(blob_path)))
     identity = "tenant:owner:loop-1:cycle-1:1:v1"
     try:
-        _release_chroma()
-        runtime, eval_store, invoke = _harness(memory_path, eval_path)
+        runtime, eval_store, invoke = _harness(blob_path, eval_path)
         set_service("tool_invoker", _storage_invoker(eval_store))
         event = Event(
             source="events.rewards", type="reward.computed",
@@ -106,9 +107,8 @@ def test_reward_memory_and_evals_dedupe_across_real_restart(tmp_path) -> None:
         assert eval_store.count("eval_results") == 1
 
         del runtime, eval_store, invoke
-        _release_chroma()
         restarted, restarted_evals, restarted_invoke = _harness(
-            memory_path, eval_path,
+            blob_path, eval_path,
         )
         set_service("tool_invoker", _storage_invoker(restarted_evals))
         replay = handle_memory_learning(event, restarted_invoke)
@@ -129,4 +129,4 @@ def test_reward_memory_and_evals_dedupe_across_real_restart(tmp_path) -> None:
     finally:
         set_service("tool_invoker", previous_invoker)
         set_service("tool_invoker_for_caller", previous_factory)
-        _release_chroma()
+        set_service("blob_store", previous_blob_store)

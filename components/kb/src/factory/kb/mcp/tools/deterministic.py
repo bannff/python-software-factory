@@ -37,23 +37,18 @@ def register(
     def get_capabilities() -> ToolResult[KbCapabilitiesResult]:
         """Describe KB brick capabilities."""
         authoring_inst = get_authoring()
-        try:
-            from ...runtime.retrieval.chroma import CHROMADB_AVAILABLE
-        except ImportError:
-            chroma_available = False
-        else:
-            chroma_available = CHROMADB_AVAILABLE
         features = ["document_storage", "collections", "metadata_filtering"]
         try:
-            vector_store = getattr(get_runtime(), "_vector_store", None)
+            runtime = get_runtime()
+            vector_store = getattr(runtime, "_vector_store", None)
             if vector_store is not None and "Neo4j" in type(vector_store).__name__:
                 features.extend(["vector_search", "entity_extraction", "graph_rag"])
-            elif chroma_available:
+            elif runtime.backend_name is not None:
                 features.append("vector_search")
             else:
                 features.append("text_search")
         except Exception:
-            features.append("vector_search" if chroma_available else "text_search")
+            features.append("text_search")
         return ok(
             KbCapabilitiesResult(
                 features=features,
@@ -73,7 +68,6 @@ def register(
                 },
                 details={
                     "authoring_enabled": authoring_inst.is_enabled(),
-                    "chroma_available": chroma_available,
                     "config_dir": str(get_config_dir()),
                 },
             )
@@ -103,7 +97,7 @@ def register(
             "type": "object", "additionalProperties": False,
             "properties": {
                 "KB_CONFIG_DIR": {"type": "string"},
-                "KB_CHROMA_DIR": {"type": "string"},
+                "KB_BACKEND": {"type": "string"},
                 "KB_ENABLE_AUTHORING_TOOLS": {"type": "string"},
             },
         }

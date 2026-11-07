@@ -72,7 +72,7 @@ These files already exist and should be updated (not recreated) when their brick
 | events | `test_memory_properties.py` |
 | storage | `test_blob_local_properties.py` |
 | graph | `test_networkx_properties.py` |
-| memory | `test_memory_properties.py`, `test_amem_properties.py`, `test_neo4j_graph_properties.py` |
+| memory | `test_memory_properties.py`, `test_neo4j_graph_properties.py` |
 | permissions | `test_evaluator_properties.py` |
 | kb | `test_kb_runtime_properties.py`, `test_neo4j_vector_properties.py`, `test_entity_extraction_properties.py`, `test_bm25_properties.py`, `test_authoring_properties.py` |
 | notification | `test_stdio_properties.py` |

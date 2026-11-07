@@ -25,6 +25,16 @@ BASE_SERVICES: dict[str, dict] = {
     },
 }
 
+# Neo4j is the only vector/graph service any brick requires: `kb` and `graph`
+# both resolve to it (ChromaDB was retired in #353).
+_NEO4J_INFRA: dict = {
+    "service": "neo4j",
+    "image": "neo4j:5-community",
+    "ports": ["7474:7474", "7687:7687"],
+    "environment": {"NEO4J_AUTH": "neo4j/password"},
+    "volumes": ["neo4j_data:/data"],
+}
+
 # Brick → infra service requirements (image, ports, env, volumes)
 BRICK_INFRA: dict[str, dict] = {
     "cache": {
@@ -37,19 +47,8 @@ BRICK_INFRA: dict[str, dict] = {
         "image": "redis:7-alpine",
         "ports": ["6379:6379"],
     },
-    "graph": {
-        "service": "neo4j",
-        "image": "neo4j:5-community",
-        "ports": ["7474:7474", "7687:7687"],
-        "environment": {"NEO4J_AUTH": "neo4j/password"},
-        "volumes": ["neo4j_data:/data"],
-    },
-    "kb": {
-        "service": "chromadb",
-        "image": "chromadb/chroma:latest",
-        "ports": ["8100:8000"],
-        "volumes": ["chroma_data:/chroma/data"],
-    },
+    "graph": _NEO4J_INFRA,
+    "kb": _NEO4J_INFRA,
     "storage": {
         "service": "postgres",
         "image": "postgres:16-alpine",

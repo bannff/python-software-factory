@@ -44,8 +44,6 @@ def register(mcp: Any, get_runtime: Callable[[], BlueprintRuntime]) -> None:
             "FACTORY_REDIS_URL": {"type": "string"},
             "FACTORY_KEYCLOAK_URL": {"type": "string"},
             "FACTORY_SEAWEED_URL": {"type": "string"},
-            "FACTORY_CHROMA_HOST": {"type": "string"},
-            "FACTORY_CHROMA_PORT": {"type": "integer"},
             "FACTORY_CELERY_BROKER_URL": {"type": "string"},
             "FACTORY_DAGSTER_URL": {"type": "string"},
             "FACTORY_PHOENIX_URL": {"type": "string"}}}

@@ -99,7 +99,7 @@ def register(mcp: Any, get_runtime: callable, get_config_dir: callable) -> None:
             "# KB Configuration",
             "",
             f"Config Directory: {config_dir}",
-            f"Chroma Directory: {os.environ.get('KB_CHROMA_DIR', './chroma_data')}",
+            f"Backend: {os.environ.get('KB_BACKEND', 'neo4j')}",
             f"Authoring Enabled: {os.environ.get('KB_ENABLE_AUTHORING_TOOLS', '0') == '1'}",
         ]
 

@@ -8,7 +8,7 @@ from typing import Literal
 SCHEMA_VERSION = 1
 
 MemoryType = Literal["short_term", "long_term", "episodic"]
-BackendType = Literal["memory", "mem0", "agentcore", "zep", "cognee", "neo4j", "amem", "graph"]
+BackendType = Literal["memory", "mem0", "agentcore", "zep", "cognee", "neo4j", "graph"]
 
 
 class MemoryCategory(str, Enum):

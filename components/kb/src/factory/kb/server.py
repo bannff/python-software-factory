@@ -58,7 +58,7 @@ def get_capabilities() -> dict[str, Any]:
     return {
         "name": "kb",
         "version": "1.0.0",
-        "backends": ["chromadb_embedded", "chromadb_server", "neo4j", "bedrock", "graph"],
+        "backends": ["neo4j", "bedrock", "graph"],
         "features": ["knowledge_base", "vector_search", "document_management", "semantic_search", "rag_support"],
     }
 
@@ -78,7 +78,6 @@ def describe_config_schema() -> dict[str, Any]:
     return {
         "type": "object",
         "properties": {
-            "chroma_dir": {"type": "string", "description": "ChromaDB persist directory"},
             "embedding_model": {"type": "string", "description": "Embedding model to use"},
         },
     }
