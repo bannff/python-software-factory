@@ -15,6 +15,7 @@ from .evaluator_factory import build_evaluators
 from .evaluator_results import json_safe_details
 from .agent_task import build_agent_fn
 from .case_adapter import cases_to_strands
+from .loop_safe import call_off_loop
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ def run_strands_experiment(config: ExperimentConfig) -> ExperimentReport:
     task_fn = build_agent_fn(config.agent_config, config.evaluator_names)
     evaluators = build_evaluators(config.evaluator_names, config.rubric, framework="strands")
     experiment = Experiment[str, str](cases=strands_cases, evaluators=evaluators)
-    report = experiment.run_evaluations(task_fn)
+    report = call_off_loop(lambda: experiment.run_evaluations(task_fn))
     case_results: list[dict[str, Any]] = []
     rows = zip(
         report.cases,
