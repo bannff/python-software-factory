@@ -60,7 +60,7 @@ describe("EvalsRunPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Start run" }));
     expect((await screen.findByRole("status")).textContent).toMatch(/2 cases/);
     expect(callTool).toHaveBeenCalledWith("evals_run_experiment", {
-      cases: [{ input: "What is 2+2?", expected: "4" }], evaluator_names: ["helpfulness"], experiment_name: "smoke",
+      cases: [{ input: "What is 2+2?", expected_output: "4" }], evaluator_names: ["helpfulness"], experiment_name: "smoke",
     });
   });
 
