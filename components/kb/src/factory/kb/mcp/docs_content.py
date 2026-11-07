@@ -46,13 +46,9 @@ HNSW cosine similarity. ChromaDB was retired in #353.
 
 ## Configuration
 
-Set the backend explicitly:
 ```bash
-export KB_BACKEND=neo4j
+export KB_BACKEND=neo4j   # neo4j | graph | bedrock; anything else fails closed
 ```
-
-`KB_BACKEND` accepts `neo4j`, `graph`, or `bedrock`; any other value fails
-closed instead of silently selecting a store.
 
 ## Features
 
@@ -75,9 +71,8 @@ results = kb.search(
 
 ## Best Practices
 
-1. Use meaningful collection names
-2. Add rich metadata for filtering
-3. Chunk large documents appropriately
+Use meaningful collection names, add rich metadata for filtering, and chunk
+large documents appropriately.
 4. Monitor collection sizes"""
 COLLECTIONS_GUIDE = """# Collection Management
 
