@@ -55,7 +55,7 @@ export default function ImportPanel() {
 
   return <section aria-labelledby="import-settings-title" className="rounded-lg border border-border/50 bg-card/30 p-5">
     <h2 id="import-settings-title" className="text-sm font-semibold">Import & Export</h2>
-    <p className="mt-0.5 text-xs text-muted-foreground">Bring supported KiroCrew data into Companion X.</p>
+    <p className="mt-0.5 text-xs text-muted-foreground">Bring supported data from a previous setup into Companion X.</p>
     <div className="mt-4 rounded-md border border-border/40 bg-muted/20 p-4">
       <p className="text-sm font-medium">Merge-only import</p>
       <p className="mt-1 text-xs text-muted-foreground">Adds missing items only. It never overwrites or deletes existing Companion X data. Schedules arrive paused.</p>

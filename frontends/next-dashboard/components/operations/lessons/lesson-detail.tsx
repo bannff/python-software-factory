@@ -2,13 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Ban, Check, Loader2, Trash2 } from "lucide-react";
-import { errorReason, withReason } from "@/lib/error-reason";
 import {
   acceptLesson,
   fetchLesson,
   LESSON_CONFLICT_MESSAGE,
   rejectLesson,
-  LESSON_ACTION_FAILED,
+  lessonActionFailure,
   removeLesson,
 } from "./lesson-actions";
 import {
@@ -68,7 +67,7 @@ export function LessonDetail({
           setNotice(LESSON_CONFLICT_MESSAGE);
           onChanged();
         } else {
-          setNotice(withReason(LESSON_ACTION_FAILED, errorReason(error)));
+          setNotice(lessonActionFailure(error));
         }
       } catch {
         onRemoved(lesson.lessonId);

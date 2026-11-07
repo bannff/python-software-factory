@@ -143,7 +143,8 @@ export default function AgentTemplatesView() {
           type="button" onClick={() => void choose(persona)} aria-current={selected === persona.id}
           className={`rounded-md px-3 py-2 text-left ${selected === persona.id ? "bg-violet-500/15" : "hover:bg-accent/30"}`}>
           <span className="block truncate text-sm font-medium">{persona.name}</span>
-          <span className="block truncate text-[10px] text-muted-foreground">{templates.has(persona.id) ? "User template" : "Built-in"}</span>
+          <span className="block truncate text-[10px] text-muted-foreground">{templates.has(persona.id)
+            ? <><span>User template</span> · <code>{persona.id}</code></> : "Built-in"}</span>
         </button>)}</div>}
       {caps && !caps.config.read && <p className="mt-3 text-[11px] text-muted-foreground">{authoringGateNotice(caps, "config", "read")}</p>}
       </div>
@@ -162,6 +163,7 @@ export default function AgentTemplatesView() {
             <GitFork className="h-3.5 w-3.5" /> Fork to edit a copy</button>}
           {caps && !canFork && selected && <p className="mt-3 text-[11px] text-muted-foreground">{authoringGateNotice(caps, "agent_templates", "fork")}</p>}</div>
           : <div className="grid gap-3">
+            <h3 className="font-semibold">{selected === null ? "New agent template" : form.name}</h3>
             {caps && !canCreate && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "agent_templates", "create")}</p>}
             <Field label="ID"><input value={form.id} onChange={set("id")} disabled={!canCreate || selected !== null} /></Field>
             <TemplateIdHint pattern={selected === null ? idPattern : null} invalid={idInvalid} />

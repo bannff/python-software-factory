@@ -96,8 +96,10 @@ export function useInbox() {
       setOpenState({ status: "unavailable", message: "This item no longer exists." });
       return;
     }
+    // Opening is reading; a no-op for items already read.
+    void markRead(item);
     router.push(route);
-  }, [router]);
+  }, [router, markRead]);
 
   return {
     items, loading, error, unread,
