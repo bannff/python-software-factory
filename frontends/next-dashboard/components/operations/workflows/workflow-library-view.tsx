@@ -2,7 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { Loader2, Play, Plus, RefreshCw, Trash2, Workflow as WorkflowIcon } from "lucide-react";
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useWorkflowLibrary } from "./use-workflow-library";
+
+/** Non-terminal run states; a `waiting` run can sit indefinitely, so it must be cancellable too. */
+const CANCELLABLE: ReadonlySet<string> = new Set(["pending", "running", "waiting"]);
 
 /**
  * Workflow library (feature-map row 42): saved dynamic-workflow definitions
@@ -126,11 +130,11 @@ export default function WorkflowLibraryView() {
                   className="rounded-md border border-border/60 p-1.5 text-muted-foreground transition-colors hover:border-emerald-400/40 hover:text-emerald-400 disabled:opacity-50">
                   {pending === definition.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
                 </button>
-                {canAuthor && <button type="button" onClick={() => void onDelete(definition.id)} disabled={pending === definition.id}
-                  aria-label={`Delete workflow definition ${definition.id}`}
+                {canAuthor && <ConfirmDelete label={`Delete workflow definition ${definition.id}`}
+                  onConfirm={() => void onDelete(definition.id)} disabled={pending === definition.id}
                   className="rounded-md border border-border/60 p-1.5 text-muted-foreground transition-colors hover:border-destructive/40 hover:text-destructive disabled:opacity-50">
                   <Trash2 className="h-3.5 w-3.5" />
-                </button>}
+                </ConfirmDelete>}
               </div>
             </li>
           ))}
@@ -149,10 +153,10 @@ export default function WorkflowLibraryView() {
                   <span className="mx-2 text-muted-foreground">·</span>
                   <span className="text-muted-foreground">{run.workflowId}</span>
                   <span className="ml-2 rounded-full bg-muted px-2 py-0.5">{run.status}</span>
-                  {run.error && <p className="mt-1 text-destructive">{run.error}</p>}
+                  {run.error && <p className={`mt-1 ${run.status === "cancelled" ? "text-muted-foreground" : "text-destructive"}`}>{run.error}</p>}
                   {failureFor(run.runId)}
                 </div>
-                {(run.status === "running" || run.status === "pending") && (
+                {CANCELLABLE.has(run.status) && (
                   <button type="button" onClick={() => void onCancel(run.runId)} disabled={pending === run.runId}
                     aria-label={`Cancel run ${run.runId}`} className="rounded-md border border-border/60 px-2 py-1 disabled:opacity-50">
                     Cancel</button>
