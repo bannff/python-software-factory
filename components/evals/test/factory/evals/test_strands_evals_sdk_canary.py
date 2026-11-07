@@ -92,6 +92,7 @@ def test_experiment_runner_consumes_native_single_flattened_report(monkeypatch) 
         "first", "first", "second", "second",
     ]
     assert report.summary == {
+        "evaluation_errors": 0,
         "overall_score": 0.5,
         "pass_rate": 0.5,
         "total_cases": 2,

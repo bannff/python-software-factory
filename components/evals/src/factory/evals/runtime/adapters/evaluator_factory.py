@@ -128,6 +128,10 @@ def build_sdk_evaluator(alias: str, model: Any, rubric: str = "") -> Any:
     """
     spec = EVALUATOR_REGISTRY[alias]
     sdk_class = get_evaluator_class(alias, "strands")
+    if isinstance(model, str):
+        # ollama:<id> must become a model object; the SDK reads any string as Bedrock.
+        from .model_resolver import resolve_agent_model
+        model = resolve_agent_model(model)
     kwargs: dict[str, Any] = {"name": alias, "model": model}
     if spec.requires_rubric:
         kwargs["rubric"] = rubric or DEFAULT_RUBRIC

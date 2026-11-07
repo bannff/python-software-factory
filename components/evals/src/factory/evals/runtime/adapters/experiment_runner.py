@@ -20,6 +20,14 @@ from .loop_safe import call_off_loop
 logger = logging.getLogger(__name__)
 
 
+class EvaluationUnavailable(Exception):
+    """Every evaluator row errored, so the run says nothing about the agent."""
+
+
+def count_evaluation_errors(case_results: list[dict[str, Any]]) -> int:
+    return sum(1 for row in case_results if str(row.get("reason", "")).startswith("Evaluator error"))
+
+
 def run_strands_experiment(config: ExperimentConfig) -> ExperimentReport:
     """Run a Strands experiment end-to-end."""
     from strands_evals import Experiment
@@ -49,8 +57,12 @@ def run_strands_experiment(config: ExperimentConfig) -> ExperimentReport:
             "reason": reason,
             "detailed_results": json_safe_details(details),
         })
+    errors = count_evaluation_errors(case_results)
+    if case_results and errors == len(case_results):
+        raise EvaluationUnavailable(f"every evaluator row errored: {case_results[0]['reason']}")
     passes = report.test_passes
     summary = {
+        "evaluation_errors": errors,
         "overall_score": report.overall_score,
         "pass_rate": sum(passes) / len(passes) if passes else 0.0,
         "total_cases": len(config.cases),
