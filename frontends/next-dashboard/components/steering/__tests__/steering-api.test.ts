@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ call: vi.fn() }));
+const mocks = vi.hoisted(() => ({ call: vi.fn(), catalog: vi.fn() }));
 vi.mock("@/lib/api", () => ({ callTool: mocks.call }));
-import { deleteSteering, listSteering, readSteering, saveSteering } from "../steering-api";
+vi.mock("@/lib/tool-catalog", () => ({ fetchToolCatalog: mocks.catalog }));
+import { deleteSteering, getSteeringIdPattern, listSteering, readSteering, saveSteering } from "../steering-api";
 
 beforeEach(() => { mocks.call.mockReset(); });
 describe("Steering MCP API", () => {
@@ -11,6 +12,13 @@ describe("Steering MCP API", () => {
       .mockResolvedValueOnce({ tool: "agent_read_steering", result: { ok: true, data: { ...row, content: "# Quality" } } });
     await expect(listSteering()).resolves.toEqual([row]);
     await expect(readSteering("quality")).resolves.toEqual({ ...row, content: "# Quality" });
+  });
+  it("reads the document ID rule from the create tool's published schema", async () => {
+    mocks.catalog.mockResolvedValue({ tools: [{ qualified_name: "agent_create_steering", input_schema: {
+      properties: { document_id: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{0,63}$" } } } }] });
+    await expect(getSteeringIdPattern()).resolves.toBe("^[a-z0-9][a-z0-9-]{0,63}$");
+    mocks.catalog.mockResolvedValue({ tools: [] });
+    await expect(getSteeringIdPattern()).resolves.toBeNull();
   });
   it("revision-fences updates", async () => {
     const row = { id: "quality", title: "Quality", sha256: "b".repeat(64), content: "updated" };

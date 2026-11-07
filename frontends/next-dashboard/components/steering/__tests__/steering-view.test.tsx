@@ -3,13 +3,14 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const mocks = vi.hoisted(() => ({
   list: vi.fn(), read: vi.fn(), save: vi.fn(), remove: vi.fn(),
-  legacyAvailable: vi.fn(), caps: vi.fn(),
+  legacyAvailable: vi.fn(), caps: vi.fn(), pattern: vi.fn(),
 }));
 vi.mock("@/lib/hooks/use-mcp-connection", () => ({ useMcpConnection: () => ({ ready: true, status: "connected" }) }));
 vi.mock("../steering-api", () => ({
   listSteering: (...args: unknown[]) => mocks.list(...args), readSteering: (...args: unknown[]) => mocks.read(...args),
   saveSteering: (...args: unknown[]) => mocks.save(...args), steeringAuthoringAvailable: (...args: unknown[]) => mocks.legacyAvailable(...args),
   deleteSteering: (...args: unknown[]) => mocks.remove(...args),
+  getSteeringIdPattern: (...args: unknown[]) => mocks.pattern(...args),
 }));
 vi.mock("@/lib/authoring-capabilities", async (importOriginal) => ({
   ...(await importOriginal<typeof AuthoringCapabilitiesModule>()),
@@ -36,6 +37,7 @@ beforeEach(() => {
   mocks.read.mockReset().mockResolvedValue(row);
   mocks.save.mockReset().mockResolvedValue({ ...row, content: "# Quality\nRun all tests.", sha256: "b".repeat(64) });
   mocks.remove.mockReset().mockResolvedValue(undefined);
+  mocks.pattern.mockReset().mockResolvedValue("^[a-z0-9][a-z0-9-]{0,63}$");
   mocks.legacyAvailable.mockReset().mockResolvedValue(true);
   mocks.caps.mockReset().mockResolvedValue(capabilities({ create: true, update: true, delete: true }));
 });
@@ -55,6 +57,18 @@ describe("SteeringView", () => {
     fireEvent.change(screen.getByLabelText("Markdown"), { target: { value: "# New" } });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(mocks.save).toHaveBeenCalledWith({ id: "new-doc", content: "# New" }));
+  });
+
+  it("states the allowed ID format and blocks an ID the backend would reject", async () => {
+    render(<SteeringView />); fireEvent.click(await screen.findByRole("button", { name: "New steering document" }));
+    expect(screen.getByText(/\^\[a-z0-9\]\[a-z0-9-\]\{0,63\}\$/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("ID"), { target: { value: "Bad ID!" } });
+    fireEvent.change(screen.getByLabelText("Markdown"), { target: { value: "# Bad" } });
+    expect(screen.getByText("ID does not match the allowed format.")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("ID"), { target: { value: "good-id" } });
+    expect(screen.queryByText("ID does not match the allowed format.")).toBeNull();
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(false);
   });
 
   it("hides New and names the variable when steering.create is denied", async () => {

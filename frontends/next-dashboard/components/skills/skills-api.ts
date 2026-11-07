@@ -1,5 +1,5 @@
 import { callTool } from "@/lib/api";
-import { fetchToolCatalog } from "@/lib/tool-catalog";
+import { toolArgPattern } from "@/lib/tool-arg-pattern";
 import { unwrapToolData } from "@/lib/tool-result-data";
 
 export interface SkillSummary {
@@ -44,12 +44,7 @@ export async function deleteSkill(skillId: string): Promise<void> {
 
 /** The ID rule the backend publishes on `agent_add_skill`'s input schema, so
  * the form never carries its own copy. Null when the catalog does not state one. */
-export async function getSkillIdPattern(): Promise<string | null> {
-  const { tools } = await fetchToolCatalog();
-  const add = tools.find((tool) => tool.qualified_name === "agent_add_skill");
-  const pattern = add?.input_schema?.properties?.skill_id?.pattern;
-  return typeof pattern === "string" ? pattern : null;
-}
+export const getSkillIdPattern = () => toolArgPattern("agent_add_skill", "skill_id");
 
 export async function addSkill(input: {
   skillId: string; name: string; description: string; body: string;

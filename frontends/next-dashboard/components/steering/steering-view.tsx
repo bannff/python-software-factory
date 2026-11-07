@@ -7,7 +7,7 @@ import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
 import { authoringGateNotice, getAuthoringCapabilities,
   type AuthoringCapabilities } from "@/lib/authoring-capabilities";
-import { deleteSteering, listSteering, readSteering, saveSteering,
+import { deleteSteering, getSteeringIdPattern, listSteering, readSteering, saveSteering,
   type SteeringDocument } from "./steering-api";
 
 export default function SteeringView() {
@@ -17,17 +17,20 @@ export default function SteeringView() {
   const [id, setId] = useState("");
   const [content, setContent] = useState("");
   const [creating, setCreating] = useState(false);
+  const [idPattern, setIdPattern] = useState<string | null>(null);
   const [caps, setCaps] = useState<AuthoringCapabilities | null>(null);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const idInvalid = Boolean(creating && id && idPattern && !new RegExp(idPattern).test(id));
 
   const refresh = useCallback(async () => {
     if (!ready) return;
     setLoading(true); setError(null);
     try {
-      const [rows, capabilities] = await Promise.all([listSteering(), getAuthoringCapabilities()]);
-      setDocuments(rows); setCaps(capabilities);
+      const [rows, capabilities, pattern] = await Promise.all([
+        listSteering(), getAuthoringCapabilities(), getSteeringIdPattern()]);
+      setDocuments(rows); setCaps(capabilities); setIdPattern(pattern);
     } catch (cause) { setError(withReason("Steering unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   }, [ready]);
@@ -81,10 +84,12 @@ export default function SteeringView() {
       {creating || active ? <div className="grid gap-3"><h3 className="font-semibold">{creating ? "New steering document" : active?.title}</h3>
         <label className="grid gap-1 text-xs text-muted-foreground">ID<input value={id} onChange={(event) => setId(event.target.value)} disabled={!creating}
           className="rounded-md border border-border/60 bg-background/50 px-3 py-2 text-foreground" /></label>
+        {creating && idPattern && <p className={`-mt-2 text-[11px] ${idInvalid ? "text-destructive" : "text-muted-foreground"}`}>
+          {idInvalid && <span role="alert">ID does not match the allowed format.</span>} Allowed: <code>{idPattern}</code></p>}
         <label className="grid gap-1 text-xs text-muted-foreground">Markdown<textarea value={content} onChange={(event) => setContent(event.target.value)}
           readOnly={!saving} rows={15} className="rounded-md border border-border/60 bg-background/50 px-3 py-2 font-mono text-xs text-foreground" /></label>
         {caps && !saving && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "steering", creating ? "create" : "update")}</p>}
-        {(saving || (!creating && active && caps?.steering.delete)) && <div className="flex gap-2">{saving && <button type="button" onClick={() => void save()} disabled={busy || !id || !content.trim()}
+        {(saving || (!creating && active && caps?.steering.delete)) && <div className="flex gap-2">{saving && <button type="button" onClick={() => void save()} disabled={busy || !id || idInvalid || !content.trim()}
           className="inline-flex w-fit items-center gap-2 rounded-md bg-violet-500 px-3 py-2 text-xs text-white disabled:opacity-40"><Save className="h-3.5 w-3.5" /> Save</button>}
           {!creating && active && caps?.steering.delete && <ConfirmDelete label="Delete steering document" onConfirm={() => void remove()} disabled={busy}
             className="inline-flex w-fit items-center gap-2 rounded-md border border-destructive/40 px-3 py-2 text-xs text-destructive disabled:opacity-40">
