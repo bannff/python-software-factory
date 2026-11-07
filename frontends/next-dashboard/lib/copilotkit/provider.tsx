@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { CopilotKitProvider } from "@copilotkit/react-core/v2";
+import { handleCopilotError } from "./chat-run-error";
 import { BridgeAdapterProvider } from "@companion-x/shared-renderer";
 import "@copilotkit/react-core/v2/styles.css";
 import "./inspector.css";
@@ -121,6 +122,7 @@ export function CopilotProvider({ children }: CopilotProviderProps) {
       selfManagedAgents={selfManagedAgents}
       showDevConsole="auto"
       renderActivityMessages={ACTIVITY_RENDERERS}
+      onError={handleCopilotError}
     >
       <BridgeAdapterProvider adapter={bridgeAdapter}>
         <ActionTranscriptProvider>
