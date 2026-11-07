@@ -36,4 +36,11 @@ describe("ConfirmDelete", () => {
     render(<ConfirmDelete label="Delete x" onConfirm={vi.fn()} disabled>Delete</ConfirmDelete>);
     expect((screen.getByRole("button", { name: "Delete x" }) as HTMLButtonElement).disabled).toBe(true);
   });
+
+  it("labels the armed confirm button with the caller's wording", () => {
+    render(<ConfirmDelete label="Reset" confirmText="Reset to original" onConfirm={vi.fn()}>Reset</ConfirmDelete>);
+    fireEvent.click(screen.getByRole("button", { name: "Reset" }));
+    expect(screen.getByRole("button", { name: "Confirm reset" }).textContent).toBe("Reset to original");
+    expect(screen.queryByText("Delete permanently")).toBeNull();
+  });
 });

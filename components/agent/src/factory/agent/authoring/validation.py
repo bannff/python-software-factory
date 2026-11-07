@@ -14,7 +14,9 @@ from factory.agent.runtime.registry_contracts import SquadConfig
 
 ConfigKind = Literal["agent", "swarm", "graph", "squad", "settings", "tool"]
 
-_ID_RE = re.compile(r"^[a-z0-9][a-z0-9_-]{0,127}$")
+# Published on tool input schemas so clients validate IDs without a copy.
+ID_PATTERN = r"^[a-z0-9][a-z0-9_-]{0,127}$"
+_ID_RE = re.compile(ID_PATTERN)
 _TOOL_MODULE_RE = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]{0,127}$")
 
 

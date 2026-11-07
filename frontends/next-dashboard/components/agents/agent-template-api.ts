@@ -1,4 +1,5 @@
 import { callTool } from "@/lib/api";
+import { fetchToolCatalog } from "@/lib/tool-catalog";
 import { unwrapToolData } from "@/lib/tool-result-data";
 
 function authoringResult(raw: unknown): Record<string, unknown> {
@@ -12,11 +13,26 @@ function authoringResult(raw: unknown): Record<string, unknown> {
 }
 
 
-export async function listUserTemplateIds(): Promise<string[]> {
+export interface UserTemplate {
+  id: string;
+  /** Source persona id when this template was forked; null for hand-authored ones. */
+  forkedFrom: string | null;
+}
+
+export async function listUserTemplates(): Promise<UserTemplate[]> {
   const result = authoringResult(await callTool("agent_list_config_items", { kind: "agent" }));
   if (!Array.isArray(result.items)) return [];
-  return result.items.flatMap((item): string[] =>
-    typeof item?.id === "string" ? [item.id] : []);
+  return result.items.flatMap((item): UserTemplate[] => typeof item?.id === "string"
+    ? [{ id: item.id, forkedFrom: typeof item.forked_from === "string" ? item.forked_from : null }] : []);
+}
+
+/** The agent ID rule the backend publishes on `agent_fork_agent`'s input schema
+ * (create takes an opaque config dict, so it states none). Null when absent. */
+export async function getTemplateIdPattern(): Promise<string | null> {
+  const { tools } = await fetchToolCatalog();
+  const fork = tools.find((tool) => tool.qualified_name === "agent_fork_agent");
+  const pattern = fork?.input_schema?.properties?.new_agent_id?.pattern;
+  return typeof pattern === "string" ? pattern : null;
 }
 
 export async function readUserTemplate(id: string): Promise<Record<string, unknown>> {
