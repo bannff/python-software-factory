@@ -11,11 +11,14 @@ from factory.mcp_utils.interface import (
 )
 
 logger = logging.getLogger(__name__)
+_NOOP_OUTCOMES = frozenset({"unchanged", "deduped"})
 
 
 async def emit_lesson_event(
     lesson: Any, event_type: str, *, outcome: str | None = None,
 ) -> None:
+    if outcome in _NOOP_OUTCOMES:
+        return  # same lesson+revision key as the original event; republishing conflicts
     try:
         factory = get_service("tool_invoker_for_caller")
         invoke = factory("lessons") if callable(factory) else None
