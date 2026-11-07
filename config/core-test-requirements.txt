@@ -1,6 +1,5 @@
 # Exact CI-only overlay. Install with --no-deps so each revision keeps its own lock.
 joserfc==1.8.0
-joserfc==1.7.7
 ddgs==9.16.1
 httpx-sse==0.4.3
 langchain-classic==1.0.8
