@@ -46,7 +46,7 @@ const SOURCE: Record<LessonSource, string> = {
   user_explicit: "You taught this",
   feedback: "Learned from your feedback",
   outcome: "Learned from an outcome",
-  import: "Imported from KiroCrew",
+  import: "Imported from a previous setup",
 };
 
 const CATEGORY: Record<LessonCategory, string> = {

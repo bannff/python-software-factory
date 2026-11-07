@@ -79,16 +79,18 @@ interface HeaderCandidate {
 
 /**
  * Pick the most recent live-tool-stream entry that is *interesting*
- * for the chat header: something the chat agent is doing. Tool calls
- * not made on behalf of a chat run (the dashboard's own polling reads,
- * warmups) and infrastructure plumbing are skipped.
+ * for the chat header: a tool call the chat agent is making. Everything
+ * else is skipped: calls not made on behalf of a chat run (the
+ * dashboard's own polling reads, warmups), infrastructure plumbing, and
+ * bridged activity events (``Lesson.Removed`` and friends), which also
+ * fire for the user's own UI actions and live in the Live view instead.
  * Returns null when nothing on the stream rises above noise.
  */
 export function pickHeaderTool<T extends HeaderCandidate>(
   entries: ReadonlyArray<T>,
 ): { entry: T; meta: FriendlyToolMeta } | null {
   for (const entry of entries) {
-    if (entry.type === "tool_call" && !entry.caller?.startsWith(CHAT_CALLER_PREFIX)) continue;
+    if (entry.type !== "tool_call" || !entry.caller?.startsWith(CHAT_CALLER_PREFIX)) continue;
     const meta = describeTool(entry.title);
     if (!meta.isInfrastructure) return { entry, meta };
   }

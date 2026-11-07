@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { Ban, Check, Loader2, Trash2 } from "lucide-react";
 import {
   acceptLesson,
@@ -8,6 +9,7 @@ import {
   LESSON_CONFLICT_MESSAGE,
   rejectLesson,
   lessonActionFailure,
+  onlyRevisionDrifted,
   removeLesson,
 } from "./lesson-actions";
 import {
@@ -54,32 +56,43 @@ export function LessonDetail({
     }
   }, [autoFocus, lesson.lessonId, onFocused]);
 
-  const run = async (action: () => Promise<void>) => {
+  /** Run ``action`` against ``target``; on failure reconcile with the server, retrying once on revision-only drift. */
+  const attempt = async (action: (target: Lesson) => Promise<void>, target: Lesson, canRetry: boolean) => {
+    try {
+      await action(target);
+    } catch (error) {
+      let current: Lesson;
+      try {
+        current = await fetchLesson(lesson.lessonId);
+      } catch {
+        onRemoved(lesson.lessonId);
+        return;
+      }
+      if (canRetry && onlyRevisionDrifted(target, current)) {
+        await attempt(action, current, false);
+      } else if (current.revision !== lesson.revision || current.status !== lesson.status) {
+        // Only a lesson that actually moved on is a conflict; otherwise the action itself failed.
+        setNotice(LESSON_CONFLICT_MESSAGE);
+        onChanged();
+      } else {
+        setNotice(lessonActionFailure(error));
+      }
+    }
+  };
+
+  const run = async (action: (target: Lesson) => Promise<void>) => {
     setBusy(true);
     setNotice(null);
     try {
-      await action();
-    } catch (error) {
-      try {
-        const current = await fetchLesson(lesson.lessonId);
-        // Only a lesson that actually moved on is a conflict; otherwise the action itself failed.
-        if (current.revision !== lesson.revision || current.status !== lesson.status) {
-          setNotice(LESSON_CONFLICT_MESSAGE);
-          onChanged();
-        } else {
-          setNotice(lessonActionFailure(error));
-        }
-      } catch {
-        onRemoved(lesson.lessonId);
-      }
+      await attempt(action, lesson, true);
     } finally {
       setBusy(false);
     }
   };
 
-  const accept = () => run(async () => { await acceptLesson(lesson, sessionId); onChanged(); });
-  const reject = () => run(async () => { await rejectLesson(lesson, sessionId); onChanged(); });
-  const remove = () => run(async () => { await removeLesson(lesson, sessionId); onRemoved(lesson.lessonId); });
+  const accept = () => run(async (l) => { await acceptLesson(l, sessionId); onChanged(); });
+  const reject = () => run(async (l) => { await rejectLesson(l, sessionId); onChanged(); });
+  const remove = () => run(async (l) => { await removeLesson(l, sessionId); onRemoved(l.lessonId); });
 
   const curatable = lesson.status === "proposed";
 
@@ -137,9 +150,12 @@ export function LessonDetail({
             </button>
           </>
         )}
-        <button type="button" onClick={remove} disabled={busy} className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50">
+        <ConfirmDelete
+          label="Delete lesson" disabled={busy} onConfirm={() => void remove()}
+          className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 px-3 py-1.5 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"
+        >
           <Trash2 className="h-3.5 w-3.5" /> Delete
-        </button>
+        </ConfirmDelete>
       </div>
     </article>
   );

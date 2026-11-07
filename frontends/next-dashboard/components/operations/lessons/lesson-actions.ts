@@ -26,6 +26,17 @@ export function lessonActionFailure(error: unknown): string {
   const reason = errorReason(error);
   return reason === "lesson_session_not_found" ? LESSON_CHAT_UNSAVED : withReason(LESSON_ACTION_FAILED, reason);
 }
+/**
+ * True when ``current`` differs from what the user saw only by revision. The
+ * server bumps the revision on its own after Keep (the Memory projection), so
+ * that drift is not a conflict and the action may be retried against it.
+ */
+export function onlyRevisionDrifted(seen: Lesson, current: Lesson): boolean {
+  return current.revision !== seen.revision
+    && current.status === seen.status
+    && current.rule === seen.rule
+    && current.negative === seen.negative;
+}
 export const LESSON_LIST_ERROR = "Lessons unavailable";
 
 export async function fetchLesson(lessonId: string): Promise<Lesson> {
