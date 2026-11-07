@@ -106,7 +106,9 @@ export function Canvas(props: CanvasProps) {
         )}
       </div>
 
-      <div className="flex-1 overflow-auto" style={{ minHeight: 0 }}>
+      {/* Container root: two-pane views switch on this width (@-variants), which
+          is what the chat dock leaves, rather than on the viewport. */}
+      <div className="@container flex-1 overflow-auto" style={{ minHeight: 0 }}>
         <Suspense fallback={<CanvasLoader />}>
           {props.activeView === "welcome" && (
             <WelcomeView onNavigate={props.onNavigate} />

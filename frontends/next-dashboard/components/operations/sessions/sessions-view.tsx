@@ -148,7 +148,7 @@ export default function SessionsView({
       )}
 
       {!error && !(loading && merged.length === 0) && (
-        <div className="grid flex-1 gap-4 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+        <div className="grid flex-1 gap-4 @4xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
           <div className="flex min-w-0 flex-col gap-3">
             <div className="flex flex-wrap gap-2" aria-label="Session filters">
               {["all", "unread", ...tagFilters.map((tag) => `tag:${tag}`), ...folderFilters.map((f) => `folder:${f}`)].map((id) => <button key={id} type="button"
@@ -180,7 +180,7 @@ export default function SessionsView({
               onResume={onResumeSession} onChanged={onChanged} onDeleted={onDeleted} onForked={onForked}
               moveUpBeforeId={moveUpBeforeId} moveDownBeforeId={moveDownBeforeId} />
           ) : (
-            <div className="hidden min-h-64 self-start items-center justify-center rounded-xl border border-border/60 bg-card/10 p-6 text-sm text-muted-foreground lg:flex">
+            <div className="hidden min-h-64 self-start items-center justify-center rounded-xl border border-border/60 bg-card/10 p-6 text-sm text-muted-foreground @4xl:flex">
               Select a session to see its details.
             </div>
           )}
