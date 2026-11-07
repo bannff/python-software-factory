@@ -17,6 +17,11 @@ from factory.mcp_utils.server import make_lazy_runner
 
 logger = logging.getLogger(__name__)
 
+# Chroma stays reachable only when asked for by name; it is a retired backend
+# kept for existing deployments, never a fallback.
+_CHROMA_BACKENDS = frozenset({"chromadb", "chroma"})
+_KNOWN_BACKENDS = frozenset({"neo4j", "graph", "bedrock"}) | _CHROMA_BACKENDS
+
 
 def _surface(runtime: KBRuntime | None = None) -> tuple[KBRuntime, KBAuthoring, Path]:
     config_dir = Path(os.environ.get("KB_CONFIG_DIR", "./config"))
@@ -74,8 +79,15 @@ def _configure_vector_store(runtime: KBRuntime) -> None:
             _configure_neo4j(runtime, get_neo4j_config)
         elif kb_backend == "graph":
             _configure_graph(runtime)
-        else:
+        elif kb_backend in _CHROMA_BACKENDS:
             _configure_chroma(runtime, get_infra)
+        else:
+            # Fail closed: an unknown value used to fall through to Chroma,
+            # silently re-enabling a retired backend on a typo.
+            raise ValueError(
+                f"unsupported kb.backend {kb_backend!r}; expected one of "
+                f"{', '.join(sorted(_KNOWN_BACKENDS))}"
+            )
     except Exception as e:
         logger.error("KB vector store initialization failed: %s", e, exc_info=True)
 
