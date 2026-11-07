@@ -110,10 +110,11 @@ export default function SchedulesView({ focusScheduleId, onFocusHandled }: {
       )}
 
       {!error && schedules.length > 0 && (
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,1.35fr)]">
-          <ul className="grid content-start gap-3" aria-label="Schedules">
+        <div className="@container">
+        <div className="grid gap-4 @4xl:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+          <ul className="grid min-w-0 content-start gap-3" aria-label="Schedules">
             {schedules.map((schedule) => (
-              <li key={schedule.scheduleId}>
+              <li key={schedule.scheduleId} className="min-w-0">
                 <ScheduleCard
                   schedule={schedule}
                   selected={schedule.scheduleId === selected}
@@ -132,10 +133,11 @@ export default function SchedulesView({ focusScheduleId, onFocusHandled }: {
               actions={{ pause, resume, trigger, remove: removeTracked }}
             />
           ) : (
-            <div className="hidden items-center justify-center rounded-xl border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground lg:flex">
+            <div className="hidden items-center justify-center rounded-xl border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground @4xl:flex">
               Select a schedule to see its detail and controls.
             </div>
           )}
+        </div>
         </div>
       )}
     </section>
