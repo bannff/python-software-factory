@@ -32,7 +32,6 @@ class ChromaVectorStore(VectorStore):
     """ChromaDB implementation of VectorStore."""
     backend_name = "chroma"
 
-
     def __init__(self, config: ChromaConfig | None = None) -> None:
         if not CHROMADB_AVAILABLE:
             raise ImportError("chromadb is not installed. Install with: pip install chromadb")
