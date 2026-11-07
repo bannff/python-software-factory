@@ -20,7 +20,7 @@ def test_pinned_strands_evals_feature_surface_is_importable() -> None:
         MultimodalInstructionFollowingEvaluator,
         MultimodalOverallQualityEvaluator,
     )
-    from strands_evals.experimental.redteam import (
+    from strands_evals.redteam import (
         AdversarialCaseGenerator,
         CrescendoStrategy,
         RedTeamExperiment,
