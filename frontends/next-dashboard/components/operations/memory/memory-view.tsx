@@ -1,5 +1,6 @@
 "use client";
 
+import AddMemoryCard from "./add-memory-card";
 import { useState, type ChangeEvent } from "react";
 import { BrainCircuit, Check, GitBranch, History, Loader2, Pencil, RefreshCw, Search, Trash2, X } from "lucide-react";
 import { useMemory } from "./use-memory";
@@ -147,6 +148,7 @@ export default function MemoryView() {
         </div>
       )}
 
+      <AddMemoryCard onSaved={refresh} />
       <EmbeddingsCard />
       <BackupCard />
 
@@ -235,7 +237,7 @@ export default function MemoryView() {
           <BrainCircuit className="h-8 w-8 text-violet-400/70" />
           <h2 className="mt-3 font-medium">{query ? "No matches" : "No memories yet"}</h2>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            {query ? "Try a different search or clear the filter." : "As Companion X learns things about you, they'll show up here."}
+            {query ? "Try a different search or clear the filter." : "As Companion X learns things about you, they'll show up here. You can also add one above."}
           </p>
         </div>
       )}
