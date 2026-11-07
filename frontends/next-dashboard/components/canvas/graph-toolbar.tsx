@@ -37,7 +37,7 @@ const PRESETS: ReadonlyArray<readonly [string, string, keyof RunActivity | null]
 
 export function GraphToolbar(props: GraphToolbarProps) {
   return (
-    <div className="flex items-center gap-2 overflow-x-auto border-b border-border/50 bg-card/10 px-4 py-2">
+    <div className="flex flex-wrap items-center gap-2 border-b border-border/50 bg-card/10 px-4 py-2">
       <div className="relative flex min-w-56 max-w-xs flex-1 items-center gap-1">
         <button onClick={props.onToggleSearchMode} disabled={props.broadControlsDisabled} className="shrink-0 rounded border border-border/50 px-1.5 py-1 text-[10px] font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40">
           {props.searchMode === "type" ? "Type" : "Name"}
