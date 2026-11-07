@@ -43,6 +43,7 @@ def _entity_to_document(entity: Entity) -> Document:
 
 class KBGraphVectorStore(VectorStore):
     """``VectorStore`` adapter over the shared graph brick's KnowledgeGraph."""
+    backend_name = "neo4j"
 
     def __init__(self, runtime: GraphRuntime | None = None,
                  embedder: LocalKBEmbedder | None = None,

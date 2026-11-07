@@ -30,6 +30,7 @@ class ChromaConfig(BaseModel):
 
 class ChromaVectorStore(VectorStore):
     """ChromaDB implementation of VectorStore."""
+    backend_name = "chroma"
 
     def __init__(self, config: ChromaConfig | None = None) -> None:
         if not CHROMADB_AVAILABLE:

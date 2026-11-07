@@ -103,7 +103,7 @@ def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
             )
             for r in results
         ]
-        return ok(KbSearchResult(results=hits, total=len(hits)))
+        return ok(KbSearchResult(results=hits, total=len(hits), backend=runtime.backend_name))
 
     @mcp.tool()
     @operational(input_model=KbDocumentIdRequest, output_model=KbGetDocumentResult)

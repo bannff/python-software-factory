@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import ClassVar, Any
 
 from .models import Document, SearchResult
 
@@ -12,6 +12,8 @@ from .models import Document, SearchResult
 
 class VectorStore(ABC):
     """Abstract base class for vector search backends."""
+
+    backend_name: ClassVar[str] = "unknown"
 
     @abstractmethod
     def add(self, document: Document, **kwargs: Any) -> Any:

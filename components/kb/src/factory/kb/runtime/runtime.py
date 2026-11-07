@@ -52,6 +52,11 @@ class KBRuntime:
         """Set the primary (local) vector store backend."""
         self._vector_store = vector_store
 
+    @property
+    def backend_name(self) -> str | None:
+        """Name of the primary vector store backend, or None before one is set."""
+        return None if self._vector_store is None else self._vector_store.backend_name
+
     def set_remote_store(self, remote_store: VectorStore) -> None:
         """Set an optional remote vector store (e.g. Bedrock KB)."""
         self._remote_store = remote_store

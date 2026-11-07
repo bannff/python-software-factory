@@ -66,6 +66,7 @@ def _resolve_kb_id() -> str:
 
 class BedrockKBVectorStore(VectorStore):
     """Bedrock Knowledge Base adapter using Retrieve API."""
+    backend_name = "bedrock"
 
     def __init__(self, config: BedrockKBConfig | None = None) -> None:
         import boto3
