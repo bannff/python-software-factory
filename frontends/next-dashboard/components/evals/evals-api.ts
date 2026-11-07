@@ -3,7 +3,8 @@ import { errorReason, withReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 
 export interface Evaluator { name: string; description: string; requiresRubric: boolean }
-export interface EvalCase { input: string; expected?: string }
+/** `expected_output` is the key the server reads; anything else is silently ignored. */
+export interface EvalCase { input: string; expected_output?: string }
 export interface RunInput { cases: EvalCase[]; evaluator_names: string[]; experiment_name?: string; rubric?: string; model_id?: string }
 export interface RunOutcome { cases: number; scores: [string, number][] }
 

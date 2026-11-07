@@ -38,7 +38,7 @@ export function EvalsRunPanel() {
     setBusy(true); setError(null); setResult(null);
     try {
       const r = await runExperiment({
-        cases: filled.map((c) => (c.expected.trim() ? { input: c.input.trim(), expected: c.expected.trim() } : { input: c.input.trim() })),
+        cases: filled.map((c) => (c.expected.trim() ? { input: c.input.trim(), expected_output: c.expected.trim() } : { input: c.input.trim() })),
         evaluator_names: chosen, experiment_name: name.trim(), rubric: needsRubric ? rubric.trim() : "",
       });
       if (mounted.current) { setResult(r); setOpen(false); }
