@@ -53,7 +53,10 @@ class AuthoringManager:
         for file_path in sorted(base.glob(pattern)):
             if kind == "tool" and file_path.name.startswith("_"):
                 continue
-            items.append({"kind": kind, "id": file_path.stem, "path": str(file_path)})
+            item: dict[str, Any] = {"kind": kind, "id": file_path.stem, "path": str(file_path)}
+            if kind == "agent" and (source := self.read_fork_provenance(kind, file_path.stem)):
+                item["forked_from"] = source
+            items.append(item)
         return items
 
     def read_yaml_config(self, kind: Literal["agent", "swarm", "graph", "squad"], item_id: str) -> dict[str, Any]:

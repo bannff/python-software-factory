@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 const mocks = vi.hoisted(() => ({
   refresh: vi.fn(), listIds: vi.fn(), read: vi.fn(), save: vi.fn(), remove: vi.fn(),
-  fork: vi.fn(), reset: vi.fn(), legacyAvailable: vi.fn(), legacyForkAvailable: vi.fn(), caps: vi.fn(),
+  fork: vi.fn(), reset: vi.fn(), pattern: vi.fn(), legacyAvailable: vi.fn(), legacyForkAvailable: vi.fn(), caps: vi.fn(),
   personas: [
     { id: "builtin", name: "Built in", description: "Core", model: "openrouter/a" },
     { id: "user-one", name: "User one", description: "Custom", model: "openrouter/b" },
@@ -16,7 +16,8 @@ vi.mock("@/lib/hooks/use-personas", () => ({ usePersonas: () => ({
 vi.mock("../agent-template-api", () => ({
   personaAuthoringAvailable: (...args: unknown[]) => mocks.legacyAvailable(...args),
   personaForkAvailable: (...args: unknown[]) => mocks.legacyForkAvailable(...args),
-  listUserTemplateIds: (...args: unknown[]) => mocks.listIds(...args),
+  listUserTemplates: (...args: unknown[]) => mocks.listIds(...args),
+  getTemplateIdPattern: (...args: unknown[]) => mocks.pattern(...args),
   readUserTemplate: (...args: unknown[]) => mocks.read(...args),
   saveUserTemplate: (...args: unknown[]) => mocks.save(...args),
   deleteUserTemplate: (...args: unknown[]) => mocks.remove(...args),
@@ -47,7 +48,8 @@ beforeEach(() => {
   mocks.refresh.mockReset(); mocks.save.mockReset().mockResolvedValue(undefined);
   mocks.remove.mockReset().mockResolvedValue(undefined); mocks.fork.mockReset().mockResolvedValue("builtin-fork");
   mocks.reset.mockReset().mockResolvedValue(undefined);
-  mocks.listIds.mockReset().mockResolvedValue(["user-one"]);
+  mocks.listIds.mockReset().mockResolvedValue([{ id: "user-one", forkedFrom: "builtin" }]);
+  mocks.pattern.mockReset().mockResolvedValue("^[a-z0-9][a-z0-9_-]{0,127}$");
   mocks.read.mockReset().mockResolvedValue({ id: "user-one", name: "User one",
     description: "Custom", model: "openrouter/b", system_prompt: "Help", tools: [], skills: [] });
   mocks.legacyAvailable.mockReset().mockResolvedValue(true);
@@ -152,5 +154,52 @@ describe("AgentTemplatesView", () => {
     expect(mocks.reset).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Confirm reset" }));
     await waitFor(() => expect(mocks.reset).toHaveBeenCalledWith("user-one"));
+  });
+
+  it("loads the new fork into the editor right after forking", async () => {
+    mocks.read.mockImplementation(async (id: string) => id === "builtin-fork"
+      ? { id: "builtin-fork", name: "Built in", description: "Core", model: "openrouter/a", system_prompt: "Core prompt", tools: [], skills: [] }
+      : { id: id, name: id, description: "", model: "", system_prompt: "x", tools: [], skills: [] });
+    render(<AgentTemplatesView />);
+    await waitFor(() => expect(screen.getByText("Built-in")).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: /Built in/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "Fork this template" }));
+    await waitFor(() => expect(mocks.read).toHaveBeenCalledWith("builtin-fork"));
+    await waitFor(() => expect((screen.getByLabelText("ID") as HTMLInputElement).value).toBe("builtin-fork"));
+    expect((screen.getByLabelText("System prompt") as HTMLTextAreaElement).value).toBe("Core prompt");
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("words the Reset confirmation as a reset, not a deletion", async () => {
+    render(<AgentTemplatesView />);
+    await waitFor(() => expect(screen.getByText("User template")).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: /User one/ }));
+    await waitFor(() => expect(mocks.read).toHaveBeenCalledWith("user-one"));
+    fireEvent.click(screen.getByRole("button", { name: "Reset" }));
+    expect(screen.getByRole("button", { name: "Confirm reset" }).textContent).toBe("Reset to original");
+    expect(screen.queryByText("Delete permanently")).toBeNull();
+  });
+
+  it("offers Reset only on forks", async () => {
+    mocks.listIds.mockResolvedValue([{ id: "user-one", forkedFrom: null }]);
+    render(<AgentTemplatesView />);
+    await waitFor(() => expect(screen.getByText("User template")).toBeTruthy());
+    fireEvent.click(screen.getByRole("button", { name: /User one/ }));
+    await waitFor(() => expect(mocks.read).toHaveBeenCalledWith("user-one"));
+    expect(screen.getByRole("button", { name: "Delete" })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Reset" })).toBeNull();
+  });
+
+  it("shows the published ID rule and blocks Save for an invalid new ID", async () => {
+    render(<AgentTemplatesView />);
+    fireEvent.click(await screen.findByRole("button", { name: "New agent template" }));
+    fireEvent.change(screen.getByLabelText("ID"), { target: { value: "Bad ID!" } });
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Bad" } });
+    fireEvent.change(screen.getByLabelText("System prompt"), { target: { value: "Hi" } });
+    expect(await screen.findByText("ID does not match the allowed format.")).toBeTruthy();
+    expect(screen.getByText("^[a-z0-9][a-z0-9_-]{0,127}$")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("ID"), { target: { value: "good-id" } });
+    expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(false);
   });
 });

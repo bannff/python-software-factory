@@ -3,6 +3,9 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
+from pydantic import Field
+
+from ...authoring.validation import ID_PATTERN
 from .discovery import StrictDTO
 
 ConfigKind = Literal["agent", "swarm", "graph"]
@@ -42,7 +45,7 @@ class AgentDeleteInput(StrictDTO):
 
 class AgentForkInput(StrictDTO):
     source_agent_id: str
-    new_agent_id: str
+    new_agent_id: str = Field(pattern=ID_PATTERN)
 
 
 class SquadCreateInput(StrictDTO):

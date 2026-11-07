@@ -10,9 +10,10 @@ import type { Persona } from "@/lib/types";
 import { authoringGateNotice, getAuthoringCapabilities,
   type AuthoringCapabilities } from "@/lib/authoring-capabilities";
 import {
-  deleteUserTemplate, forkTemplate, listUserTemplateIds,
+  deleteUserTemplate, forkTemplate, getTemplateIdPattern, listUserTemplates,
   readUserTemplate, resetTemplate, saveUserTemplate,
 } from "./agent-template-api";
+import { TemplateIdHint } from "./template-id-hint";
 
 const EMPTY = { id: "", name: "", description: "", model: "", system_prompt: "" };
 type Form = typeof EMPTY;
@@ -31,7 +32,9 @@ function fromPersona(persona: Persona): Form {
 export default function AgentTemplatesView() {
   const { personas, loading, error, refresh } = usePersonas();
   const { ready } = useMcpConnection();
-  const [userIds, setUserIds] = useState<Set<string>>(new Set());
+  // User template id -> source persona id (null when hand-authored, so not resettable).
+  const [templates, setTemplates] = useState<Map<string, string | null>>(new Map());
+  const [idPattern, setIdPattern] = useState<string | null>(null);
   const [capabilities, setCapabilities] = useState<Capabilities>({ status: "checking" });
   const [selected, setSelected] = useState<string | null>(null);
   const [form, setForm] = useState<Form>(EMPTY);
@@ -43,16 +46,22 @@ export default function AgentTemplatesView() {
     if (!ready) return;
     void getAuthoringCapabilities().then(async (caps) => {
       setCapabilities({ status: "ready", caps });
-      if (caps.config.read) setUserIds(new Set(await listUserTemplateIds()));
+      if (caps.config.read) {
+        setTemplates(new Map((await listUserTemplates()).map((t) => [t.id, t.forkedFrom])));
+      }
     }).catch((cause) => {
       setCapabilities({ status: "failed",
         message: withReason("Couldn’t inspect Agent authoring capabilities.", errorReason(cause)) });
     });
   }, [personas.length, ready]);
+  useEffect(() => {
+    if (ready) void getTemplateIdPattern().then(setIdPattern).catch(() => setIdPattern(null));
+  }, [ready]);
 
-  const choose = async (persona: Persona) => {
+  // `isUser` is passed explicitly because a fresh fork is not yet in `templates` state.
+  const load = async (persona: Persona, isUser: boolean) => {
     setSelected(persona.id); setNotice(null); setForm(fromPersona(persona)); setRaw({});
-    if (!userIds.has(persona.id)) return;
+    if (!isUser) return;
     setBusy(true);
     try {
       const config = await readUserTemplate(persona.id);
@@ -65,6 +74,7 @@ export default function AgentTemplatesView() {
     } catch (cause) { setNotice(withReason("Template unavailable.", errorReason(cause))); }
     finally { setBusy(false); }
   };
+  const choose = (persona: Persona) => load(persona, templates.has(persona.id));
   const set = (key: keyof Form) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm((value) => ({ ...value, [key]: event.target.value }));
   const save = async () => {
@@ -91,8 +101,9 @@ export default function AgentTemplatesView() {
     const newId = `${selected}-fork`;
     try {
       const id = await forkTemplate(selected, newId);
-      setUserIds((prev) => new Set(prev).add(id));
-      setSelected(id); refresh();
+      setTemplates((prev) => new Map(prev).set(id, selected));
+      refresh();
+      await load({ id, name: form.name, description: form.description, model: form.model } as Persona, true);
       setNotice("Forked a private copy you can edit.");
     } catch (cause) { setNotice(withReason("Couldn’t fork this template.", errorReason(cause))); }
     finally { setBusy(false); }
@@ -104,7 +115,7 @@ export default function AgentTemplatesView() {
       await resetTemplate(selected);
       await choose({ id: selected, name: form.name, description: form.description, model: form.model } as Persona);
       setNotice("Reset to the original template.");
-    } catch (cause) { setNotice(withReason("Couldn’t reset — this template may not be a fork.", errorReason(cause))); }
+    } catch (cause) { setNotice(withReason("Couldn’t reset template.", errorReason(cause))); }
     finally { setBusy(false); }
   };
 
@@ -113,7 +124,8 @@ export default function AgentTemplatesView() {
   const canDelete = caps?.agent_templates.delete === true;
   const canFork = caps?.agent_templates.fork === true;
   const canReset = caps?.agent_templates.reset === true;
-  const isUserTemplate = selected !== null && userIds.has(selected);
+  const idInvalid = Boolean(selected === null && form.id && idPattern && !new RegExp(idPattern).test(form.id));
+  const isUserTemplate = selected !== null && templates.has(selected);
   // The New button sets `selected` to null; a user template always keeps its editor.
   const showEditor = selected === null ? canCreate : isUserTemplate;
 
@@ -131,7 +143,7 @@ export default function AgentTemplatesView() {
           type="button" onClick={() => void choose(persona)} aria-current={selected === persona.id}
           className={`rounded-md px-3 py-2 text-left ${selected === persona.id ? "bg-violet-500/15" : "hover:bg-accent/30"}`}>
           <span className="block truncate text-sm font-medium">{persona.name}</span>
-          <span className="block truncate text-[10px] text-muted-foreground">{userIds.has(persona.id) ? "User template" : "Built-in"}</span>
+          <span className="block truncate text-[10px] text-muted-foreground">{templates.has(persona.id) ? "User template" : "Built-in"}</span>
         </button>)}</div>}
       {caps && !caps.config.read && <p className="mt-3 text-[11px] text-muted-foreground">{authoringGateNotice(caps, "config", "read")}</p>}
       </div>
@@ -152,17 +164,18 @@ export default function AgentTemplatesView() {
           : <div className="grid gap-3">
             {caps && !canCreate && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "agent_templates", "create")}</p>}
             <Field label="ID"><input value={form.id} onChange={set("id")} disabled={!canCreate || selected !== null} /></Field>
+            <TemplateIdHint pattern={selected === null ? idPattern : null} invalid={idInvalid} />
             <Field label="Name"><input value={form.name} onChange={set("name")} disabled={!canCreate} /></Field>
             <Field label="Description"><input value={form.description} onChange={set("description")} disabled={!canCreate} /></Field>
             <Field label="Model"><input value={form.model} onChange={set("model")} disabled={!canCreate} /></Field>
             <Field label="System prompt"><textarea value={form.system_prompt} onChange={set("system_prompt")} rows={6} disabled={!canCreate} /></Field>
-            <div className="flex gap-2">{canCreate && <button type="button" onClick={() => void save()} disabled={busy || !form.id || !form.name || !form.system_prompt}
+            <div className="flex gap-2">{canCreate && <button type="button" onClick={() => void save()} disabled={busy || !form.id || idInvalid || !form.name || !form.system_prompt}
               className="inline-flex items-center gap-1.5 rounded-md bg-violet-500 px-3 py-2 text-xs text-white disabled:opacity-40"><Save className="h-3.5 w-3.5" /> Save</button>}
-              {selected && canReset && <ConfirmDelete label="Reset" onConfirm={() => void reset()} disabled={busy}
+              {selected && canReset && templates.get(selected) && <ConfirmDelete label="Reset" confirmText="Reset to original" onConfirm={() => void reset()} disabled={busy}
                 className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-3 py-2 text-xs text-muted-foreground hover:bg-accent/30 hover:text-foreground"><RotateCcw className="h-3.5 w-3.5" /> Reset</ConfirmDelete>}
               {selected && canDelete && <ConfirmDelete label="Delete" onConfirm={() => void remove()} disabled={busy}
                 className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 px-3 py-2 text-xs text-destructive"><Trash2 className="h-3.5 w-3.5" /> Delete</ConfirmDelete>}</div>
-            {selected && caps && !canReset && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "agent_templates", "reset")}</p>}
+            {selected && caps && !canReset && templates.get(selected) && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "agent_templates", "reset")}</p>}
             {selected && caps && !canDelete && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "agent_templates", "delete")}</p>}
           </div>}
         {notice && <p role="status" className="mt-3 text-xs text-muted-foreground">{notice}</p>}

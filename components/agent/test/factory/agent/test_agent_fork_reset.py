@@ -64,3 +64,25 @@ def test_provenance_sidecar_is_root_confined(manager: AuthoringManager) -> None:
     """Same path-escape guard every other authoring primitive gets."""
     with pytest.raises(AuthoringError):
         manager.write_fork_provenance("agent", "../../etc/passwd", "companion-x-default")
+
+
+def test_list_items_reports_fork_source_only_for_forks(manager: AuthoringManager) -> None:
+    for item_id in ("plain", "forked"):
+        manager.write_yaml_config("agent", {"id": item_id, "name": item_id, "system_prompt": "hi"})
+    manager.write_fork_provenance("agent", "forked", "companion-x-default")
+
+    items = {item["id"]: item for item in manager.list_items("agent")}
+
+    assert "forked_from" not in items["plain"]
+    assert items["forked"]["forked_from"] == "companion-x-default"
+
+
+def test_fork_input_publishes_the_id_rule_in_its_schema() -> None:
+    """The dashboard reads this pattern instead of carrying its own copy."""
+    import re
+
+    from factory.agent.mcp.contracts.authoring import AgentForkInput
+
+    pattern = AgentForkInput.model_json_schema()["properties"]["new_agent_id"]["pattern"]
+    assert re.fullmatch(pattern, "security-analyst-fork")
+    assert not re.fullmatch(pattern, "Bad ID!")
