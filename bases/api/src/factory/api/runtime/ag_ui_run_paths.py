@@ -164,6 +164,7 @@ async def legacy_agent_reason(
     with ``CHAT_STREAMING`` off).
     """
     from .ag_ui_helpers import (
+        MODEL_NOT_CONFIGURED, MODEL_NOT_CONFIGURED_TEXT,
         execute_tool_calls, extract_ag_ui_events,
     )
 
@@ -179,6 +180,13 @@ async def legacy_agent_reason(
         yield sse({"type": "RUN_ERROR",
                     "message": "Chat is temporarily unavailable. Please retry.",
                     "timestamp": time.time()})
+        return
+
+    if isinstance(agent_result, dict) and agent_result.get("error") == MODEL_NOT_CONFIGURED:
+        if outcome is not None:
+            outcome.errored = True
+        yield sse({"type": "RUN_ERROR", "code": MODEL_NOT_CONFIGURED,
+                   "message": MODEL_NOT_CONFIGURED_TEXT, "timestamp": time.time()})
         return
 
     if isinstance(agent_result, dict):
