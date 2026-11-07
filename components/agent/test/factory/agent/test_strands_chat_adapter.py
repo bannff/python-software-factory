@@ -84,8 +84,14 @@ async def test_cancel_running_turn() -> None:
         return collected
 
     task = asyncio.ensure_future(drain())
-    await asyncio.sleep(0.05)
-    assert await chat.cancel("cancel-thread") is True
+    # Poll instead of a fixed sleep: cancel() is False until the turn registers,
+    # and how long that takes varies with machine load.
+    async def cancelled() -> bool:
+        while not await chat.cancel("cancel-thread"):
+            await asyncio.sleep(0.01)
+        return True
+
+    assert await asyncio.wait_for(cancelled(), timeout=5) is True
     gate.set()
     events = await asyncio.wait_for(task, timeout=5)
     assert any(e.type == "text_delta" for e in events)
