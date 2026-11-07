@@ -52,3 +52,13 @@ def test_one_env_var_sets_agent_and_judge_defaults(monkeypatch) -> None:
 ])
 def test_model_unavailable_classification(error, expected) -> None:
     assert mr.is_model_unavailable(error) is expected
+
+
+def test_untouched_bedrock_default_follows_the_env_default(monkeypatch) -> None:
+    """Simulation/SOP/chaos tools all default model_id to the Bedrock id (#369)."""
+    monkeypatch.setenv("COMPANION_X_EVAL_MODEL", "us.anthropic.claude-env")
+    assert mr.resolve_agent_model(mr.DEFAULT_BEDROCK_MODEL) == "us.anthropic.claude-env"
+    # An explicit non-default id is never overridden.
+    assert mr.resolve_agent_model("us.anthropic.claude-x") == "us.anthropic.claude-x"
+    monkeypatch.delenv("COMPANION_X_EVAL_MODEL")
+    assert mr.resolve_agent_model(mr.DEFAULT_BEDROCK_MODEL) == mr.DEFAULT_BEDROCK_MODEL
