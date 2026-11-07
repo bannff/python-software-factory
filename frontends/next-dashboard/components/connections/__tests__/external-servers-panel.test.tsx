@@ -61,6 +61,18 @@ describe("ExternalServersPanel", () => {
     await waitFor(() => expect(mocks.importDoc).toHaveBeenCalledWith(doc));
   });
 
+  it("explains a malformed import in words, not the raw code", async () => {
+    mocks.importDoc.mockRejectedValueOnce(new Error("connections_document_invalid"));
+    render(<ExternalServersPanel ready onChanged={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: /Add server/ }));
+    fireEvent.click(screen.getByRole("tab", { name: "JSON" }));
+    fireEvent.change(screen.getByLabelText("mcpServers JSON"), { target: { value: "{bad json" } });
+    fireEvent.submit(screen.getByRole("dialog").querySelector("form")!);
+    const alert = (await screen.findByRole("alert")).textContent ?? "";
+    expect(alert).toContain("valid mcpServers JSON");
+    expect(alert).not.toContain("connections_document_invalid");
+  });
+
   it("toggles enabled with the exact stored spec and CAS revision", async () => {
     render(<ExternalServersPanel ready onChanged={vi.fn()} />);
     fireEvent.click(await screen.findByLabelText("Enable github"));

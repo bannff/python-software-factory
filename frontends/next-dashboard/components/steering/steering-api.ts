@@ -1,4 +1,5 @@
 import { callTool } from "@/lib/api";
+import { toolArgPattern } from "@/lib/tool-arg-pattern";
 import { unwrapToolData } from "@/lib/tool-result-data";
 
 export interface SteeringDocument {
@@ -27,6 +28,9 @@ export async function readSteering(id: string): Promise<Required<SteeringDocumen
   if (!row || row.content === undefined) throw new Error("Steering document unavailable.");
   return row as Required<SteeringDocument>;
 }
+
+/** The document ID rule the backend publishes on `agent_create_steering`. */
+export const getSteeringIdPattern = () => toolArgPattern("agent_create_steering", "document_id");
 
 export async function saveSteering(input: {
   id: string; content: string; expectedSha256?: string;
