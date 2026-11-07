@@ -68,15 +68,27 @@ export function describeTool(name: string): FriendlyToolMeta {
   };
 }
 
+/** Backend stamps tool calls made during a chat run with ``chat:<thread>``. */
+const CHAT_CALLER_PREFIX = "chat:";
+
+interface HeaderCandidate {
+  title: string;
+  type?: string;
+  caller?: string;
+}
+
 /**
  * Pick the most recent live-tool-stream entry that is *interesting*
- * for the chat header (skip session keepalives, telemetry pings, etc.).
+ * for the chat header: something the chat agent is doing. Tool calls
+ * not made on behalf of a chat run (the dashboard's own polling reads,
+ * warmups) and infrastructure plumbing are skipped.
  * Returns null when nothing on the stream rises above noise.
  */
-export function pickHeaderTool<T extends { title: string }>(
+export function pickHeaderTool<T extends HeaderCandidate>(
   entries: ReadonlyArray<T>,
 ): { entry: T; meta: FriendlyToolMeta } | null {
   for (const entry of entries) {
+    if (entry.type === "tool_call" && !entry.caller?.startsWith(CHAT_CALLER_PREFIX)) continue;
     const meta = describeTool(entry.title);
     if (!meta.isInfrastructure) return { entry, meta };
   }
