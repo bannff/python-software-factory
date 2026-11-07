@@ -1,0 +1,36 @@
+import { callTool } from "@/lib/api";
+import { errorReason, withReason } from "@/lib/error-reason";
+import { unwrapToolData } from "@/lib/tool-result-data";
+
+export interface Evaluator { name: string; description: string; requiresRubric: boolean }
+export interface EvalCase { input: string; expected?: string }
+export interface RunInput { cases: EvalCase[]; evaluator_names: string[]; experiment_name?: string; rubric?: string; model_id?: string }
+export interface RunOutcome { cases: number; scores: [string, number][] }
+
+export async function listEvaluators(): Promise<Evaluator[]> {
+  const data = unwrapToolData(await callTool("evals_list_evaluators")) as { evaluators?: unknown } | null;
+  const rows = Array.isArray(data?.evaluators) ? data.evaluators : [];
+  return rows.flatMap((r: Record<string, unknown>) => typeof r?.name === "string"
+    ? [{ name: r.name, description: typeof r.description === "string" ? r.description : "", requiresRubric: r.requires_rubric === true }] : []);
+}
+
+/** Sends only what the person filled in, so server defaults (model, prompt) stay in charge. */
+export async function runExperiment(input: RunInput): Promise<RunOutcome> {
+  const args: Record<string, unknown> = { ...input };
+  for (const key of ["experiment_name", "rubric", "model_id"] as const) if (!input[key]?.trim()) delete args[key];
+  const data = unwrapToolData(await callTool("evals_run_experiment", args)) as Record<string, unknown> | null;
+  const summary = (data?.summary && typeof data.summary === "object" ? data.summary : {}) as Record<string, unknown>;
+  const scores = Object.entries(summary).filter((e): e is [string, number] => typeof e[1] === "number").slice(0, 3);
+  return { cases: Array.isArray(data?.case_results) ? data.case_results.length : input.cases.length, scores };
+}
+
+const MODELS = "Evaluation models aren't set up on this server, so the run couldn't be scored. Ask an operator to configure them.";
+const FAILURES: [RegExp, string][] = [
+  [/eval_model_unavailable|tool_execution_failed/, MODELS],
+];
+
+export function runFailure(cause: unknown): string {
+  const reason = errorReason(cause) ?? "";
+  const known = FAILURES.find(([pattern]) => pattern.test(reason));
+  return known ? known[1] : withReason("The run could not start.", reason || undefined);
+}

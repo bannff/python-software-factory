@@ -15,9 +15,11 @@ const WelcomeView = lazy(() => import("./welcome-view"));
 const GraphView = lazy(() => import("./graph-view"));
 const TimelineViewV2 = lazy(() => import("./timeline-view-v2"));
 const EvalsLeaderboardView = lazy(() => import("./evals-leaderboard-view"));
+const EvalsRunPanel = lazy(() => import("@/components/evals/evals-run-panel").then((m) => ({ default: m.EvalsRunPanel })));
 const FindingsView = lazy(() => import("./findings-view"));
 const BrickViewRenderer = lazy(() => import("./brick-view-renderer"));
 const MlControls = lazy(() => import("../ml/ml-controls").then((m) => ({ default: m.MlControls })));
+const EnvironmentsPanel = lazy(() => import("../sandbox/environments-panel").then((m) => ({ default: m.EnvironmentsPanel })));
 const SandboxBanner = lazy(() => import("../sandbox/sandbox-banner").then((m) => ({ default: m.SandboxBanner })));
 const GamesPanel = lazy(() => import("../games/games-panel").then((m) => ({ default: m.GamesPanel })));
 const BountiesPanel = lazy(() => import("../blockchain/bounties-panel").then((m) => ({ default: m.BountiesPanel })));
@@ -112,12 +114,12 @@ export function Canvas(props: CanvasProps) {
           {props.activeView === "graph" && <GraphView {...canvasState} />}
           {props.activeView === "timeline-v2" && <TimelineViewV2 {...canvasState} />}
           {props.activeView === "findings" && <FindingsView {...canvasState} />}
-          {props.activeView === "evals" && <EvalsLeaderboardView onNavigate={props.onNavigate} />}
+          {props.activeView === "evals" && <Refreshable label="evals"><><EvalsRunPanel /><EvalsLeaderboardView onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "metrics" && <RuntimeMetricsView onNavigate={props.onNavigate} />}
           {props.activeView === "ml" && <Refreshable label="ml"><BrickViewRenderer viewTool="ml_get_views" /><MlControls /></Refreshable>}
           {props.activeView === "games" && <Refreshable label="games"><><GamesPanel /><GraphBrickView viewTool="games_get_views" defaultEntityType="GameSession" onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "blockchain" && <Refreshable label="blockchain"><><BlockchainPanel /><BountiesPanel /><GraphBrickView viewTool="blockchain_get_views" defaultEntityType="Transaction" onNavigate={props.onNavigate} /></></Refreshable>}
-          {props.activeView === "sandbox" && <Refreshable label="sandbox"><><SandboxBanner /><GraphBrickView viewTool="sandbox_get_views" defaultEntityType="ToolInvocation" onNavigate={props.onNavigate} /></></Refreshable>}
+          {props.activeView === "sandbox" && <Refreshable label="sandbox"><><SandboxBanner /><EnvironmentsPanel /><GraphBrickView viewTool="sandbox_get_views" defaultEntityType="ToolInvocation" onNavigate={props.onNavigate} /></></Refreshable>}
           {props.activeView === "capabilities" && <AgentCapabilitiesView />}
           {props.activeView === "sessions" && <SessionsCanvas pathname={pathname}
             chatOpen={props.chatOpen} onToggleChat={props.onToggleChat} />}
