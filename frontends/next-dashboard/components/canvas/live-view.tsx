@@ -20,7 +20,8 @@
  */
 
 import { useMemo } from "react";
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, Paintbrush } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ComponentTree } from "@companion-x/shared-renderer";
 import { useCopilotCanvasState } from "@/lib/hooks/use-copilot-state";
 import { usePaintedComponents } from "@/lib/copilotkit/a2ui-canvas-slots";
@@ -40,7 +41,7 @@ export default function LiveView() {
   const components = usePaintedComponents(slot);
 
   if (components.length === 0) {
-    return <EmptyState />;
+    return <LiveEmpty />;
   }
 
   return (
@@ -58,20 +59,10 @@ export default function LiveView() {
   );
 }
 
-function EmptyState() {
+function LiveEmpty() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-muted-foreground">
-      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/10">
-        <LayoutGrid className="h-6 w-6 text-violet-400/60" />
-      </div>
-      <p className="text-sm">Awaiting agent paint…</p>
-      <p className="text-[11px] text-muted-foreground/60 max-w-xs">
-        This view renders any A2UI payload the agent writes to{" "}
-        <code className="rounded bg-muted/50 px-1 py-0.5 font-mono text-[10px]">
-          state.canvas.live
-        </code>{" "}
-        via the <code className="rounded bg-muted/50 px-1 py-0.5 font-mono text-[10px]">ui_paint_canvas</code> MCP tool.
-      </p>
-    </div>
+    <EmptyState icon={LayoutGrid} title="Nothing painted yet"
+      hint="Ask the assistant to build a view and it appears here."
+      action={{ icon: Paintbrush, label: "Paint something", prompt: "Paint something useful on the Live view." }} />
   );
 }
