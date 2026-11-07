@@ -27,7 +27,7 @@ export function SessionCard({ session, agentName, active, selected, onSelect }: 
       aria-label={`Open session ${session.title}${archived ? " (archived)" : ""}`}
       onClick={onSelect}
       className={cn(
-        "group flex min-w-0 flex-col gap-1 rounded-xl border p-3 text-left transition-all",
+        "group flex w-full min-w-0 flex-col gap-1 rounded-xl border p-3 text-left transition-all",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         selected
           ? "border-violet-500/50 bg-violet-500/[0.06]"
