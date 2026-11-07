@@ -27,7 +27,13 @@ def _ollama_client_args() -> dict[str, str]:
 
 
 def resolve_agent_model(model_id: str) -> Any:
-    """Strands accepts a Bedrock id string, or a model object for other providers."""
+    """Strands accepts a Bedrock id string, or a model object for other providers.
+
+    Tools default ``model_id`` to the Bedrock id, so an untouched default means
+    "use the configured default" rather than a deliberate Bedrock choice.
+    """
+    if model_id == DEFAULT_BEDROCK_MODEL:
+        model_id = default_model_id()
     if model_id.startswith(OLLAMA_PREFIX):
         from strands.models.openai import OpenAIModel
         return OpenAIModel(
