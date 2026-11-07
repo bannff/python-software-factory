@@ -17,6 +17,7 @@ from typing import Any
 
 from .registry import get_service
 from .poll_noise import POLL_NOISE as _POLL_NOISE
+from .graph_sink_gate import graph_sink_enabled
 from . import event_bus
 
 logger = logging.getLogger(__name__)
@@ -161,6 +162,9 @@ async def _stream_via_brick(
 
     while True:
         try:
+            if not graph_sink_enabled():
+                await asyncio.sleep(_POLL_INTERVAL)
+                continue
             invoker = _get_invoker()
             if invoker is None:
                 await asyncio.sleep(_POLL_INTERVAL)

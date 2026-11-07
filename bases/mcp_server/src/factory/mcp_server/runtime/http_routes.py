@@ -27,6 +27,7 @@ import os
 from typing import Any
 
 from factory.mcp_utils.interface import get_tool_map, make_serializable
+from factory.mcp_utils.interface import graph_sink_enabled as _graph_sink_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +39,7 @@ def _timeline_capabilities() -> dict[str, Any]:
         or os.environ.get("GRAPH_BACKEND")
         or "networkx"
     ).lower()
-    graph_sink_enabled = os.environ.get(
-        "TELEMETRY_GRAPH_SINK", "false",
-    ).lower() in ("1", "true", "yes")
+    graph_sink_enabled = _graph_sink_enabled()
     history_available = graph_sink_enabled
     history_reason = None if history_available else "graph_sink_disabled"
 

@@ -13,12 +13,13 @@ state remain here so existing test patches keep applying.
 from __future__ import annotations
 
 import logging
-import os
 import threading
 import time
 from queue import SimpleQueue, Empty
 from typing import Any
 from uuid import uuid4
+
+from factory.mcp_utils.interface import graph_sink_enabled
 
 from . import _graph_sink_lineage as _lineage
 from . import _graph_sink_writers as _w
@@ -85,7 +86,7 @@ def set_aggregator(agg: Any) -> None:
 
 
 def _is_enabled() -> bool:
-    return os.environ.get("TELEMETRY_GRAPH_SINK", "false").lower() in ("1", "true", "yes")
+    return graph_sink_enabled()
 
 
 def _is_recursive(brick_name: str, tool_name: str) -> bool:
