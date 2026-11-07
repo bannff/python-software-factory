@@ -12,6 +12,7 @@ from .cors import cors_options, cors_origins
 from .coercion import JsonObject, JsonArray, WireDatetime
 from .decorators import deterministic, operational, authoring
 from .digests import egress_request_digest
+from .graph_sink_gate import GRAPH_SINK_ENV, graph_sink_enabled
 from .service_bindings import (
     AttemptBinding, EnrollmentBinding, ExecutionBinding, ProtectedArtifactBinding,
     CredentialSlotBinding, CredentialEgressBinding, SteerBinding,
@@ -122,6 +123,7 @@ __all__ = [
     "set_caller_hint", "get_caller_hint", "get_run_id", "normalize_envelope",
     "envelope_updates_from_mapping", "push_envelope_updates", "reset_envelope",
     "set_service", "get_service", "event_bus", "tool_invocation_stream",
+    "GRAPH_SINK_ENV", "graph_sink_enabled",
     "_SENTINEL_PING", "AuthorizationAssertion", "LocalEnvironmentKeyProvider", "ProtectedKeyUnavailable",
     "ProtectedArtifactRef", "ProtectedContentDescriptor", "ProtectedContentKeyProvider",
     "ProtectedContentPolicyProfile", "ProtectedContentProjection", "TestKeyProvider",
