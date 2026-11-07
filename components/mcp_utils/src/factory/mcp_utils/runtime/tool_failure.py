@@ -23,7 +23,8 @@ IDEMPOTENCY_KEY_CONFLICT = "idempotency_key_conflict"
 # caller secrets in them, unlike an arbitrary third-party exception's
 # message, which might. Safe to log verbatim, same trust class as
 # SafeDiagnostic below.
-_SAFE_TO_LOG_MESSAGE = (ValueError, TypeError, ValidationError)
+# ImportError text is module/name-shaped, and is exactly what an operator needs.
+_SAFE_TO_LOG_MESSAGE = (ValueError, TypeError, ValidationError, ImportError)
 
 
 class SafeDiagnostic(ValueError):
@@ -89,3 +90,17 @@ def tool_idempotency_conflict(func: Callable[..., Any]) -> ToolResult[None]:
     tool_identity = f"{func.__module__}.{func.__qualname__}"
     logger.error("typed_mcp_idempotency_key_conflict tool=%s", tool_identity)
     return ToolResult(ok=False, data=None, error=IDEMPOTENCY_KEY_CONFLICT)
+
+
+def log_dispatch_failure(tool_name: str, exc: BaseException) -> None:
+    """Trace an unexpected native-dispatch failure the public envelope hides."""
+    if isinstance(exc, _SAFE_TO_LOG_MESSAGE):
+        logger.error(
+            "native_mcp_dispatch_failed tool=%s error_type=%s message=%s",
+            tool_name, type(exc).__name__, exc,
+        )
+    else:
+        logger.error(
+            "native_mcp_dispatch_failed tool=%s error_type=%s",
+            tool_name, type(exc).__name__,
+        )
