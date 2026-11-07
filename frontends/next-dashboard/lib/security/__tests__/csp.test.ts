@@ -21,6 +21,13 @@ describe("CSP — production nonce policy", () => {
     expect(scriptSrc).not.toContain("'unsafe-inline'");
   });
 
+  it("keeps style and font sources self-only", () => {
+    const csp = buildContentSecurityPolicy("test-nonce");
+
+    expect(csp).not.toContain("fonts.googleapis.com");
+    expect(csp).not.toContain("fonts.gstatic.com");
+  });
+
   it("retains restrictive document, frame, and connection directives", () => {
     const csp = buildContentSecurityPolicy("test-nonce");
 
@@ -50,6 +57,13 @@ describe("CSP — development compatibility", () => {
     expect(csp).toContain("'unsafe-inline'");
     expect(csp).toContain("'unsafe-eval'");
     expect(csp).toContain("connect-src 'self' https: wss: ws: http:");
+  });
+
+  it("allows only the Google Fonts origins the CopilotKit inspector imports", () => {
+    const csp = buildContentSecurityPolicy("test-nonce");
+
+    expect(csp).toContain("style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;");
+    expect(csp).toContain("font-src 'self' data: https://fonts.gstatic.com;");
   });
 });
 

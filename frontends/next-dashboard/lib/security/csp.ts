@@ -32,7 +32,17 @@ export function buildContentSecurityPolicy(nonce?: string): string {
     : `'self'${nonceSource} 'wasm-unsafe-eval' 'unsafe-inline' 'unsafe-eval'`;
   // Next Themes and runtime UI styles do not all carry a nonce. This preserves
   // the dashboard's pre-existing style allowance without weakening scripts.
-  const styleSrc = "'self' 'unsafe-inline'";
+  // CopilotKit's dev inspector (<cpk-web-inspector>, enabled on localhost)
+  // @imports Plus Jakarta Sans / Spline Sans Mono from Google Fonts inside its
+  // shadow-DOM styles, which cannot be self-hosted via next/font. Allow exactly
+  // those two origins outside production so the inspector loads cleanly; the
+  // production policy stays self-only.
+  const styleSrc = isProd
+    ? "'self' 'unsafe-inline'"
+    : "'self' 'unsafe-inline' https://fonts.googleapis.com";
+  const fontSrc = isProd
+    ? "'self' data:"
+    : "'self' data: https://fonts.gstatic.com";
   const connectSrc = (isProd
     ? ["'self'", "https:", "wss:", apiOrigin]
     : ["'self'", "https:", "wss:", "ws:", "http:", apiOrigin]
@@ -48,7 +58,7 @@ export function buildContentSecurityPolicy(nonce?: string): string {
     // React and Framer Motion intentionally use style attributes.
     ["style-src-attr", "'unsafe-inline'"],
     ["img-src", "'self' data: blob:"],
-    ["font-src", "'self' data:"],
+    ["font-src", fontSrc],
     ["frame-src", "'self'"],
     ["frame-ancestors", "'self'"],
     ["connect-src", connectSrc],
