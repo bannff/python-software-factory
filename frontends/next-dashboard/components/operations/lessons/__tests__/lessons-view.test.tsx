@@ -120,6 +120,7 @@ describe("LessonsView curation", () => {
     });
     await open();
     fireEvent.click(screen.getByRole("button", { name: /Delete/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Confirm delete/i }));
     const notice = await screen.findByText(/Send a message first so this chat is saved, then try again/i);
     expect(notice.textContent).not.toMatch(/lesson_session_not_found|changed since|has been deleted/i);
     expect(screen.getByRole("heading", { name: "Prefer dark mode" })).toBeTruthy();
@@ -145,9 +146,63 @@ describe("LessonsView curation", () => {
     });
     await open();
     fireEvent.click(screen.getByRole("button", { name: /Delete/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Confirm delete/i }));
     await waitFor(() =>
       expect(mocks.callTool).toHaveBeenCalledWith("lessons_remove", { lesson_id: ID, expected_revision: 2, envelope: { session_id: "thread" } }),
     );
     expect(await screen.findByText(/This lesson has been deleted/i)).toBeTruthy();
+  });
+
+  it("does not delete on the first click; Cancel backs out", async () => {
+    route({ lessons_list: async () => wrap({ lessons: [proposed] }) });
+    await open();
+    fireEvent.click(screen.getByRole("button", { name: /Delete/ }));
+    expect(mocks.callTool.mock.calls.some((c) => c[0] === "lessons_remove")).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(mocks.callTool.mock.calls.some((c) => c[0] === "lessons_remove")).toBe(false);
+    expect(screen.getByRole("button", { name: /Delete/ })).toBeTruthy();
+  });
+
+  it("Keep then Delete works first time when the server bumped only the revision", async () => {
+    // accept returns rev 3; the Memory projection then bumps the stored lesson to rev 4.
+    const stored = { ...proposed, status: "accepted", revision: 4 };
+    let kept = false;
+    route({
+      lessons_list: async () => wrap({ lessons: [kept ? { ...stored, revision: 3 } : proposed] }),
+      lessons_accept: async () => { kept = true; return wrap({ lesson: { ...proposed, status: "accepted", revision: 3 } }); },
+      lessons_get: async () => wrap({ lesson: stored }),
+      lessons_remove: async (args) => {
+        const { expected_revision: rev } = args as { expected_revision: number };
+        return rev === 4 ? wrap({ lesson_id: ID, removed: true }) : Promise.reject(new Error("conflict"));
+      },
+    });
+    await open();
+    fireEvent.click(screen.getByRole("button", { name: /Keep lesson/ }));
+    await screen.findByRole("button", { name: /Delete/ });
+    fireEvent.click(screen.getByRole("button", { name: /Delete/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Confirm delete/i }));
+    await waitFor(() =>
+      expect(mocks.callTool).toHaveBeenCalledWith("lessons_remove", { lesson_id: ID, expected_revision: 4, envelope: { session_id: "thread" } }),
+    );
+    expect(screen.queryByText(/changed since you opened it/i)).toBeNull();
+  });
+
+  it("still reports a real conflict when the lesson's status moved", async () => {
+    route({
+      lessons_list: async () => wrap({ lessons: [proposed] }),
+      lessons_remove: async () => { throw new Error("conflict"); },
+      lessons_get: async () => wrap({ lesson: { ...proposed, status: "rejected", revision: 3 } }),
+    });
+    await open();
+    fireEvent.click(screen.getByRole("button", { name: /Delete/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Confirm delete/i }));
+    expect(await screen.findByText(/changed since you opened it/i)).toBeTruthy();
+  });
+
+  it("labels imported lessons neutrally", async () => {
+    route({ lessons_list: async () => wrap({ lessons: [{ ...proposed, source: "import" }] }) });
+    await open();
+    expect(screen.queryByText(/KiroCrew/i)).toBeNull();
+    expect(screen.getAllByText(/Imported from a previous setup/).length).toBeGreaterThan(0);
   });
 });

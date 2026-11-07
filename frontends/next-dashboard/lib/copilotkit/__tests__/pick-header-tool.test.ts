@@ -18,8 +18,16 @@ describe("pickHeaderTool", () => {
     expect(pickHeaderTool([call("ui_start_session", "chat:abcd1234")])).toBeNull();
   });
 
-  it("keeps non-tool entries such as swarm activity", () => {
-    const entry = { title: "Swarm launched", type: "swarm_event" as const };
-    expect(pickHeaderTool([entry])?.entry).toBe(entry);
+  it("ignores bridged activity events, which are not the chat agent's own work", () => {
+    const events = [
+      { title: "Graph.Projection.Requested", type: "swarm_event" as const },
+      { title: "Lesson.Removed", type: "swarm_event" as const },
+    ];
+    expect(pickHeaderTool(events)).toBeNull();
+  });
+
+  it("looks past activity events to the chat agent's latest tool call", () => {
+    const picked = pickHeaderTool([{ title: "Lesson.Removed", type: "swarm_event" as const }, call("kb_search", "chat:abcd1234")]);
+    expect(picked?.meta.label).toBe("Knowledge search");
   });
 });
