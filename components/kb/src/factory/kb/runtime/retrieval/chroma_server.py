@@ -44,6 +44,8 @@ class ChromaServerVectorStore(VectorStore):
     Connects to a running ChromaDB server via HTTP. Shares the same
     VectorStore protocol as ChromaVectorStore (embedded mode).
     """
+    backend_name = "chroma"
+
 
     def __init__(self, config: ChromaServerConfig | None = None) -> None:
         if not CHROMADB_AVAILABLE:

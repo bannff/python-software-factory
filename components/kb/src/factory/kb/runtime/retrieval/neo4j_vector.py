@@ -36,6 +36,8 @@ class Neo4jVectorConfig(BaseModel):
 
 class Neo4jVectorStore(VectorStore):
     """Neo4j vector store with HNSW semantic search + text fallback."""
+    backend_name = "neo4j"
+
 
     def __init__(self, config: Neo4jVectorConfig | None = None, embedder: Any | None = None) -> None:
         if not NEO4J_AVAILABLE:
