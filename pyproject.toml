@@ -63,7 +63,7 @@ langgraph-legacy = [
 ]
 core-test = [
     "authlib>=1.9.1",
-    "ddgs==9.16.0",
+    "ddgs==9.16.1",
     "langchain-community==0.4.2",
     "langchain-experimental==0.4.2",
 ]
