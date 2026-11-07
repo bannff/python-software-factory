@@ -157,6 +157,34 @@ describe("a2uiToReactAdapterNodes", () => {
     expect(out[0].originalType).toBe("Spacer");
   });
 
+  // Nested `children` are never schema-validated by the backend (only the
+  // top-level components are), so a bare string item must not become a
+  // type-less, id-less node that renders as "Unknown component".
+  it("turns bare text children into Text nodes with stable ids", () => {
+    const out = a2uiToReactAdapterNodes([
+      { id: "list", type: "List", children: ["Item one", "Item two"] as never },
+    ]);
+    const kids = out[0].children ?? [];
+    expect(kids.map((k) => k.component)).toEqual(["Text", "Text"]);
+    expect(kids.map((k) => k.props.value)).toEqual(["Item one", "Item two"]);
+    expect(new Set(kids.map((k) => k.id)).size).toBe(2);
+    expect(kids.every((k) => k.id !== "")).toBe(true);
+  });
+
+  it("does the same for bare text inside props.children", () => {
+    const out = a2uiToReactAdapterNodes([
+      { id: "card", type: "Card", props: { children: ["only text"] } },
+    ]);
+    expect(out[0].children?.[0]).toMatchObject({ component: "Text", props: { value: "only text" } });
+  });
+
+  it("drops children that are neither objects nor text", () => {
+    const out = a2uiToReactAdapterNodes([
+      { id: "card", type: "Card", children: [null, true, undefined] as never },
+    ]);
+    expect(out[0].children).toBeUndefined();
+  });
+
   it("preserves explicit component field over type field", () => {
     const out = a2uiToReactAdapterNodes([
       { id: "a", type: "card", component: "Card", props: {} },

@@ -42,6 +42,23 @@ interface ToAdapterResult {
   parentRef?: string;
 }
 
+/**
+ * Nested children are not schema-validated server-side (only the top-level
+ * components are), so agents may send bare text as an item. Parse it into a
+ * Text node here, at the boundary; anything else non-object is dropped.
+ */
+function _normalizeKids(
+  kids: unknown[],
+  parentId: string | undefined,
+): A2UIWireComponent[] {
+  return kids.flatMap((kid, i): A2UIWireComponent[] => {
+    if (typeof kid === "string" || typeof kid === "number") {
+      return [{ id: `${parentId ?? "text"}-text-${i}`, type: "Text", props: { value: String(kid) } }];
+    }
+    return typeof kid === "object" && kid !== null ? [kid as A2UIWireComponent] : [];
+  });
+}
+
 function _toAdapter(
   c: A2UIWireComponent,
   inheritedParent?: string,
@@ -57,7 +74,7 @@ function _toAdapter(
     cleanProps = rest;
   }
   const topChildren = Array.isArray(c.children) ? c.children : [];
-  const childResults = [...topChildren, ...propChildren].map((kid) =>
+  const childResults = _normalizeKids([...topChildren, ...propChildren], c.id).map((kid) =>
     _toAdapter(kid, c.id),
   );
   const adapter: ReactAdapterNode = {

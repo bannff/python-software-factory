@@ -179,13 +179,18 @@ export function CustomRenderer({ node, renderChildren }: RendererProps) {
 /* FallbackComponent */
 
 export function FallbackComponent({ node }: RendererProps) {
+  // A node with no type is a malformed payload, not an unsupported type; name
+  // the props it did carry so the offending shape can be found.
+  const untyped = !node.component;
+  const keys = Object.keys(node.props ?? {});
   return (
     <div className="rounded-md border border-dashed border-yellow-500/50 bg-yellow-50/50 p-4 dark:bg-yellow-950/20">
       <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
-        Unknown component: <code>{node.component}</code>
+        {untyped ? "Component has no type" : <>Unknown component: <code>{node.component}</code></>}
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
-        Original type: {node.originalType} | ID: {node.id}
+        {untyped ? `Props: ${keys.length > 0 ? keys.join(", ") : "none"}`
+          : `Original type: ${node.originalType}`} | ID: {node.id || "none"}
       </p>
     </div>
   );
