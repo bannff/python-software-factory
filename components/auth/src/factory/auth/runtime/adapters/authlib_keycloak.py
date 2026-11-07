@@ -1,7 +1,7 @@
-"""Authlib-backed Keycloak adapter.
+"""Keycloak adapter using `joserfc` for JWKS handling and JWT verification.
 
-Uses `authlib` for JWKS fetching and JWT verification instead of
-hand-rolling PyJWT key selection + decode.
+The backend kind stays ``authlib_keycloak`` so existing configs keep working;
+authlib.jose is deprecated upstream and joserfc is its successor.
 """
 from __future__ import annotations
 
@@ -9,8 +9,9 @@ from time import time
 from typing import Any
 
 import httpx
-from authlib.jose import JsonWebKey, jwt as authlib_jwt
-from authlib.jose.errors import JoseError
+from joserfc import jwt as jose_jwt
+from joserfc.errors import JoseError
+from joserfc.jwk import KeySet
 
 from factory.auth.runtime.envelope import Envelope
 from factory.auth.runtime.models import (
@@ -20,7 +21,7 @@ from factory.auth.runtime.models import (
 
 
 class AuthlibKeycloakBackend:
-    """Keycloak backend using authlib for JWKS/JWT handling."""
+    """Keycloak backend using joserfc for JWKS/JWT handling."""
 
     kind = "authlib_keycloak"
 
@@ -37,7 +38,7 @@ class AuthlibKeycloakBackend:
             return self._jwks
         resp = self._http.get(self.cfg.effective_jwks_url())
         resp.raise_for_status()
-        self._jwks = JsonWebKey.import_key_set(resp.json())
+        self._jwks = KeySet.import_key_set(resp.json())
         self._jwks_at = now
         return self._jwks
 
@@ -52,7 +53,7 @@ class AuthlibKeycloakBackend:
     def verify_access_token(self, token: str, *, required_audience: str | None,
                             required_scopes: list[str] | None, envelope: Envelope) -> dict[str, Any]:
         try:
-            claims = authlib_jwt.decode(token, self._get_jwks())
+            claims = jose_jwt.decode(token, self._get_jwks()).claims
             opts: dict[str, Any] = {}
             aud = required_audience or self.cfg.default_audience
             if aud:
@@ -60,7 +61,7 @@ class AuthlibKeycloakBackend:
             iss = self.cfg.effective_issuer()
             if iss:
                 opts["iss"] = {"essential": True, "value": iss}
-            claims.validate(opts)
+            jose_jwt.JWTClaimsRegistry(**opts).validate(claims)
             scopes = scope_list_from_claims(dict(claims))
             if required_scopes:
                 missing = sorted(set(required_scopes) - set(scopes))

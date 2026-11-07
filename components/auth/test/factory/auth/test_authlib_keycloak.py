@@ -1,7 +1,7 @@
-"""Tests for AuthlibKeycloakBackend adapter (authlib library).
+"""Tests for AuthlibKeycloakBackend adapter (joserfc library).
 
 Tests JWT verification and JWKS handling with mocked HTTP responses.
-Uses real authlib crypto for key generation and token signing.
+Uses real joserfc crypto for key generation and token signing.
 """
 
 from __future__ import annotations
@@ -11,7 +11,8 @@ import time
 import pytest
 from unittest.mock import MagicMock
 
-from authlib.jose import JsonWebKey, jwt as authlib_jwt
+from joserfc import jwt as jose_jwt
+from joserfc.jwk import KeySet, RSAKey
 
 from factory.auth.runtime.adapters.authlib_keycloak import AuthlibKeycloakBackend
 from factory.auth.runtime.envelope import Envelope
@@ -20,9 +21,9 @@ from factory.auth.runtime.models import KeycloakBackendConfig
 
 def _make_jwk_pair():
     """Generate an RSA key pair for testing."""
-    key = JsonWebKey.generate_key("RSA", 2048, is_private=True)
-    private_jwk = key.as_dict(is_private=True)
-    public_jwk = key.as_dict(is_private=False)
+    key = RSAKey.generate_key(2048)
+    private_jwk = key.as_dict(private=True)
+    public_jwk = key.as_dict(private=False)
     public_jwk["kid"] = "test-kid"
     private_jwk["kid"] = "test-kid"
     return private_jwk, public_jwk
@@ -31,7 +32,7 @@ def _make_jwk_pair():
 def _sign_token(private_jwk: dict, claims: dict) -> str:
     """Sign a JWT with the given private key."""
     header = {"alg": "RS256", "kid": private_jwk["kid"]}
-    return authlib_jwt.encode(header, claims, private_jwk).decode("utf-8")
+    return jose_jwt.encode(header, claims, RSAKey.import_key(private_jwk))
 
 
 @pytest.fixture
@@ -62,12 +63,11 @@ def backend(config, keys):
 
 
 class TestAuthlibKeycloakBackend:
-    """Tests for AuthlibKeycloakBackend using real authlib crypto."""
+    """Tests for AuthlibKeycloakBackend using real joserfc crypto."""
 
     def test_import(self) -> None:
-        """Adapter and authlib are importable."""
-        from authlib.jose import jwt
-        assert jwt is not None
+        """Adapter and joserfc are importable."""
+        assert jose_jwt is not None
         assert AuthlibKeycloakBackend is not None
 
     def test_health_check(self, backend: AuthlibKeycloakBackend) -> None:
@@ -89,14 +89,14 @@ class TestAuthlibKeycloakBackend:
         assert backend._http.get.call_count == 1
 
     def test_token_decode_with_real_crypto(self, keys) -> None:
-        """authlib can sign and decode a JWT with real RSA keys."""
+        """joserfc can sign and decode a JWT with real RSA keys."""
         private_jwk, public_jwk = keys
         now = int(time.time())
         claims = {"sub": "user-42", "exp": now + 3600, "iat": now}
         token = _sign_token(private_jwk, claims)
 
-        key_set = JsonWebKey.import_key_set({"keys": [public_jwk]})
-        decoded = authlib_jwt.decode(token, key_set)
+        key_set = KeySet.import_key_set({"keys": [public_jwk]})
+        decoded = jose_jwt.decode(token, key_set).claims
         assert decoded["sub"] == "user-42"
 
     def test_verify_expired_token(self, backend, keys) -> None:
