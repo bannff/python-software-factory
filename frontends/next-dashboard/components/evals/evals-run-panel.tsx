@@ -56,7 +56,10 @@ export function EvalsRunPanel() {
       </div>
       {result && (
         <p role="status" className="text-xs text-emerald-400">
-          Run finished · {result.cases} cases{result.scores.map(([k, v]) => ` · ${k.replace(/_/g, " ")} ${v.toFixed(2)}`).join("")}. Use the refresh icon to see it below.
+          Run finished · {result.cases} {result.cases === 1 ? "case" : "cases"}
+          {result.overallScore !== null && ` · overall score ${result.overallScore.toFixed(2)}`}
+          {result.passRate !== null && ` · pass rate ${Math.round(result.passRate * 100)}%`}
+          {result.errors > 0 && ` · ${result.errors} could not be scored`}. Use the refresh icon to see it below.
         </p>
       )}
       {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
