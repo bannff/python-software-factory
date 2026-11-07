@@ -114,4 +114,19 @@ describe("SteeringView", () => {
     render(<SteeringView />); fireEvent.click(await screen.findByRole("button", { name: "New steering document" }));
     expect(screen.queryByRole("button", { name: "Delete steering document" })).toBeNull();
   });
+  it("states the empty list once: the right pane points at + instead of repeating it", async () => {
+    mocks.list.mockResolvedValue([]);
+    render(<SteeringView />);
+    await screen.findByText("No steering documents yet.");
+    expect(screen.queryByText(/Select a steering document/)).toBeNull();
+    expect(screen.getByText(/to write the first one/i)).toBeTruthy();
+  });
+
+  it("keeps the toolbar from being squeezed out of a narrow list column", async () => {
+    render(<SteeringView />);
+    const toolbar = (await screen.findByRole("button", { name: "Refresh steering" })).parentElement as HTMLElement;
+    expect(toolbar.className).toMatch(/shrink-0/);
+    // Laid out by pane width (container query), not viewport width, like Agent Capabilities (#336).
+    expect(toolbar.closest("section")?.className).toContain("@container");
+  });
 });

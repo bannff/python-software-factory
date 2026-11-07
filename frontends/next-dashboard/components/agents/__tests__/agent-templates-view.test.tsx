@@ -202,4 +202,16 @@ describe("AgentTemplatesView", () => {
     fireEvent.change(screen.getByLabelText("ID"), { target: { value: "good-id" } });
     expect((screen.getByRole("button", { name: "Save" }) as HTMLButtonElement).disabled).toBe(false);
   });
+  it("shows the create form under a heading on first open", async () => {
+    render(<AgentTemplatesView />);
+    expect(await screen.findByRole("heading", { name: "New agent template" })).toBeTruthy();
+  });
+
+  it("shows each user template's id so a fork is told apart from its source", async () => {
+    mocks.listIds.mockResolvedValue([{ id: "user-one", forkedFrom: "builtin" }]);
+    render(<AgentTemplatesView />);
+    const row = (await screen.findByRole("button", { name: /User one/ }));
+    expect(row.textContent).toMatch(/user-one/);
+    expect(screen.getByRole("button", { name: /Built in/ }).textContent).not.toMatch(/builtin/);
+  });
 });

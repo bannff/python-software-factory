@@ -121,6 +121,29 @@ describe("InboxPopover", () => {
     expect(mocks.push).toHaveBeenCalledWith("/sessions/sess-1");
   });
 
+  it("marks an unread item read when it is opened", async () => {
+    routeList();
+    render(<InboxPopover />);
+    await screen.findByRole("button", { name: /Notifications/ });
+    fireEvent.click(screen.getByRole("button", { name: /Notifications/ }));
+    const row = (await screen.findByText("Session updated")).closest("li") as HTMLElement;
+    fireEvent.click(within(row).getByRole("button", { name: "Open" }));
+    await waitFor(() => expect(mocks.callTool).toHaveBeenCalledWith(
+      "notification_inbox_mark_read", { notification_id: "ntf_sess", expected_revision: 2 },
+    ));
+  });
+
+  it("does not mark an already-read item when it is opened", async () => {
+    routeList();
+    render(<InboxPopover />);
+    await screen.findByRole("button", { name: /Notifications/ });
+    fireEvent.click(screen.getByRole("button", { name: /Notifications/ }));
+    const row = (await screen.findByText("Crew ready")).closest("li") as HTMLElement;
+    fireEvent.click(within(row).getByRole("button", { name: "Open" }));
+    await waitFor(() => expect(mocks.push).toHaveBeenCalled());
+    expect(mocks.callTool).not.toHaveBeenCalledWith("notification_inbox_mark_read", expect.anything());
+  });
+
   it("renders an empty state when there are no notifications", async () => {
     routeList({ list: listResult([]) });
     render(<InboxPopover />);

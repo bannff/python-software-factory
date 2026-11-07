@@ -62,10 +62,11 @@ export default function SteeringView() {
   // Creating a document rides `steering.create`; saving an existing one `steering.update`.
   const saving = creating ? caps?.steering.create === true : caps?.steering.update === true;
 
-  return <section aria-labelledby="steering-title" className="grid gap-4 lg:grid-cols-[19rem_minmax(0,1fr)]">
-    <div><div className="mb-3 flex items-start justify-between"><div><h2 id="steering-title" className="text-lg font-semibold">Steering</h2>
+  // Lay out by the pane's own width: with the chat panel open the viewport is wide but the pane is not.
+  return <section aria-labelledby="steering-title" className="@container"><div className="grid gap-4 @3xl:grid-cols-[19rem_minmax(0,1fr)]">
+    <div className="min-w-0"><div className="mb-3 flex items-start justify-between gap-2"><div className="min-w-0"><h2 id="steering-title" className="text-lg font-semibold">Steering</h2>
       <p className="text-xs text-muted-foreground">Instructions injected into every Agent prompt.</p></div>
-      <div className="flex gap-1">{caps?.steering.create && <button type="button" aria-label="New steering document" onClick={startCreate}
+      <div className="flex shrink-0 gap-1">{caps?.steering.create && <button type="button" aria-label="New steering document" onClick={startCreate}
         className="rounded-md border border-border/60 p-2 hover:bg-accent/40"><Plus className="h-4 w-4" /></button>}
         <button type="button" aria-label="Refresh steering" onClick={() => void refresh()} disabled={!ready || loading}
           className="rounded-md border border-border/60 p-2 disabled:opacity-40"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /></button></div></div>
@@ -96,7 +97,7 @@ export default function SteeringView() {
             <Trash2 className="h-3.5 w-3.5" /> Delete</ConfirmDelete>}</div>}
         {!creating && active && caps && !caps.steering.delete && <p className="text-[11px] text-muted-foreground">{authoringGateNotice(caps, "steering", "delete")}</p>}</div>
         : <div className="flex min-h-56 flex-col items-center justify-center text-center text-muted-foreground"><Compass className="mb-3 h-8 w-8 text-violet-400" />
-          <p className="text-sm">Select a steering document to read or edit it.</p></div>}
+          <p className="text-sm">{documents.length === 0 ? (caps?.steering.create ? "Use + to write the first one." : "Nothing to read yet.") : "Select a steering document to read or edit it."}</p></div>}
     </div>
-  </section>;
+  </div></section>;
 }

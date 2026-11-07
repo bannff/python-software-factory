@@ -1,4 +1,5 @@
 import { callTool } from "@/lib/api";
+import { errorReason, withReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import { parseLesson, type Lesson } from "./lesson-types";
 
@@ -16,9 +17,15 @@ import { parseLesson, type Lesson } from "./lesson-types";
 
 export const LESSON_CONFLICT_MESSAGE =
   "This lesson changed since you opened it. We refreshed it to the latest — take another look.";
-export const LESSON_REMOVED_MESSAGE =
-  "This lesson is no longer here — it was already removed.";
+export const LESSON_REMOVED_MESSAGE = "This lesson has been deleted.";
 export const LESSON_ACTION_FAILED = "That action didn't go through. Try again.";
+export const LESSON_CHAT_UNSAVED = "Send a message first so this chat is saved, then try again.";
+
+/** Curation needs a persisted chat thread; retrying cannot help until one message is saved. */
+export function lessonActionFailure(error: unknown): string {
+  const reason = errorReason(error);
+  return reason === "lesson_session_not_found" ? LESSON_CHAT_UNSAVED : withReason(LESSON_ACTION_FAILED, reason);
+}
 export const LESSON_LIST_ERROR = "Lessons unavailable";
 
 export async function fetchLesson(lessonId: string): Promise<Lesson> {

@@ -120,8 +120,8 @@ describe("LessonsView curation", () => {
     });
     await open();
     fireEvent.click(screen.getByRole("button", { name: /Delete/ }));
-    const notice = await screen.findByText(/didn't go through.*lesson_session_not_found/i);
-    expect(notice.textContent).not.toMatch(/changed since|no longer here/i);
+    const notice = await screen.findByText(/Send a message first so this chat is saved, then try again/i);
+    expect(notice.textContent).not.toMatch(/lesson_session_not_found|changed since|has been deleted/i);
     expect(screen.getByRole("heading", { name: "Prefer dark mode" })).toBeTruthy();
   });
 
@@ -148,6 +148,6 @@ describe("LessonsView curation", () => {
     await waitFor(() =>
       expect(mocks.callTool).toHaveBeenCalledWith("lessons_remove", { lesson_id: ID, expected_revision: 2, envelope: { session_id: "thread" } }),
     );
-    expect(await screen.findByText(/no longer here/i)).toBeTruthy();
+    expect(await screen.findByText(/This lesson has been deleted/i)).toBeTruthy();
   });
 });
