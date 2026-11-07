@@ -67,3 +67,28 @@ export function parseOk(raw: unknown): boolean {
   const data = unwrapToolData(raw) as { ok?: unknown };
   return data?.ok === true;
 }
+
+/** ``workflow.get_run`` output (``RunOutput``): the list row plus where the run is and what it took/produced. */
+export interface WorkflowRunDetail extends WorkflowRun {
+  currentStepId?: string;
+  waitingForEventType?: string;
+  input: Record<string, unknown>;
+  result?: Record<string, unknown>;
+}
+
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+export function parseRunDetail(raw: unknown): WorkflowRunDetail | null {
+  const data = unwrapToolData(raw);
+  const base = runRow(data);
+  if (!base) return null;
+  const value = data as Record<string, unknown>;
+  return {
+    ...base,
+    input: isObject(value.input) ? value.input : {},
+    ...(typeof value.current_step_id === "string" ? { currentStepId: value.current_step_id } : {}),
+    ...(typeof value.waiting_for_event_type === "string" ? { waitingForEventType: value.waiting_for_event_type } : {}),
+    ...(isObject(value.result) ? { result: value.result } : {}),
+  };
+}
