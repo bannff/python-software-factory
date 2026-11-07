@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { Loader2, Play, Plus, RefreshCw, Trash2, Workflow as WorkflowIcon } from "lucide-react";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useWorkflowLibrary } from "./use-workflow-library";
+import { WorkflowRunDetailPanel } from "./workflow-run-detail";
 
 /** Non-terminal run states; a `waiting` run can sit indefinitely, so it must be cancellable too. */
 const CANCELLABLE: ReadonlySet<string> = new Set(["pending", "running", "waiting"]);
@@ -23,6 +24,7 @@ export default function WorkflowLibraryView() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [pending, setPending] = useState<string | null>(null);
+  const [openRun, setOpenRun] = useState<string | null>(null);
   const [failure, setFailure] = useState<{ subject: string; message: string } | null>(null);
 
   const onCreate = async (event: FormEvent) => {
@@ -155,7 +157,13 @@ export default function WorkflowLibraryView() {
                   <span className="ml-2 rounded-full bg-muted px-2 py-0.5">{run.status}</span>
                   {run.error && <p className={`mt-1 ${run.status === "cancelled" ? "text-muted-foreground" : "text-destructive"}`}>{run.error}</p>}
                   {failureFor(run.runId)}
+                  {openRun === run.runId && <WorkflowRunDetailPanel runId={run.runId} />}
                 </div>
+                <button type="button" onClick={() => setOpenRun(openRun === run.runId ? null : run.runId)}
+                  aria-expanded={openRun === run.runId}
+                  aria-label={`${openRun === run.runId ? "Hide" : "Show"} details for run ${run.runId}`}
+                  className="self-start rounded-md border border-border/60 px-2 py-1">
+                  {openRun === run.runId ? "Hide details" : "Details"}</button>
                 {CANCELLABLE.has(run.status) && (
                   <button type="button" onClick={() => void onCancel(run.runId)} disabled={pending === run.runId}
                     aria-label={`Cancel run ${run.runId}`} className="rounded-md border border-border/60 px-2 py-1 disabled:opacity-50">
