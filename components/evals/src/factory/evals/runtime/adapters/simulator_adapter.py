@@ -112,6 +112,7 @@ def run_simulation(config: ExperimentConfig, max_turns: int = 10) -> ExperimentR
     from strands_evals import ActorSimulator, Case, Experiment
     from factory.telemetry.interface import get_capture
     from .evaluator_factory import build_evaluators
+    from .loop_safe import call_off_loop
     agent_cfg = config.agent_config or EvalAgentConfig()
     capture = get_capture().setup()
     run_id = config.run_id or uuid.uuid4().hex
@@ -135,4 +136,4 @@ def run_simulation(config: ExperimentConfig, max_turns: int = 10) -> ExperimentR
         cases=cases_to_strands(config.cases),
         evaluators=build_evaluators(config.evaluator_names, config.rubric, framework="strands"),
     )
-    return _build_report(config, experiment.run_evaluations(task_fn), evidence_by_execution)
+    return _build_report(config, call_off_loop(lambda: experiment.run_evaluations(task_fn)), evidence_by_execution)

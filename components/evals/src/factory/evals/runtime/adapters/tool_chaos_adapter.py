@@ -8,6 +8,7 @@ from ..ports import EvalCase, ExperimentConfig, ExperimentReport
 from ..simulation_report import build_report
 from ..tool_chaos_artifacts import build_tool_chaos_artifacts
 from ..tool_chaos_contract import MAX_STATE_CACHE, bounded_value
+from .loop_safe import call_off_loop
 from .tool_catalog import register_catalog
 
 
@@ -76,6 +77,6 @@ def run_tool_chaos(
         })
         return {"output": output}
     native = ChaosExperiment(cases=variants, evaluators=build_evaluators(config.evaluator_names, config.rubric, framework="strands"))
-    native_report = native.run_evaluations(task)
+    native_report = call_off_loop(lambda: native.run_evaluations(task))
     report = build_report(replace(config, cases=report_cases), native_report, evidence)
     return report, build_tool_chaos_artifacts(report, evidence)
