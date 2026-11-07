@@ -21,6 +21,10 @@ _AUTH = (
     "LLM provider authentication failed — check the configured API key "
     "for the chat model."
 )
+_NO_MODEL = (
+    "No chat model configured yet: set COMPANION_X_CHAT_MODEL "
+    "(or an openai-compat profile)"
+)
 _RATE = (
     "LLM provider rate limit reached — wait a moment and try again."
 )
@@ -28,6 +32,9 @@ _RATE = (
 
 def provider_error_message(exc: Exception) -> str:
     """Return a user-facing message, specific when the status code is known."""
+    from factory.llm_gateway.interface import AgentCredentialError
+    if isinstance(exc, AgentCredentialError):
+        return _NO_MODEL
     status = getattr(exc, "status_code", None)
     if status == 402:
         return _CREDIT

@@ -26,6 +26,13 @@ TOOL_FALLBACK_TEXT = (
     "I hit an internal error while working on that. Please try again."
 )
 
+# Typed failure code the agent's reason tool returns when no chat model resolves.
+MODEL_NOT_CONFIGURED = "model_not_configured"
+MODEL_NOT_CONFIGURED_TEXT = (
+    "No chat model configured yet: set COMPANION_X_CHAT_MODEL "
+    "(or an openai-compat profile)"
+)
+
 
 def extract_user_message(messages: list[dict]) -> str:
     """Return the most recent user message from a messages array.

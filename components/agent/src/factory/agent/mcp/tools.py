@@ -172,11 +172,17 @@ async def _reason(agent: "SuperAgent", task: str, context: dict[str, Any], hints
             "workflow_id": str(result.get("run_id", "")),
             **result,
         }
+    from factory.llm_gateway.interface import AgentCredentialError
+    from factory.mcp_utils.interface import TypedToolFailure
     from ..runtime.chat import get_chat_agent
     chat = get_chat_agent()
-    result = await chat.invoke(
-        context.get("thread_id", "default"), task, agent_id=agent_id,
-    )
+    try:
+        result = await chat.invoke(
+            context.get("thread_id", "default"), task, agent_id=agent_id,
+        )
+    except AgentCredentialError as exc:
+        # The caller can act on this (configure a model); a bare sentinel hides it.
+        raise TypedToolFailure("model_not_configured", str(exc)) from exc
     return {"workflow_type": "chat_agent", "status": result.status, "output": result.output}
 
 
