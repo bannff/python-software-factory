@@ -11,7 +11,7 @@ import logging
 import pytest
 
 import factory.config.interface as config_interface
-from factory.kb import server
+from factory.kb.runtime import vector_store_selection as selection
 from factory.kb.runtime.runtime import KBRuntime
 
 
@@ -32,8 +32,8 @@ def _record(monkeypatch) -> dict[str, str]:
     def fake_chroma(runtime: KBRuntime, get_infra) -> None:
         calls["chroma"] = "chroma"
 
-    monkeypatch.setattr(server, "_configure_neo4j", fake_neo4j)
-    monkeypatch.setattr(server, "_configure_chroma", fake_chroma)
+    monkeypatch.setattr(selection, "_configure_neo4j", fake_neo4j)
+    monkeypatch.setattr(selection, "_configure_chroma", fake_chroma)
     return calls
 
 
@@ -41,7 +41,7 @@ def test_default_backend_is_neo4j(monkeypatch, tmp_path) -> None:
     _patch_backend(monkeypatch, None)
     calls = _record(monkeypatch)
 
-    server._configure_vector_store(KBRuntime(tmp_path))
+    selection.configure_vector_store(KBRuntime(tmp_path))
 
     assert calls == {"neo4j": "neo4j"}
 
@@ -51,7 +51,7 @@ def test_chroma_is_reachable_only_by_explicit_name(monkeypatch, tmp_path, value)
     _patch_backend(monkeypatch, value)
     calls = _record(monkeypatch)
 
-    server._configure_vector_store(KBRuntime(tmp_path))
+    selection.configure_vector_store(KBRuntime(tmp_path))
 
     assert calls == {"chroma": "chroma"}
 
@@ -63,7 +63,7 @@ def test_unknown_backend_fails_closed(monkeypatch, tmp_path, caplog, value) -> N
     runtime = KBRuntime(tmp_path)
 
     with caplog.at_level(logging.ERROR):
-        server._configure_vector_store(runtime)
+        selection.configure_vector_store(runtime)
 
     assert calls == {}, "an unknown backend must not configure a store"
     assert runtime.backend_name is None
