@@ -14,7 +14,7 @@ const EVALUATORS = [
 let runResponse: () => unknown;
 beforeEach(() => {
   callTool.mockReset();
-  runResponse = () => ok({ run_id: "r1", name: "smoke", case_results: [{}, {}], summary: { pass_rate: 1, avg_score: 0.9 }, evaluators_used: ["helpfulness"] });
+  runResponse = () => ok({ run_id: "r1", name: "smoke", case_results: [{}, {}], summary: { overall_score: 0.9, pass_rate: 1, total_cases: 2, evaluation_errors: 0 }, evaluators_used: ["helpfulness"] });
   callTool.mockImplementation(async (name: string) => {
     if (name === "evals_list_evaluators") return ok({ evaluators: EVALUATORS });
     return runResponse();
@@ -58,10 +58,24 @@ describe("EvalsRunPanel", () => {
     fireEvent.click(await screen.findByLabelText("helpfulness"));
     fireEvent.change(screen.getByLabelText("Run name"), { target: { value: "smoke" } });
     fireEvent.click(screen.getByRole("button", { name: "Start run" }));
-    expect((await screen.findByRole("status")).textContent).toMatch(/2 cases/);
+    const line = (await screen.findByRole("status")).textContent ?? "";
+    expect(line).toMatch(/2 cases · overall score 0\.90 · pass rate 100%/);
+    expect(line).not.toMatch(/error|could not be scored/i);
     expect(callTool).toHaveBeenCalledWith("evals_run_experiment", {
       cases: [{ input: "What is 2+2?", expected_output: "4" }], evaluator_names: ["helpfulness"], experiment_name: "smoke",
     });
+  });
+
+  it("says case in the singular and reports unscored rows only when there are some", async () => {
+    runResponse = () => ok({ run_id: "r2", case_results: [{}], summary: { overall_score: 0.5, pass_rate: 0.5, evaluation_errors: 1 } });
+    render(<EvalsRunPanel />);
+    await open();
+    prompt();
+    fireEvent.click(await screen.findByLabelText("helpfulness"));
+    fireEvent.click(screen.getByRole("button", { name: "Start run" }));
+    const line = (await screen.findByRole("status")).textContent ?? "";
+    expect(line).toMatch(/1 case · /);
+    expect(line).toMatch(/1 could not be scored/);
   });
 
   it("adds and removes cases", async () => {
