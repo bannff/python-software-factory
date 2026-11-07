@@ -66,7 +66,7 @@ export function ScheduleDetail({
   };
 
   return (
-    <article className="rounded-xl border border-violet-500/30 bg-violet-500/[0.04] p-4">
+    <article className="min-w-0 rounded-xl border border-violet-500/30 bg-violet-500/[0.04] p-4">
       <header className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 ref={headingRef} tabIndex={-1} className="truncate font-medium outline-none">
