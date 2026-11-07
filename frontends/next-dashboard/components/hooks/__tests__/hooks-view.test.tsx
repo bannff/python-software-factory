@@ -43,6 +43,28 @@ describe("HooksView", () => {
     }));
   });
 
+  it("refuses a tool name that is not in the live tool catalog", async () => {
+    render(<HooksView />);
+    fireEvent.click(await screen.findByRole("button", { name: "New hook" }));
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "x" } });
+    fireEvent.change(screen.getByLabelText("Run this tool"), { target: { value: "agent_read_" } });
+    expect(screen.getByText("Unknown tool: pick one from the list.")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Create hook" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("Run this tool"), { target: { value: "agent_read_skill" } });
+    expect(screen.queryByText(/Unknown tool/)).toBeNull();
+    expect((screen.getByRole("button", { name: "Create hook" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("shows platform rows with readable labels and keeps raw codes in the tooltip", async () => {
+    mocks.list.mockResolvedValue([{ ...hook, id: "auto-improve", origin: "system",
+      eventType: "reward.computed", tool: "mcp:improvement_dispatch" }]);
+    render(<HooksView />);
+    const when = await screen.findByText("When Reward computed");
+    expect(when.getAttribute("title")).toBe("reward.computed");
+    const runs = screen.getByText("Runs: improvement_dispatch");
+    expect(runs.getAttribute("title")).toBe("mcp:improvement_dispatch");
+  });
+
   it("toggles enabled state on an existing hook", async () => {
     render(<HooksView />);
     fireEvent.click(await screen.findByRole("button", { name: "Enabled" }));

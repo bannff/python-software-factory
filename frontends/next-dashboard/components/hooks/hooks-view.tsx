@@ -5,6 +5,7 @@ import { Plus, RefreshCw, Trash2, Webhook } from "lucide-react";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
 import { eventHistoryLabel, hasEventHistory } from "./event-history";
+import { eventLabel, toolLabel } from "./hook-labels";
 import { AGENT_LIFECYCLE_EVENTS, deleteHook, hookAuthoringAvailable, listHooks,
   listInvocableTools, listRecentFirings, saveHook, setHookEnabled,
   type Hook, type HookFiring } from "./hooks-api";
@@ -22,6 +23,9 @@ export default function HooksView() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [firings, setFirings] = useState<Record<string, HookFiring[]>>({});
+
+  // The picker offers only the live catalog's invocable tools; free text outside it can never run.
+  const unknownTool = form.tool !== "" && !tools.includes(form.tool);
 
   const refresh = useCallback(async () => {
     if (!ready) return;
@@ -88,12 +92,13 @@ export default function HooksView() {
             <input list="hooks-tool-options" value={form.tool} onChange={(event) => setForm((value) => ({ ...value, tool: event.target.value }))}
               placeholder="Start typing a tool name…" className="rounded-md border border-border/60 bg-background/50 px-3 py-2 text-foreground" />
             <datalist id="hooks-tool-options">{tools.map((tool) => <option key={tool} value={tool} />)}</datalist></label>
+          {unknownTool && <p role="alert" className="-mt-2 text-xs text-destructive">Unknown tool: pick one from the list.</p>}
           <label className="grid gap-1 text-xs text-muted-foreground">Description (optional)
             <input value={form.description} onChange={(event) => setForm((value) => ({ ...value, description: event.target.value }))}
               className="rounded-md border border-border/60 bg-background/50 px-3 py-2 text-foreground" /></label>
         </div>
         <div className="mt-4 flex gap-2">
-          <button type="button" onClick={() => void create()} disabled={Boolean(busy) || !form.id || !form.tool}
+          <button type="button" onClick={() => void create()} disabled={Boolean(busy) || !form.id || !form.tool || unknownTool}
             className="rounded-md bg-violet-500 px-3 py-2 text-xs text-white disabled:opacity-40">Create hook</button>
           <button type="button" onClick={() => setCreating(false)} className="rounded-md border border-border/60 px-3 py-2 text-xs">Cancel</button>
         </div>
@@ -102,12 +107,11 @@ export default function HooksView() {
       : hooks.length === 0 ? <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-muted-foreground">
         <Webhook className="mx-auto mb-3 h-8 w-8 text-violet-400" /><p>No hooks configured.</p></div>
       : <div className="grid gap-3 md:grid-cols-2">{hooks.map((hook) => {
-        const event = AGENT_LIFECYCLE_EVENTS.find((option) => option.value === hook.eventType);
         const history = eventHistoryLabel(hook, firings[hook.id] ?? []);
         return <article key={hook.id} className="rounded-xl border border-border/60 bg-card/20 p-4">
           <div className="flex items-start justify-between gap-3">
             <div><h3 className="font-medium">{hook.id}</h3>
-              <p className="text-xs text-muted-foreground">When {event?.label ?? hook.eventType}</p></div>
+              <p className="text-xs text-muted-foreground" title={hook.eventType}>When {eventLabel(hook.eventType)}</p></div>
             <div className="flex items-center gap-1">
               {hook.origin === "system"
                 ? <span className="rounded-full bg-muted px-2 py-1 text-[10px] text-muted-foreground"
@@ -121,7 +125,7 @@ export default function HooksView() {
                 </>}
             </div>
           </div>
-          <p className="mt-3 font-mono text-xs">Runs: {hook.tool}</p>
+          <p className="mt-3 font-mono text-xs" title={hook.tool}>Runs: {toolLabel(hook.tool)}</p>
           {hook.description && <p className="mt-2 text-xs text-muted-foreground">{hook.description}</p>}
           {history && <p className="mt-3 text-[11px] text-muted-foreground">{history}</p>}
         </article>;

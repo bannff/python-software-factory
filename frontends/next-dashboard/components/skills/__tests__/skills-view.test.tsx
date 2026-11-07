@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   // Kept so the pre-change panel (which imported `skillAuthoringAvailable`)
   // can still be driven when this suite runs against the base revision.
   legacyAvailable: vi.fn(),
-  caps: vi.fn(),
+  caps: vi.fn(), pattern: vi.fn(),
 }));
 vi.mock("@/lib/hooks/use-mcp-connection", () => ({
   useMcpConnection: () => ({ ready: true, status: "connected" }),
@@ -15,6 +15,7 @@ vi.mock("../skills-api", () => ({
   listSkills: (...args: unknown[]) => mocks.list(...args),
   readSkill: (...args: unknown[]) => mocks.read(...args),
   addSkill: (...args: unknown[]) => mocks.add(...args),
+  getSkillIdPattern: (...args: unknown[]) => mocks.pattern(...args),
   deleteSkill: (...args: unknown[]) => mocks.remove(...args),
   skillAuthoringAvailable: (...args: unknown[]) => mocks.legacyAvailable(...args),
 }));
@@ -44,6 +45,7 @@ beforeEach(() => {
   mocks.list.mockReset().mockResolvedValue([{ id: "review", name: "Review", description: "Check evidence" }]);
   mocks.read.mockReset().mockResolvedValue({ id: "review", name: "Review", description: "Check evidence", body: "Read the diff." });
   mocks.add.mockReset().mockResolvedValue({ id: "new-skill", name: "New Skill", description: "Added" });
+  mocks.pattern.mockReset().mockResolvedValue("^[a-z0-9][a-z0-9-]{0,63}$");
   mocks.remove.mockReset().mockResolvedValue(undefined);
   mocks.legacyAvailable.mockReset().mockResolvedValue(true);
   mocks.caps.mockReset().mockResolvedValue(capabilities({ add: true, delete: true }));
@@ -73,6 +75,20 @@ describe("SkillsView", () => {
       skillId: "new-skill", name: "New Skill", description: "", body: "Use evidence.",
     }));
     expect(await screen.findByText("Use evidence.")).toBeTruthy();
+  });
+
+  it("states the allowed ID format and blocks an ID the backend would reject", async () => {
+    render(<SkillsView />);
+    fireEvent.click(await screen.findByRole("button", { name: "Add skill" }));
+    expect(screen.getByText(/\^\[a-z0-9\]\[a-z0-9-\]\{0,63\}\$/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("ID"), { target: { value: "Bad ID!" } });
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Bad" } });
+    fireEvent.change(screen.getByLabelText("Instructions"), { target: { value: "Body." } });
+    expect(screen.getByText("ID does not match the allowed format.")).toBeTruthy();
+    expect((screen.getAllByRole("button", { name: "Add skill" })[1] as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.change(screen.getByLabelText("ID"), { target: { value: "lc-skill" } });
+    expect(screen.queryByText("ID does not match the allowed format.")).toBeNull();
+    expect((screen.getAllByRole("button", { name: "Add skill" })[1] as HTMLButtonElement).disabled).toBe(false);
   });
 
   it("keeps reads available and names the variable when skills.add is denied", async () => {

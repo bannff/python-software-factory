@@ -45,6 +45,7 @@ export interface JsonSchema {
   anyOf?: JsonSchema[];
   items?: JsonSchema;
   description?: string;
+  pattern?: string;
   additionalProperties?: boolean | JsonSchema;
 }
 
