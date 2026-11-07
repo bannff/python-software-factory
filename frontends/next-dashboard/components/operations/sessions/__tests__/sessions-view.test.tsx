@@ -93,6 +93,25 @@ describe("SessionsView states and accessibility", () => {
     fireEvent.click(screen.getByRole("button", { name: /^all$/i }));
     expect(screen.getByText("Already read")).toBeTruthy();
   });
+  it("says no unread sessions (not 'No sessions yet') when the Unread filter is empty", () => {
+    render(<SessionsView />);
+    fireEvent.click(screen.getByRole("button", { name: /unread/i }));
+    expect(screen.getByText("No unread sessions.")).toBeTruthy();
+    expect(screen.queryByText(/No sessions yet/)).toBeNull();
+  });
+  it("drops the Delete all count when the last archived session is reopened", async () => {
+    mocks.list.sessions = [session({ archived_at: new Date().toISOString() })];
+    mocks.callTool.mockImplementation((name: string) => Promise.resolve(
+      name === "session_count_archived"
+        ? { tool: name, result: { count: mocks.list.sessions.some((s) => (s as { archived_at: string | null }).archived_at) ? 1 : 0 } }
+        : { tool: name, result: { session: session() } }));
+    const { rerender } = render(<SessionsView />);
+    fireEvent.click(screen.getByRole("button", { name: "Show archived sessions" }));
+    await screen.findByRole("button", { name: "Delete all (1)" });
+    mocks.list.sessions = [session()];
+    rerender(<SessionsView />);
+    await waitFor(() => expect(screen.queryByRole("button", { name: /Delete all/ })).toBeNull());
+  });
   it("filters by authoritative Session tags", () => {
     mocks.list.sessions = [
       session({ tags: ["urgent"], title: "Urgent row" }),
@@ -189,6 +208,20 @@ describe("SessionsView actions and focus", () => {
     fireEvent.click(screen.getByRole("button", { name: "Rename" }));
     fireEvent.change(screen.getByLabelText("Session name"), { target: { value: "Renamed" } });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
+    await waitFor(() => expect(mocks.callTool).toHaveBeenCalledWith("session_rename", {
+      session_id: "sess-abc123", title: "Renamed", expected_revision: 2,
+    }));
+  });
+  it("commits a rename on Enter and cancels on Escape", async () => {
+    render(<SessionsView />);
+    openSession();
+    fireEvent.click(screen.getByRole("button", { name: "Rename" }));
+    fireEvent.keyDown(screen.getByLabelText("Session name"), { key: "Escape" });
+    expect(screen.queryByLabelText("Session name")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Rename" }));
+    const input = screen.getByLabelText("Session name");
+    fireEvent.change(input, { target: { value: "Renamed" } });
+    fireEvent.keyDown(input, { key: "Enter" });
     await waitFor(() => expect(mocks.callTool).toHaveBeenCalledWith("session_rename", {
       session_id: "sess-abc123", title: "Renamed", expected_revision: 2,
     }));

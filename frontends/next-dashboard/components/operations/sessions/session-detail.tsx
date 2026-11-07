@@ -64,6 +64,8 @@ export function SessionDetail({ session, agentName, crews, active, focusHeading,
     setEditing(false);
   };
 
+  const cancelRename = () => { setEditing(false); setDraft(session.title); };
+
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-4 rounded-xl border border-border/60 bg-card/20 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -71,11 +73,15 @@ export function SessionDetail({ session, agentName, crews, active, focusHeading,
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <input autoFocus aria-label="Session name" value={draft} maxLength={200}
               onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") { event.preventDefault(); void saveRename(); }
+                else if (event.key === "Escape") cancelRename();
+              }}
               className="min-w-0 flex-1 rounded-md border border-border/60 bg-background/60 px-2.5 py-1.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" />
             <button type="button" aria-label="Save name" disabled={busy === "rename"}
               onClick={() => void saveRename()}
               className="rounded-md p-1.5 text-emerald-400 hover:bg-accent/20 disabled:opacity-50"><Check className="h-4 w-4" /></button>
-            <button type="button" aria-label="Cancel rename" onClick={() => { setEditing(false); setDraft(session.title); }}
+            <button type="button" aria-label="Cancel rename" onClick={cancelRename}
               className="rounded-md p-1.5 text-muted-foreground hover:bg-accent/20"><X className="h-4 w-4" /></button>
           </div>
         ) : (

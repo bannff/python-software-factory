@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { SessionGroupedList } from "./session-grouped-list";
 import { SessionDetail } from "./session-detail";
 import { ClearArchivedControl } from "./clear-archived-control";
+import { emptyMessage } from "./empty-message";
 import { useSessionsViewDerived } from "./use-sessions-view-derived";
 
 /**
@@ -69,6 +70,9 @@ export default function SessionsView({
   const { merged, tagFilters, folderFilters, visible, groups, selected, moveUpBeforeId, moveDownBeforeId } =
     useSessionsViewDerived(sessions, overrides, query, filter, selectedId);
 
+  // Reopen/archive keep the list length; the archived count is what the bulk-delete preview tracks.
+  const archivedCount = merged.filter((session) => session.archived_at !== null).length;
+
   // Adopt an incoming deep-link target and arm the heading focus.
   useEffect(() => {
     if (focusSessionId) { setSelectedId(focusSessionId); setFocusPending(true); }
@@ -110,7 +114,7 @@ export default function SessionsView({
               includeArchived && "border-violet-500/40 bg-violet-500/[0.06] text-foreground")}>
             <Archive className="h-3.5 w-3.5" /> Archived
           </button>
-          <ClearArchivedControl visible={includeArchived} listVersion={sessions.length} onCleared={refresh} />
+          <ClearArchivedControl visible={includeArchived} listVersion={archivedCount} onCleared={refresh} />
           <button type="button" onClick={refresh} aria-label="Refresh sessions"
             className="rounded-lg border border-border/60 p-2 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground">
             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
@@ -159,11 +163,7 @@ export default function SessionsView({
             </label>
             {visible.length === 0 ? (
               <p className="rounded-xl border border-dashed border-border/60 p-6 text-center text-sm text-muted-foreground">
-                {query.trim()
-                  ? "No sessions match your search."
-                  : includeArchived
-                    ? "No sessions yet. Start a chat to create one."
-                    : "No active sessions. Start a chat, or show archived sessions."}
+                {emptyMessage(query, filter, includeArchived)}
               </p>
             ) : (
               <SessionGroupedList groups={groups} agentNames={agentNames}
