@@ -4,6 +4,7 @@ from .server import (
     create_mcp_server as create_server, get_runtime, health_check,
 )
 from .runtime.runtime import TelemetryRuntime as Runtime
+from .runtime.adapters.span_capture import get_capture
 from .runtime.otlp_boundary import OTLPBatchAdapter, TelemetryOTLPBoundary
 from .runtime.adapters.storage import (
     StorageLogExporter, StorageMetricExporter, StorageSpanExporter,
@@ -20,6 +21,7 @@ __all__ = [
     "Runtime",
     "create_server",
     "get_runtime",
+    "get_capture",
     "health_check",
     "StorageSpanExporter",
     "StorageMetricExporter",
