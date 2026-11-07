@@ -14,18 +14,17 @@ from __future__ import annotations
 import os
 from typing import Any
 
-DEFAULT_JUDGE_MODEL = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
+from .model_resolver import DEFAULT_BEDROCK_MODEL, default_model_id, resolve_judge_model
+
+DEFAULT_JUDGE_MODEL = DEFAULT_BEDROCK_MODEL
 _ENV = "COMPANION_X_EVAL_JUDGE_MODEL"
 
 
 def judge_model_id() -> str:
     """Return the configured judge model id (env override or default)."""
-    return os.getenv(_ENV) or DEFAULT_JUDGE_MODEL
+    return os.getenv(_ENV) or default_model_id()
 
 
 def get_judge_model() -> Any:
-    """Return a LangChain Bedrock chat model instance (lazy import)."""
-    model_id = judge_model_id()
-    from langchain.chat_models import init_chat_model
-
-    return init_chat_model(f"bedrock_converse:{model_id}")
+    """Return the judge chat model (Bedrock for bare ids, local Ollama for ollama:<model>)."""
+    return resolve_judge_model(judge_model_id())
