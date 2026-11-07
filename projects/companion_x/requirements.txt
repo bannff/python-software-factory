@@ -1,5 +1,5 @@
 # Companion X core runtime requirements
-# For optional adapter deps, install with: pip install companion_x[chromadb,celery,...]
+# For optional adapter deps, install with: pip install companion_x[celery,...]
 # Or install everything: pip install companion_x[all]
 aiohttp>=3.9.0
 aiosqlite>=0.19.0
