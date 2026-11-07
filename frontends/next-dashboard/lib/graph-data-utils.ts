@@ -20,8 +20,20 @@ export interface GraphStats { node_count: number; edge_count: number }
 export const MAX_NEIGHBOR_LIMIT = 200;
 export const DEFAULT_NEIGHBOR_LIMIT = 20;
 
+/** Hex (callers append an alpha suffix) colors for types the curated map does not know. */
+const FALLBACK_COLORS = [
+  "#60a5fa", "#34d399", "#fbbf24", "#c084fc", "#fb7185", "#2dd4bf",
+  "#a3e635", "#fb923c", "#818cf8", "#f0abfc", "#38bdf8", "#4ade80",
+];
+
+function hashedColor(type: string): string {
+  let hash = 0;
+  for (const ch of type) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  return FALLBACK_COLORS[hash % FALLBACK_COLORS.length];
+}
+
 export function colorForType(type: string): string {
-  return TYPE_COLORS[type] ?? TYPE_COLORS.default;
+  return TYPE_COLORS[type] ?? (type === "default" ? TYPE_COLORS.default : hashedColor(type));
 }
 
 /** Unwrap both the API response and the canonical typed MCP data envelope. */
