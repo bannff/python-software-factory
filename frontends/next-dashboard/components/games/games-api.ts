@@ -21,9 +21,17 @@ export async function listGames(): Promise<Game[]> {
   const data = unwrapToolData(await callTool("games_list")) as { games?: unknown };
   return Array.isArray(data?.games) ? data.games.map(gameFrom).filter((g): g is Game => g !== null) : [];
 }
-export async function listGameTypes(): Promise<string[]> {
-  const data = unwrapToolData(await callTool("games_get_capabilities")) as { game_types?: unknown };
-  return Array.isArray(data?.game_types) ? data.game_types.filter((t): t is string => typeof t === "string") : [];
+export interface GameTypes {
+  all: string[];
+  /** Types a person can play; null when the server does not say (then every type is offered). */
+  humanPlayable: string[] | null;
+}
+
+const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((t): t is string => typeof t === "string") : []);
+
+export async function listGameTypes(): Promise<GameTypes> {
+  const data = unwrapToolData(await callTool("games_get_capabilities")) as { game_types?: unknown; human_playable_game_types?: unknown } | null;
+  return { all: strings(data?.game_types), humanPlayable: data?.human_playable_game_types === undefined ? null : strings(data.human_playable_game_types) };
 }
 export async function createGame(gameType: string): Promise<void> {
   unwrapToolData(await callTool("games_create", { game_type: gameType }));

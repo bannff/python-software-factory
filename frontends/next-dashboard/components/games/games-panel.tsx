@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Gamepad2, Plus, RotateCcw, Trash2 } from "lucide-react";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { EmptyState } from "@/components/ui/empty-state";
-import { createGame, deleteGame, listGames, listGameTypes, moveInColumn, resetGame, type Game } from "./games-api";
+import { createGame, deleteGame, listGames, listGameTypes, moveInColumn, resetGame, type Game, type GameTypes } from "./games-api";
 import { gameFailure } from "./game-errors";
 import { GameBoard } from "./game-board";
 
@@ -12,6 +12,7 @@ import { GameBoard } from "./game-board";
 export function GamesPanel() {
   const [games, setGames] = useState<Game[]>([]);
   const [types, setTypes] = useState<string[] | null>(null);
+  const [catalog, setCatalog] = useState<GameTypes | null>(null);
   const [chosen, setChosen] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -23,6 +24,8 @@ export function GamesPanel() {
     finally { setLoaded(true); }
   }, []);
   useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => { void listGameTypes().then(setCatalog).catch(() => undefined); }, []);
+  const playable = (g: Game) => catalog?.humanPlayable == null || catalog.humanPlayable.includes(g.game_type);
 
   const run = async (action: () => Promise<void>, failure: string): Promise<boolean> => {
     setBusy(true); setNotice(null);
@@ -32,7 +35,9 @@ export function GamesPanel() {
   };
   const openForm = async () => {
     try {
-      const available = types ?? await listGameTypes();
+      const loaded = catalog ?? await listGameTypes();
+      setCatalog(loaded);
+      const available = loaded.humanPlayable ?? loaded.all;
       setTypes(available); setChosen(available[0] ?? "");
     } catch (cause) { setNotice(gameFailure("Game types are unavailable.", cause)); }
   };
@@ -61,7 +66,7 @@ export function GamesPanel() {
       {loaded && games.length === 0 && types === null && !notice && (
         <EmptyState icon={Gamepad2} title="No games yet" hint="Start one to play or let an agent play." />
       )}
-      {games.map((g) => (
+      {games.filter(playable).map((g) => (
         <div key={g.game_id} className="grid gap-2 rounded-xl border border-border/60 bg-card/20 px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
@@ -94,6 +99,17 @@ export function GamesPanel() {
           )}
         </div>
       ))}
+      {games.some((g) => !playable(g)) && (
+        <>
+          <h3 className="mt-2 text-sm font-medium text-muted-foreground">Agent scenarios</h3>
+          {games.filter((g) => !playable(g)).map((g) => (
+            <div key={g.game_id} className="rounded-xl border border-border/40 bg-card/10 px-4 py-3">
+              <p className="truncate font-mono text-sm">{g.game_id}</p>
+              <p className="truncate text-xs text-muted-foreground">{[g.game_type, g.status].filter(Boolean).join(" · ")}</p>
+            </div>
+          ))}
+        </>
+      )}
     </section>
   );
 }
