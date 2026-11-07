@@ -8,7 +8,7 @@ import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
 import { authoringGateNotice, getAuthoringCapabilities,
   type AuthoringCapabilities } from "@/lib/authoring-capabilities";
 import { useSkillPolicy } from "./use-skill-policy";
-import { addSkill, deleteSkill, listSkills, readSkill,
+import { addSkill, deleteSkill, getSkillIdPattern, listSkills, readSkill,
   type SkillDetail, type SkillSummary } from "./skills-api";
 
 const EMPTY = { skillId: "", name: "", description: "", body: "" };
@@ -22,6 +22,8 @@ export default function SkillsView() {
   const [form, setForm] = useState(EMPTY);
   const [creating, setCreating] = useState(false);
   const [caps, setCaps] = useState<AuthoringCapabilities | null>(null);
+  const [idPattern, setIdPattern] = useState<string | null>(null);
+  const idInvalid = Boolean(form.skillId && idPattern && !new RegExp(idPattern).test(form.skillId));
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +32,9 @@ export default function SkillsView() {
     if (!ready) return;
     setLoading(true); setError(null);
     try {
-      const [rows, capabilities] = await Promise.all([listSkills(), getAuthoringCapabilities()]);
-      setSkills(rows); setCaps(capabilities);
+      const [rows, capabilities, pattern] = await Promise.all([
+        listSkills(), getAuthoringCapabilities(), getSkillIdPattern()]);
+      setSkills(rows); setCaps(capabilities); setIdPattern(pattern);
     } catch (cause) { setError(withReason("Skills unavailable.", errorReason(cause))); }
     finally { setLoading(false); }
   }, [ready]);
@@ -98,12 +101,14 @@ export default function SkillsView() {
         {error && <div role="alert" className="mb-3 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">{error}</div>}
         {busy && <Loader2 className="mb-3 h-4 w-4 animate-spin text-muted-foreground" />}
         {creating ? <div className="grid gap-3"><h3 className="font-semibold">Add skill</h3>
-          <Field label="ID"><input value={form.skillId} onChange={set("skillId")} placeholder="review-evidence" /></Field>
+          <Field label="ID"><input value={form.skillId} onChange={set("skillId")} placeholder="review-evidence" aria-invalid={idInvalid} /></Field>
+          {idPattern && <p className={`-mt-2 text-[11px] ${idInvalid ? "text-destructive" : "text-muted-foreground"}`}>
+            {idInvalid && <span role="alert">ID does not match the allowed format.</span>} Allowed: <code>{idPattern}</code></p>}
           <Field label="Name"><input value={form.name} onChange={set("name")} /></Field>
           <Field label="Description"><input value={form.description} onChange={set("description")} /></Field>
           <Field label="Instructions"><textarea value={form.body} onChange={set("body")} rows={10} /></Field>
           <div className="flex gap-2"><button type="button" onClick={() => void create()}
-            disabled={busy || !form.skillId || !form.name.trim() || !form.body.trim()}
+            disabled={busy || !form.skillId || idInvalid || !form.name.trim() || !form.body.trim()}
             className="rounded-md bg-violet-500 px-3 py-2 text-xs text-white disabled:opacity-40">Add skill</button>
             <button type="button" onClick={() => setCreating(false)} className="rounded-md border border-border/60 px-3 py-2 text-xs">Cancel</button></div></div>
           : detail ? <article><div className="flex items-start justify-between gap-2">

@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ callTool: vi.fn() }));
+const mocks = vi.hoisted(() => ({ callTool: vi.fn(), catalog: vi.fn() }));
 vi.mock("@/lib/api", () => ({ callTool: mocks.callTool }));
+vi.mock("@/lib/tool-catalog", () => ({ fetchToolCatalog: mocks.catalog }));
 
-import { addSkill, deleteSkill, listSkills, readSkill } from "../skills-api";
+import { addSkill, deleteSkill, getSkillIdPattern, listSkills, readSkill } from "../skills-api";
 
 beforeEach(() => { mocks.callTool.mockReset(); });
 
@@ -21,7 +22,18 @@ describe("Skills MCP API", () => {
     expect(mocks.callTool).toHaveBeenLastCalledWith("agent_read_skill", { skill_id: "review" });
   });
 
-  it("sends exact add arguments", async () => {
+  it("reads the skill ID rule from the add tool's published schema", async () => {
+    mocks.catalog.mockResolvedValue({ tools: [
+      { qualified_name: "agent_list_skills", input_schema: {} },
+      { qualified_name: "agent_add_skill", input_schema: { properties: {
+        skill_id: { type: "string", pattern: "^[a-z0-9][a-z0-9-]{0,63}$" } } } },
+    ] });
+    await expect(getSkillIdPattern()).resolves.toBe("^[a-z0-9][a-z0-9-]{0,63}$");
+    mocks.catalog.mockResolvedValue({ tools: [] });
+    await expect(getSkillIdPattern()).resolves.toBeNull();
+  });
+
+  it("sends exact add arguments",async () => {
     mocks.callTool.mockResolvedValue({ tool: "agent_add_skill", result: { ok: true, data: {
       created: true, skill: { id: "new-skill", name: "New", description: "Added" },
     } } });
