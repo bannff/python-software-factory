@@ -65,4 +65,16 @@ describe("AgentCapabilitiesView", () => {
       .toBe("true");
     expect(screen.getByText("Lessons content")).toBeTruthy();
   });
+
+  it("lays the section list out by the pane's width, not the viewport's", () => {
+    const { container } = render(<AgentCapabilitiesView />);
+    const section = container.querySelector("section") as HTMLElement;
+    const list = screen.getByRole("tablist");
+    const grid = list.parentElement as HTMLElement;
+    expect(section.className).toContain("@container");
+    expect(grid.className).toMatch(/@\w+:grid-cols-/);
+    expect(grid.className).not.toContain("md:grid-cols");
+    expect(list.className).toContain("flex-wrap");
+    expect(list.className).not.toContain("overflow-x-auto");
+  });
 });

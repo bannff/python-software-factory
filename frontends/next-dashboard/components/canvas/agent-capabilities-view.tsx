@@ -57,13 +57,13 @@ export default function AgentCapabilitiesView() {
 
   const label = TABS.find(([id]) => id === active)?.[1] ?? active;
   return (
-    <section className="mx-auto flex min-h-full w-full max-w-7xl flex-col gap-5 p-6" aria-labelledby="capabilities-title">
+    <section className="@container mx-auto flex min-h-full w-full max-w-7xl flex-col gap-5 p-6" aria-labelledby="capabilities-title">
       <header><p className="text-xs font-medium uppercase tracking-[0.2em] text-violet-400">Workspace</p>
         <h1 id="capabilities-title" className="mt-1 text-2xl font-semibold">Agent Capabilities</h1>
         <p className="mt-1 text-sm text-muted-foreground">Configure what your agents can use and manage.</p></header>
-      <div className="grid min-h-0 flex-1 gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
+      <div className="grid min-h-0 flex-1 gap-5 @3xl:grid-cols-[13rem_minmax(0,1fr)]">
         <div role="tablist" aria-label="Agent Capabilities sections" onKeyDown={onKeys}
-          className="flex gap-1 overflow-x-auto md:flex-col">
+          className="flex flex-wrap gap-1 @3xl:flex-col">
           {TABS.map(([id, tabLabel]) => <button key={id} ref={(node) => { refs.current[id] = node; }}
             type="button" role="tab" aria-selected={active === id} tabIndex={active === id ? 0 : -1}
             onClick={() => select(id)} className={cn("min-h-10 shrink-0 rounded-md px-3 text-left text-sm",
