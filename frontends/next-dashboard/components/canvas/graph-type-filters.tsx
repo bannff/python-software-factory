@@ -14,7 +14,7 @@ export function GraphTypeFilters({ typeCounts, hiddenTypes, visibleCount, onTogg
   if (typeCounts.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-1.5 border-b border-border/50 bg-card/5 px-4 py-1.5 overflow-x-auto">
+    <div className="flex flex-wrap items-center gap-1.5 border-b border-border/50 bg-card/5 px-4 py-1.5 max-h-20 overflow-y-auto">
       <span className="text-[10px] text-muted-foreground mr-1 shrink-0">
         {visibleCount} visible
       </span>
