@@ -2,14 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ListChecks, Play, Plus } from "lucide-react";
-import { EmptyState } from "@/components/ui/empty-state";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useFindings } from "@/lib/hooks/use-findings";
 import { ComponentTree } from "@companion-x/shared-renderer";
 import { FindingDetail } from "./finding-detail";
 import { FindingRow } from "./finding-row";
 import { FindingForm } from "./finding-form";
+import { EmptyFindings } from "./findings-empty";
 import { kindCounts } from "./finding-kinds";
 import {
   usePaintedComponents,
@@ -155,16 +155,9 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
             ))}
           </div>
         ) : (
-          <EmptyFindings />
+          adding ? null : <EmptyFindings onAdd={() => setAdding(true)} />
         )}
       </div>
     </div>
-  );
-}
-
-function EmptyFindings() {
-  return (
-    <EmptyState icon={ListChecks} title="No findings yet"
-      action={{ icon: Play, label: "Run an analysis", prompt: "Analyze the system and report any findings" }} />
   );
 }
