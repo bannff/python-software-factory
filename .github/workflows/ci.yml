@@ -149,6 +149,58 @@ jobs:
             --ignore=components/machine_learning/test/factory/machine_learning/test_can_inference.py \
             -k "properties or property or contract or registry or split or curriculum or projection or lifecycle or family or alias"
 
+  neo4j-live:
+    # Runs the Neo4j-backed suites that self-skip (or fail) without a server in
+    # the mock-adapter `core-tests` lane. Advisory: continue-on-error keeps a
+    # first-run surprise from gating merges; promote it to required once it has
+    # been green for a while. Community image only (no GDS plugin needed here).
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    services:
+      neo4j:
+        image: neo4j:5.26-community
+        env:
+          # Throwaway CI credential for a service container that dies with the job.
+          NEO4J_AUTH: neo4j/ci-neo4j-password-0123
+        ports:
+          - 7687:7687
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p ci-neo4j-password-0123 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 10s
+          --health-retries 12
+    env:
+      NEO4J_URI: bolt://localhost:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ci-neo4j-password-0123
+      MCP_LOCAL_AUTH: "true"
+      MCP_LOCAL_AUTH_TOKEN: "ci-local-auth-token-0123456789"
+      MCP_PERMISSIONS_CONFIG_DIR: config/mcp_permissions
+      TELEMETRY_REQUIRED: "0"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.12.0"
+      - name: Install candidate dependencies
+        run: |
+          uv lock --check
+          uv sync --frozen --group langgraph-legacy
+          uv pip install --python .venv/bin/python --no-deps \
+            -r config/core-test-requirements.txt
+      - name: Run the Neo4j-backed suites against the service container
+        run: |
+          uv run pytest -q \
+            components/graph/test/factory/graph/test_provenance_neo4j_live.py \
+            components/memory/test/factory/memory/test_tags_pushdown_neo4j.py \
+            components/memory/test/factory/memory/test_metadata_pushdown_neo4j.py \
+            components/storage/test/factory/storage/test_doc_neo4j.py \
+            components/blockchain/test/factory/blockchain/test_reward_escrow_release_neo4j.py
+
   post-merge:
     # Post-merge smoke for `main` (see the trigger comment): the strict
     # control-plane suites only, no selector — neither a push nor a scheduled
