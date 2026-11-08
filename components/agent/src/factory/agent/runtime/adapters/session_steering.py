@@ -6,7 +6,7 @@ from dataclasses import replace
 from typing import TYPE_CHECKING, Any
 from uuid import uuid4
 
-from factory.llm_gateway.interface import configured_chat_model_id
+from factory.llm_gateway.interface import default_chat_model_id
 from factory.mcp_utils.interface import get_service
 
 from ..runtime_contracts import RuntimeInvocation
@@ -24,7 +24,7 @@ def _process_default_model_id():
     session brick requires a concrete non-empty model. Delegates to the
     gateway's authority (#136), with this literal covering an unset value.
     """
-    return configured_chat_model_id() or "us.anthropic.claude-sonnet-4-6"
+    return default_chat_model_id()
 
 
 def _default_project() -> str:
