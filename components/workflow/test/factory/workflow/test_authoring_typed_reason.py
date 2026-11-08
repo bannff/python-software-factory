@@ -27,7 +27,7 @@ class _Registry:
 @pytest.fixture
 def upsert(tmp_path: Path):
     registry = _Registry()
-    runtime = type("Runtime", (), {"config_dir": tmp_path})()
+    runtime = type("Runtime", (), {"config_dir": tmp_path, "reload_workflows": lambda self: None})()
     register(registry, runtime, AuthoringManager(config_dir=tmp_path))
     return registry.tools[_TOOL]
 

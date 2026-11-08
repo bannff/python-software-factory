@@ -7,6 +7,7 @@ from typing import Any
 
 import yaml
 
+from .definitions import load_workflows, replace_registry
 from .envelope import Envelope
 from .execution.adapters import TaskExecutor
 from .execution_engines import ExecutionEngineRegistry
@@ -89,24 +90,17 @@ class WorkflowRuntime(LoopRuntime, BackgroundCompletionRuntime, ExecutionRuntime
         settings = Settings.model_validate(raw)
         return cls(
             config_dir=config_dir, settings=settings, settings_raw=raw,
-            workflows=cls._load_workflows(config_dir),
+            workflows=load_workflows(config_dir),
             storage=cls._create_storage(config_dir, settings),
             executor=create_configured_executor(settings),
             tool_invoker=tool_invoker or resolve_tool_invoker(),
             task_allowlist=task_allowlist,
         )
 
-    @staticmethod
-    def _load_workflows(config_dir: Path) -> list[WorkflowDefinition]:
-        definitions = []
-        workflows_dir = config_dir / "workflows"
-        if workflows_dir.exists():
-            for path in sorted(workflows_dir.glob("*.yaml")):
-                parsed = yaml.safe_load(path.read_text())
-                if not isinstance(parsed, dict):
-                    raise WorkflowError(f"Workflow file must parse to a mapping: {path}")
-                definitions.append(WorkflowDefinition.model_validate(parsed))
-        return definitions
+    def reload_workflows(self) -> None:
+        """Refresh the live registry from config_dir (used after authoring writes)."""
+        replace_registry(self.config_dir, self._workflows, self._workflow_by_id,
+                         self._workflow_by_name)
 
     @staticmethod
     def _create_storage(config_dir: Path, settings: Settings) -> WorkflowStorage:

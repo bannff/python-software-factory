@@ -47,6 +47,8 @@ def register(mcp: Any, runtime: "WorkflowRuntime", manager: "AuthoringManager | 
             if typed is None:
                 raise
             raise typed from exc
+        if not dry_run:
+            runtime.reload_workflows()
         return DefinitionOutput.model_validate(json_safe(saved))
 
     @mcp.tool(name="workflow.authoring.delete_workflow_definition")
@@ -54,4 +56,7 @@ def register(mcp: Any, runtime: "WorkflowRuntime", manager: "AuthoringManager | 
     def authoring_delete_workflow_definition(id: str) -> ToolResult[DefinitionOutput]:
         if not manager:
             raise AuthoringError("Authoring tools disabled")
-        return DefinitionOutput.model_validate(json_safe(manager.delete_workflow_definition(id=id)))
+        result = manager.delete_workflow_definition(id=id)
+        if result.get("deleted"):
+            runtime.reload_workflows()
+        return DefinitionOutput.model_validate(json_safe(result))
