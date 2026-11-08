@@ -15,6 +15,7 @@ BRICK_ENV_VARS: dict[str, list[tuple[str, str]]] = {
     ],
     "cache": [
         ("FACTORY_CACHE_ADAPTER", "memory"),
+        ("CACHE_BACKEND", "memory"),
         ("REDIS_URL", "redis://localhost:6379/0"),
     ],
     "events": [
@@ -23,6 +24,7 @@ BRICK_ENV_VARS: dict[str, list[tuple[str, str]]] = {
     ],
     "graph": [
         ("FACTORY_GRAPH_ADAPTER", "networkx"),
+        ("GRAPH_BACKEND", "persistent_networkx"),
         ("NEO4J_URI", "bolt://localhost:7687"),
         ("NEO4J_USER", "neo4j"),
         ("NEO4J_PASSWORD", "password"),
@@ -48,6 +50,7 @@ BRICK_ENV_VARS: dict[str, list[tuple[str, str]]] = {
     ],
     "memory": [
         ("FACTORY_MEMORY_ADAPTER", "memory"),
+        ("MEMORY_BACKEND", "memory"),
     ],
     "workflow": [
         ("FACTORY_WORKFLOW_ADAPTER", "memory"),

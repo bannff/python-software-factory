@@ -35,8 +35,8 @@ logger = logging.getLogger(__name__)
 def _timeline_capabilities() -> dict[str, Any]:
     """Describe timeline support for the frontend."""
     graph_backend = (
-        os.environ.get("FACTORY_GRAPH_ADAPTER")
-        or os.environ.get("GRAPH_BACKEND")
+        os.environ.get("GRAPH_BACKEND")  # the key that selects the adapter wins
+        or os.environ.get("FACTORY_GRAPH_ADAPTER")
         or "networkx"
     ).lower()
     graph_sink_enabled = _graph_sink_enabled()
