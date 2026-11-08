@@ -44,7 +44,7 @@ REVIEW_GAME_MASTER = _EVAL_PREAMBLE + (
     "'target': '<app_name>', 'max_actions': 20}) → create game\n"
     "4. For each finding, record a triage move:\n"
     "   games_security_move(game_id=..., action='submit_finding', "
-    "params={finding_id, classification: tp|fp|needs_info})\n"
+    "finding_id=..., classification='tp'/'fp'/'needs_info', evidence=...)\n"
     "5. games_evaluate(game_id=...) → get preliminary score\n"
     "6. Hand off to eval-judge with: game_id, findings list, "
     "preliminary score."
