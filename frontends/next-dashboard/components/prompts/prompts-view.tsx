@@ -57,7 +57,7 @@ export default function PromptsView() {
   const requiredMissing = selected?.arguments.some((argument) =>
     argument.required && !(values[argument.name] ?? "").trim()) ?? false;
 
-  return <section aria-labelledby="prompts-title">
+  return <section aria-labelledby="prompts-title" className="@container">
     <div className="mb-4 flex items-start justify-between gap-3"><div>
       <h2 id="prompts-title" className="text-lg font-semibold">Prompts</h2>
       <p className="text-xs text-muted-foreground">Reusable instructions from Factory MCP prompt registries, loaded only when rendered.</p>
@@ -78,8 +78,8 @@ export default function PromptsView() {
         </div>
         {catalog.failedBricks.length > 0 && <p className="mb-3 rounded-md border border-amber-500/30 p-3 text-xs text-amber-300">
           {catalog.failedBricks.length} registries could not be inspected: {catalog.failedBricks.join(", ")}</p>}
-        <div className="grid min-h-[28rem] gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(20rem,1.1fr)]">
-          <div className="grid content-start gap-2 overflow-y-auto pr-1 lg:max-h-[38rem]">
+        <div className="grid min-h-[28rem] gap-4 @3xl:grid-cols-[minmax(0,0.9fr)_minmax(20rem,1.1fr)]">
+          <div className="grid content-start gap-2 overflow-y-auto pr-1 @3xl:max-h-[38rem]">
             {filtered.length === 0 ? <p className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">No matching prompts.</p>
               : filtered.map((prompt) => <button type="button" key={`${prompt.brick}:${prompt.name}`}
                 onClick={() => select(prompt)} aria-pressed={selected?.brick === prompt.brick && selected.name === prompt.name}
