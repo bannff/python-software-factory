@@ -25,6 +25,7 @@ def build_learning_progress(activities: list[dict[str, Any]]) -> list[dict[str, 
     """Return newest-first learning rows derived from RL lifecycle events."""
     events_by_run: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for activity in activities:
+        activity = _game_finished_as_rl(activity)
         if not str(activity.get("event_type", "")).startswith("rl."):
             continue
         run_id = str(activity.get("run_id", ""))
@@ -35,6 +36,26 @@ def build_learning_progress(activities: list[dict[str, Any]]) -> list[dict[str, 
     rows.sort(key=lambda item: str(item.get("timestamp", "")), reverse=True)
     _add_trends(rows)
     return rows
+
+
+def _game_finished_as_rl(activity: dict[str, Any]) -> dict[str, Any]:
+    """Present a finished game's learner score as an ``rl.completed`` row.
+
+    The learner is player 1 (same rule as the reward handler); a loss scores
+    0.0, a win 1.0, so the panel's best-score and trend work for gameplay too.
+    """
+    if activity.get("event_type") != "game.finished":
+        return activity
+    payload = activity.get("payload") if isinstance(activity.get("payload"), dict) else {}
+    reward = payload.get("reward") if isinstance(payload.get("reward"), dict) else {}
+    value = reward.get("1")
+    game_id = str(payload.get("game_id") or activity.get("game_id") or "")
+    if value is None or not game_id:
+        return activity
+    return {
+        **activity, "event_type": "rl.completed", "run_id": f"game-{game_id}",
+        "workflow_type": payload.get("game_type", "game"), "f1": max(0.0, min(1.0, float(value))),
+    }
 
 
 def learning_overview(rows: list[dict[str, Any]]) -> dict[str, Any]:
