@@ -140,6 +140,14 @@ class AllowedProjectRootsOutput(DTO):
     roots: list[str]
 
 
+class ListProjectsInput(DTO):
+    """Zero-argument list of admissible projects under the allowed roots."""
+
+
+class ListProjectsOutput(DTO):
+    projects: list[str]
+
+
 class FileWriteOutput(DTO):
     result: FileWrite
 
@@ -149,6 +157,7 @@ __all__ = [
     "DirectoryOutput", "EditFileInput", "FileReadOutput", "FileWriteOutput",
     "GitCommitInput", "GitDiffInput", "GitLogInput", "GitOutput",
     "GitPathsInput", "GitPushInput", "GitStatusInput", "ListDirInput",
+    "ListProjectsInput", "ListProjectsOutput",
     "ReadFileInput", "RunCommandInput", "RunCommandOutput", "SearchInput",
     "SearchOutput", "WriteFileInput",
 ]

@@ -54,8 +54,8 @@ export default function ConnectionsView() {
   };
 
   return (
-    <section aria-labelledby="connections-title" className="grid gap-4 lg:grid-cols-[21rem_minmax(0,1fr)]">
-      <div className="lg:col-span-2"><ExternalServersPanel ready={ready} onChanged={() => void refresh()} /></div>
+    <section aria-labelledby="connections-title" className="grid gap-4 @3xl:grid-cols-[21rem_minmax(0,1fr)]">
+      <div className="@3xl:col-span-2"><ExternalServersPanel ready={ready} onChanged={() => void refresh()} /></div>
       <div className="min-w-0"><div className="mb-3 flex items-start justify-between gap-2">
         <div><h2 id="connections-title" className="text-lg font-semibold">Connections</h2>
           <p className="text-xs text-muted-foreground">MCP powers available to this Companion-X deployment.</p></div>

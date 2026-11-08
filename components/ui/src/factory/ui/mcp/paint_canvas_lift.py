@@ -62,4 +62,24 @@ def lift_props_children(components: list[Any]) -> list[dict[str, Any]]:
     return out
 
 
-__all__ = ["lift_props_children"]
+def props_children_error(components: list[Any]) -> str | None:
+    """Refuse non-object ``props.children`` entries that the lift would drop.
+
+    Bare strings cannot be lifted into siblings; dropping them silently hid
+    the agent's content (issue #224), so the agent gets a refusal instead.
+    """
+    for i, comp in enumerate(components):
+        props = comp.get("props") if isinstance(comp, dict) else None
+        kids = props.get("children") if isinstance(props, dict) else None
+        if kids is None:
+            continue
+        if not isinstance(kids, list) or not all(isinstance(k, dict) for k in kids):
+            return (f"components[{i}].props.children must be an array of component "
+                    "objects; use a Text component for text")
+        nested = props_children_error(kids)
+        if nested:
+            return nested
+    return None
+
+
+__all__ = ["lift_props_children", "props_children_error"]

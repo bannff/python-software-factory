@@ -33,6 +33,15 @@ def configured_chat_model_id() -> str:
     return os.getenv(CONFIGURED_CHAT_MODEL_ENV, "").strip()
 
 
+#: Last-resort chat model when ``COMPANION_X_CHAT_MODEL`` is unset.
+FALLBACK_CHAT_MODEL_ID = "us.anthropic.claude-sonnet-4-6"
+
+
+def default_chat_model_id() -> str:
+    """The concrete chat model a new Session is created with (never empty)."""
+    return configured_chat_model_id() or FALLBACK_CHAT_MODEL_ID
+
+
 @dataclass(frozen=True, slots=True)
 class ChatModelDescriptor:
     """Non-secret model choice suitable for MCP and frontend projection."""
@@ -186,5 +195,6 @@ __all__ = [
     "ChatModelCatalog",
     "ChatModelDescriptor",
     "configured_chat_model_id",
+    "default_chat_model_id",
     "list_chat_models",
 ]

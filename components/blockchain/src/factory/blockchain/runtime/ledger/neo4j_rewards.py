@@ -54,6 +54,7 @@ class Neo4jRewardMixin:
             raise ValueError(f"Wallet not found: {record['wallet_id']}")
         self._update_wallet_balance(  # type: ignore[attr-defined]
             record["wallet_id"], float(rp.get("balance", 0)) + record["amount"])
+        self._total_supply += record["amount"]  # type: ignore[attr-defined]
         release_tx = self._make_tx(  # type: ignore[attr-defined]
             TransactionType.BOUNTY_RELEASE, None, record["wallet_id"],
             record["amount"], record.get("memo") or f"reward release run {run_id}",

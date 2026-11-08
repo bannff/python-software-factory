@@ -18,6 +18,7 @@ from .extended_models import (
     SandboxServiceMocksRequest, SandboxServiceMocksResult, SandboxWorkspaceResult,
     SandboxWriteFileRequest, SandboxWriteFileResult,
 )
+from .lifecycle_guard import require_live
 from .nested_models import SandboxServiceMockConfig
 from .models import SandboxEnvironmentRequest
 
@@ -53,6 +54,7 @@ def register(mcp: Any, runtime: "SandboxRuntime") -> None:
         timeout_seconds: int = Field(default=300, ge=1, le=3600),
     ) -> ToolResult[SandboxCommandResult]:
         """Execute a command; nonzero exits are data, not transport failures."""
+        require_live(runtime, env_id)
         return ok(SandboxCommandResult.model_validate(
             (await runtime.execute(env_id, command, timeout_seconds)).model_dump(),
         ))
@@ -101,6 +103,7 @@ def register(mcp: Any, runtime: "SandboxRuntime") -> None:
         encoding: Literal["utf8", "base64"] = "utf8",
     ) -> ToolResult[SandboxWriteFileResult]:
         """Write inline content to a file inside the sandbox (no host staging)."""
+        require_live(runtime, env_id)
         raw = await runtime.write_file(env_id, remote_path, content, encoding)
         if not raw.get("success", False):
             return fail(str(raw.get("error", "sandbox write_file failed")))
@@ -116,6 +119,7 @@ def register(mcp: Any, runtime: "SandboxRuntime") -> None:
         path: str = Field(default=".", min_length=1, max_length=4096),
     ) -> ToolResult[SandboxDiffResult]:
         """Report changed files under a path via git; empty when not a repo."""
+        require_live(runtime, env_id)
         raw = await runtime.diff(env_id, path)
         return ok(SandboxDiffResult(
             env_id=env_id,

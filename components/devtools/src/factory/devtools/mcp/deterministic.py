@@ -10,8 +10,8 @@ from factory.mcp_utils.registration import typed_tool
 from .binding import project_binding
 from .contracts import (
     AllowedProjectRootsInput, AllowedProjectRootsOutput, DirectoryOutput, FileReadOutput, GitDiffInput,
-    GitLogInput, GitOutput, GitStatusInput, ListDirInput, ReadFileInput,
-    SearchInput, SearchOutput,
+    GitLogInput, GitOutput, GitStatusInput, ListDirInput, ListProjectsInput,
+    ListProjectsOutput, ReadFileInput, SearchInput, SearchOutput,
 )
 
 
@@ -22,6 +22,13 @@ def register(mcp: Any, runtime: Any) -> None:
     def devtools_list_allowed_project_roots() -> ToolResult[AllowedProjectRootsOutput]:
         from factory.devtools.interface import list_allowed_project_roots
         return AllowedProjectRootsOutput(roots=list_allowed_project_roots())
+
+    @typed_tool(mcp)
+    @deterministic(input_model=ListProjectsInput, output_model=ListProjectsOutput)
+    @op_kind("read")
+    def devtools_list_projects() -> ToolResult[ListProjectsOutput]:
+        from factory.devtools.interface import list_projects
+        return ListProjectsOutput(projects=list_projects())
 
     @typed_tool(mcp)
     @deterministic(input_model=ReadFileInput, output_model=FileReadOutput)

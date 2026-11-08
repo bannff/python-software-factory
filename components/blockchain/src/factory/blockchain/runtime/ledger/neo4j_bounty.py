@@ -29,6 +29,7 @@ class Neo4jBountyMixin(Neo4jRewardMixin):
             raise LedgerError("invalid_amount", "Amount must be positive")
         new_bal = float(rp.get("balance", 0)) + amount
         self._update_wallet_balance(to_wallet, new_bal)  # type: ignore[attr-defined]
+        self._total_supply += amount  # type: ignore[attr-defined]
         tx = self._make_tx(TransactionType.MINT, None, to_wallet, amount, memo)  # type: ignore[attr-defined]
         self._commit_block([tx.tx_id])  # type: ignore[attr-defined]
         return tx

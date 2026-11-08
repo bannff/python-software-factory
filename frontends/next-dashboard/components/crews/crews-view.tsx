@@ -81,7 +81,7 @@ export default function CrewsView() {
       )}
 
       {!error && !(loading && crews.length === 0) && (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 @xl:grid-cols-2 @4xl:grid-cols-3">
           {crews.map((crew) => (
             <CrewCard
               key={crew.id}

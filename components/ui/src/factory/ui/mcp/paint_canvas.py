@@ -5,7 +5,7 @@ from typing import Any, Callable, TYPE_CHECKING
 
 from factory.mcp_utils.interface import ToolResult, fail, operational
 
-from .paint_canvas_lift import lift_props_children
+from .paint_canvas_lift import lift_props_children, props_children_error
 from .paint_dtos import CanvasPaintInput, CanvasPaintOutput
 
 if TYPE_CHECKING:
@@ -53,6 +53,9 @@ def register(mcp: Any, get_runtime: Callable[[], "UIRuntime"]) -> None:
         if mode not in _VALID_MODES:
             return fail(f"Invalid mode {mode!r}; expected one of {_VALID_MODES}")
         if isinstance(payload, dict) and isinstance(payload.get("components"), list):
+            error = props_children_error(payload["components"])
+            if error:
+                return fail(error)
             payload = {**payload, "components": lift_props_children(payload["components"])}
         error = _error_for_payload(payload)
         if error:

@@ -106,7 +106,7 @@ export default function HooksView() {
       : loading && hooks.length === 0 ? <p className="text-sm text-muted-foreground">Loading hooks…</p>
       : hooks.length === 0 ? <div className="rounded-xl border border-dashed border-border/60 p-8 text-center text-muted-foreground">
         <Webhook className="mx-auto mb-3 h-8 w-8 text-violet-400" /><p>No hooks configured.</p></div>
-      : <div className="grid gap-3 md:grid-cols-2">{hooks.map((hook) => {
+      : <div className="grid gap-3 @2xl:grid-cols-2">{hooks.map((hook) => {
         const history = eventHistoryLabel(hook, firings[hook.id] ?? []);
         return <article key={hook.id} className="rounded-xl border border-border/60 bg-card/20 p-4">
           <div className="flex items-start justify-between gap-3">

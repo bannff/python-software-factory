@@ -21,6 +21,7 @@ from .runtime.chat_catalog import (
     ChatModelCatalog,
     ChatModelDescriptor,
     configured_chat_model_id,
+    default_chat_model_id,
     list_chat_models,
 )
 from .runtime.openrouter_catalog import ModelPricing
@@ -46,6 +47,7 @@ __all__ = [
     "FULL",
     "SCOPED",
     "configured_chat_model_id",
+    "default_chat_model_id",
     "resolve_chat_profile",
     "list_chat_models",
     # Typed credential no-go (S3, epic #124)

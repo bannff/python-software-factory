@@ -67,7 +67,7 @@ export default function KnowledgeView() {
       </header>
 
       {stats && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Knowledge library statistics">
+        <div className="grid grid-cols-2 gap-3 @xl:grid-cols-4" aria-label="Knowledge library statistics">
           <div className="rounded-lg border border-border/60 bg-card/30 p-3">
             <p className="text-xs text-muted-foreground">Documents</p>
             <p className="text-lg font-semibold">{stats.documentCount}</p>

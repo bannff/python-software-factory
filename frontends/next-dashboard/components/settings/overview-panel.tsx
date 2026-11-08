@@ -45,7 +45,7 @@ export default function OverviewPanel() {
       </p>
     </section>
 
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" role="list" aria-label="Runtime at a glance">
+    <div className="grid gap-3 @md:grid-cols-2 @3xl:grid-cols-4" role="list" aria-label="Runtime at a glance">
       <Stat icon={Wrench} label="Tools available" value={health.totalTools} hint="Agent Capabilities → Connections" onOpen={go("capabilities", "/capabilities?tab=connections")} />
       <Stat icon={PlugZap} label="External MCP servers" value={external.count} hint={external.mounted != null ? `${external.mounted} mounted` : "Add your own servers"} onOpen={go("capabilities", "/capabilities?tab=connections")} />
       <Stat icon={MessagesSquare} label="Sessions" value={sessionsLoading ? null : sessions.length} hint="Open the Sessions list" onOpen={go("sessions")} />

@@ -20,6 +20,7 @@ from .adapters.gt_findings import GtFindingsRewardSource
 from .adapters.llm_judge import LlmJudgeRewardSource
 from .adapters.telemetry import TelemetryRewardSource
 from .adapters.user_feedback import UserFeedbackRewardSource
+from .adapters.game_outcome import GameOutcomeRewardSource
 from .models import RewardSignal
 from .registry import RewardSourceRegistry, get_registry
 
@@ -100,6 +101,7 @@ def get_runtime() -> LearningRuntime:
         registry.register_builtin(GtFindingsRewardSource())
         registry.register_builtin(LlmJudgeRewardSource())
         registry.register_builtin(UserFeedbackRewardSource())
+        registry.register_builtin(GameOutcomeRewardSource())
         registry.register_builtin(TelemetryRewardSource())
         _runtime = LearningRuntime(registry)
     return _runtime
