@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 
-from .runtime.path_resolver import bind_project
+from .runtime.path_resolver import PathRefused, bind_project
 from .runtime.runtime import DevtoolsRuntime as Runtime
 from .server import create_mcp_server as create_server
 
@@ -26,4 +26,29 @@ def list_allowed_project_roots() -> list[str]:
     return [str(root.resolve()) for root in _allowed_roots()]
 
 
-__all__ = ["Runtime", "create_server", "list_allowed_project_roots", "validate_project"]
+# bind_project needs identity fields; admission does not depend on them.
+_PICKER_IDS = ("picker", "picker", "picker")
+
+
+def list_projects() -> list[str]:
+    """Admissible projects: each allowed root and its direct children that `bind_project` accepts.
+
+    Admission is delegated to `bind_project` so the picker can never offer a
+    choice that session/crew creation would refuse.
+    """
+    roots = _allowed_roots()
+    found: set[str] = set()
+    for root in roots:
+        try:
+            candidates = [root, *(c for c in root.iterdir() if c.is_dir())]
+        except OSError:
+            continue
+        for candidate in candidates:
+            try:
+                found.add(bind_project(*_PICKER_IDS, str(candidate), roots).root)
+            except (PathRefused, OSError):
+                continue
+    return sorted(found)
+
+
+__all__ = ["Runtime", "create_server", "list_allowed_project_roots", "list_projects", "validate_project"]

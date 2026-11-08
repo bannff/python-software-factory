@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 vi.mock("@/lib/hooks/use-personas", () => ({
   usePersonas: () => ({ personas: [{ id: "redteam", name: "Red Team" }], loading: false, error: null, refresh: vi.fn() }),
 }));
-vi.mock("@/lib/hooks/use-project-roots", () => ({ useProjectRoots: () => ({ roots: [], loading: false }) }));
+vi.mock("@/lib/hooks/use-project-directories", () => ({ useProjectDirectories: () => ({ projects: [], loading: false }) }));
 vi.mock("@/lib/hooks/use-model-catalog", () => ({
   useModelCatalog: () => ({ models: [], groups: [], loading: false, error: null, refresh: vi.fn() }),
 }));
