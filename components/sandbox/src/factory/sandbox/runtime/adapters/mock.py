@@ -81,4 +81,4 @@ class MockAdapter:
 
     def health_check(self) -> dict[str, Any]:
         """Check mock adapter health."""
-        return {"healthy": True, "adapter": "mock", "environments": len(self._environments)}
+        return {"healthy": True, "adapter": "mock", "simulated": True, "environments": len(self._environments)}

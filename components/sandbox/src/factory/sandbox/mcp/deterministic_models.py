@@ -9,6 +9,7 @@ class CapabilitiesResult(StrictModel):
     version: str
     tools: dict[str, list[str]]
     adapters: list[str]
+    simulated: bool = False
     features: list[str]
 class HealthResult(StrictModel):
     healthy: bool

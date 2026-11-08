@@ -46,7 +46,8 @@ def register(mcp: Any, runtime: "SandboxRuntime") -> None:
                     "sandbox.authoring.upsert_template", "sandbox.authoring.delete_template",
                 ],
             },
-            adapters=["aws_ec2", "aws_ssm", "mock"],
+            adapters=["docker", "aws_ec2", "aws_ssm", "mock"],
+            simulated=bool(runtime.health_check()["adapter"].get("simulated", False)),
             features=[
                 "environment_provisioning", "command_execution", "file_transfer",
                 "session_management", "cfn_deployment", "manifest_provisioning",
