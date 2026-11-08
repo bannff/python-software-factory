@@ -10,6 +10,7 @@ from ..models import (
     TransactionStatus, TransactionType, Wallet, _utcnow,
 )
 from .chain_ops import _GENESIS_PREV, make_block, verify_blocks
+from .neo4j_chain_state import load_chain_state
 
 _TREASURY_ID = "wallet-treasury"
 
@@ -50,8 +51,7 @@ class Neo4jLedger:
     """
 
     def __init__(self, total_supply: float = 1_000_000.0) -> None:
-        self._total_supply = total_supply
-        self._blocks: list[Block] = []
+        self._blocks, self._total_supply = load_chain_state(_invoke, total_supply)
         self._init_genesis(total_supply)
 
     def _init_genesis(self, supply: float) -> None:
