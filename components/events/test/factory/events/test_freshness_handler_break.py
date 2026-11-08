@@ -17,6 +17,7 @@ import inspect
 import os
 import sys
 import time
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -48,10 +49,19 @@ def _make_event(event_type: str = "graph.completed", **payload_overrides) -> Eve
     return Event(type=event_type, source="qa-break-test", payload=payload)
 
 
+def _runs(*epochs: float, target: str = "experiment-x") -> dict:
+    """evals_list_run_results payload with one score run per epoch."""
+    return {"runs": [
+        {"run_id": f"r{i}", "experiment_name": f"score:security-scan:{target}",
+         "timestamp": datetime.fromtimestamp(e, timezone.utc).isoformat().replace("+00:00", "Z")}
+        for i, e in enumerate(epochs)
+    ]}
+
+
 def _stale_invoker(tool: str, **kwargs):
     """Invoker that always says 'never evaluated' (stale)."""
-    if tool == "evals_get_latest_score":
-        return {}
+    if tool == "evals_list_run_results":
+        return _runs()
     return None
 
 
@@ -60,8 +70,8 @@ def _fresh_invoker(threshold_s: float = 3600, age_s: float = 60):
     ts = time.time() - age_s
 
     def _invoker(tool: str, **kwargs):
-        if tool == "evals_get_latest_score":
-            return {"timestamp": ts}
+        if tool == "evals_list_run_results":
+            return _runs(ts)
         return None
 
     return _invoker
@@ -119,21 +129,21 @@ class TestBoundaryPrecision:
 class TestDefensiveIsolation:
     """The handler must NEVER propagate exceptions to the caller."""
 
-    def test_invoker_raises_on_get_latest_still_triggers(self):
-        """If we can't query freshness, treat as stale (safe default)."""
+    def test_invoker_raises_on_lookup_reports_error(self):
+        """A failed lookup is reported as an error, not guessed stale."""
         def _boom(tool, **kw):
-            if tool == "evals_get_latest_score":
+            if tool == "evals_list_run_results":
                 raise ConnectionError("DB down")
             return None
 
         result = handle_freshness_check(_make_event(), _boom)
-        assert result["action"] == "triggered"
+        assert result["action"] == "error"
 
     def test_invoker_raises_on_persist_does_not_crash(self):
         """Persist failure is swallowed — action still 'triggered'."""
         def _invoker(tool, **kw):
-            if tool == "evals_get_latest_score":
-                return {}  # None → stale
+            if tool == "evals_list_run_results":
+                return _runs()  # no runs → stale
             if tool == "evals_persist_score":
                 raise RuntimeError("Write refused")
             return None
@@ -141,44 +151,34 @@ class TestDefensiveIsolation:
         result = handle_freshness_check(_make_event(), _invoker)
         assert result["action"] == "triggered"
 
-    def test_invoker_returns_garbage_from_get_latest(self):
-        """Non-dict return from get_latest → treat as None → stale."""
+    def test_invoker_returns_garbage_from_lookup(self):
+        """Non-mapping return from the lookup → typed error, no persist."""
         def _invoker(tool, **kw):
-            if tool == "evals_get_latest_score":
+            if tool == "evals_list_run_results":
                 return "garbage string"
             return None
 
         result = handle_freshness_check(_make_event(), _invoker)
-        assert result["action"] == "triggered"
+        assert result["action"] == "error"
 
     def test_invoker_returns_non_numeric_timestamp(self):
-        """Timestamp that can't be float'd → None → stale."""
+        """Unparseable run timestamp → typed error, not a silent stale."""
         def _invoker(tool, **kw):
-            if tool == "evals_get_latest_score":
-                return {"timestamp": "not-a-number"}
+            if tool == "evals_list_run_results":
+                return {"runs": [{"experiment_name": "score:x:experiment-x", "timestamp": "not-a-time"}]}
             return None
 
         result = handle_freshness_check(_make_event(), _invoker)
-        assert result["action"] == "triggered"
+        assert result["action"] == "error"
 
     def test_none_invoker_does_not_crash(self):
         """If invoker is None (misconfigured), handler must not raise.
 
-        FINDING (Sev: Low): handler returns 'triggered' even though persist
-        failed because None is not callable. It doesn't crash, so defensive
-        isolation holds, but the return value is misleading — it claims a
-        persist happened when it didn't. Acceptable for now (caller doesn't
-        branch on the return dict), but worth a NOTE.
+        A None invoker fails the lookup, which is reported as an error.
         """
-        # None is not callable — the handler's try/except should catch
         result = handle_freshness_check(_make_event(), None)
-        # Handler survives — that's the critical contract
-        assert result["action"] in ("triggered", "error")
-        # It actually returns "triggered" because:
-        # _get_last_eval_timestamp catches TypeError → None → stale
-        # _persist_freshness_eval catches TypeError → logged warning
-        # outer flow returns {"action": "triggered"}
-        assert result["action"] == "triggered"
+        # Handler survives; lookup TypeError is reported, nothing persisted.
+        assert result["action"] == "error"
 
     def test_empty_payload_does_not_crash(self):
         """An event with empty payload should not crash."""
@@ -257,8 +257,8 @@ class TestIdempotency:
         persist_count = {"n": 0}
 
         def _invoker(tool, **kw):
-            if tool == "evals_get_latest_score":
-                return {}  # stale
+            if tool == "evals_list_run_results":
+                return _runs()  # stale
             if tool == "evals_persist_score":
                 persist_count["n"] += 1
             return None
@@ -280,8 +280,8 @@ class TestIdempotency:
         ts_state = {"ts": None}
 
         def _invoker(tool, **kw):
-            if tool == "evals_get_latest_score":
-                return {"timestamp": ts_state["ts"]}
+            if tool == "evals_list_run_results":
+                return _runs(*([ts_state["ts"]] if ts_state["ts"] else []))
             if tool == "evals_persist_score":
                 call_count["persist"] += 1
                 ts_state["ts"] = time.time()  # Simulate timestamp update
@@ -360,8 +360,8 @@ class TestConfigAbuse:
         age_s = 100  # 100s old eval
 
         def _invoker(tool, **kw):
-            if tool == "evals_get_latest_score":
-                return {"timestamp": now - age_s}
+            if tool == "evals_list_run_results":
+                return _runs(now - age_s)
             return None
 
         event = _make_event()

@@ -22,12 +22,32 @@ from factory.events.runtime.freshness_handler import (
     _is_stale,
     handle_freshness_check,
 )
+from datetime import datetime, timezone
+
 from pydantic import BaseModel
 from factory.mcp_utils.runtime.tool_result import ToolResult
 
 
-class _LatestScore(BaseModel):
-    timestamp: float | None = None
+class _RunList(BaseModel):
+    runs: list[dict]
+    count: int = 0
+
+
+def _iso(epoch: float) -> str:
+    return datetime.fromtimestamp(epoch, timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _run(target: str, epoch: float, workflow_type: str = "security-scan") -> dict:
+    """Run summary shaped like evals_list_run_results rows for score records."""
+    return {
+        "run_id": f"r-{target}-{int(epoch)}",
+        "experiment_name": f"score:{workflow_type}:{target}",
+        "timestamp": _iso(epoch),
+    }
+
+
+def _runs_result(*runs: dict) -> ToolResult:
+    return ToolResult(data=_RunList(runs=list(runs)))
 
 
 from factory.events.runtime.models import Event
@@ -88,10 +108,10 @@ class TestHandleFreshnessCheckStale:
 
     def test_stale_triggers_persist(self):
         invoker = MagicMock()
-        # evals_get_latest_score returns None → never evaluated → stale
-        invoker.return_value = ToolResult(data=_LatestScore(timestamp=None))
+        # evals_list_run_results returns None → never evaluated → stale
+        invoker.return_value = _runs_result()
         invoker.side_effect = lambda tool, **kwargs: (
-            ToolResult(data=_LatestScore(timestamp=None)) if tool == "evals_get_latest_score"
+            _runs_result() if tool == "evals_list_run_results"
             else None
         )
 
@@ -109,18 +129,6 @@ class TestHandleFreshnessCheckStale:
         assert call_kwargs["source"] == "freshness"
         assert call_kwargs["target_app"] == "my-experiment"
 
-    def test_never_evaluated_is_stale(self):
-        invoker = MagicMock()
-        # evals_get_latest_score raises (no data) → None → stale
-        invoker.side_effect = lambda tool, **kwargs: (
-            ToolResult(ok=False, data=None, error="unavailable") if tool == "evals_get_latest_score" else None
-        )
-
-        event = _make_event("swarm.completed")
-        result = handle_freshness_check(event, invoker)
-
-        assert result["action"] == "triggered"
-
 
 class TestHandleFreshnessCheckFresh:
     """Contract: fresh experiment does NOT persist."""
@@ -130,7 +138,7 @@ class TestHandleFreshnessCheckFresh:
 
         invoker = MagicMock()
         invoker.side_effect = lambda tool, **kwargs: (
-            ToolResult(data=_LatestScore(timestamp=recent_ts)) if tool == "evals_get_latest_score"
+            _runs_result(_run("my-experiment", recent_ts)) if tool == "evals_list_run_results"
             else None
         )
 
@@ -153,7 +161,7 @@ class TestCadenceEventRoutes:
         invoker = MagicMock()
         # Stale → triggers
         invoker.side_effect = lambda tool, **kwargs: (
-            ToolResult(data=_LatestScore(timestamp=None)) if tool == "evals_get_latest_score"
+            _runs_result() if tool == "evals_list_run_results"
             else None
         )
 
@@ -175,9 +183,9 @@ class TestPersistFailureDefensive:
         call_count = {"get": 0, "persist": 0}
 
         def _invoker(tool, **kwargs):
-            if tool == "evals_get_latest_score":
+            if tool == "evals_list_run_results":
                 call_count["get"] += 1
-                return ToolResult(data=_LatestScore(timestamp=None))  # stale
+                return _runs_result()  # stale
             if tool == "evals_persist_score":
                 call_count["persist"] += 1
                 raise RuntimeError("DB connection refused")
@@ -190,19 +198,6 @@ class TestPersistFailureDefensive:
         # Handler completes — action is still "triggered" even though persist failed
         assert result["action"] == "triggered"
         assert call_count["persist"] == 1
-
-    def test_get_latest_error_still_triggers(self):
-        """If we can't determine freshness, assume stale (safe default)."""
-        def _invoker(tool, **kwargs):
-            if tool == "evals_get_latest_score":
-                raise ConnectionError("timeout")
-            return None
-
-        event = _make_event("graph.completed")
-        result = handle_freshness_check(event, _invoker)
-
-        # _get_last_eval_timestamp returns None on error → _is_stale(None) → True
-        assert result["action"] == "triggered"
 
 
 class TestSubscriptionYAMLLoading:
