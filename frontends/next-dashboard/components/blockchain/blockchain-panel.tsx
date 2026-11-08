@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { errorReason, withReason } from "@/lib/error-reason";
 import { createWallet, ledgerFailure, listWallets, mint, transfer, verifyChain, type ChainCheck, type Wallet } from "./blockchain-api";
 import { MoneyForm } from "./money-form";
+import { useMutationRefresh } from "@/components/canvas/refresh-context";
 
 type Mode = "wallet" | "transfer" | "mint" | null;
 const BTN = "inline-flex items-center gap-1.5 rounded-md border border-border/60 px-2.5 py-1.5 text-xs hover:bg-accent/40";
@@ -21,17 +22,18 @@ export function BlockchainPanel() {
   const [check, setCheck] = useState<ChainCheck | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { version, notify } = useMutationRefresh();
 
   const refresh = useCallback(async () => {
     try { setWallets(await listWallets()); }
     catch (cause) { setNotice(withReason("Wallets are unavailable.", errorReason(cause))); }
     finally { setLoaded(true); }
   }, []);
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => { void refresh(); }, [refresh, version]);
 
   const run = async (action: () => Promise<void>, failure: string) => {
     setBusy(true); setNotice(null);
-    try { await action(); setMode(null); await refresh(); }
+    try { await action(); setMode(null); await refresh(); notify(); }
     catch (cause) { setNotice(ledgerFailure(failure, cause)); }
     finally { setBusy(false); }
   };

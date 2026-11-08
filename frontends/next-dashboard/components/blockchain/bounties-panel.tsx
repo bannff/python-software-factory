@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useMutationRefresh } from "@/components/canvas/refresh-context";
 import { Plus, Target, X } from "lucide-react";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -22,6 +23,7 @@ export function BountiesPanel() {
   const [claiming, setClaiming] = useState<{ id: string; wallet: string } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { version, notify } = useMutationRefresh();
   const mounted = useMounted();
 
   const refresh = useCallback(async () => {
@@ -31,11 +33,11 @@ export function BountiesPanel() {
     } catch (cause) { if (mounted.current) setNotice(bountyFailure("Bounties are unavailable.", cause)); }
     finally { if (mounted.current) setLoaded(true); }
   }, [mounted]);
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => { void refresh(); }, [refresh, version]);
 
   const run = async (action: () => Promise<void>, failure: string) => {
     setBusy(true); setNotice(null);
-    try { await action(); setPosting(null); setClaiming(null); await refresh(); }
+    try { await action(); setPosting(null); setClaiming(null); await refresh(); notify(); }
     catch (cause) { setNotice(bountyFailure(failure, cause)); }
     finally { setBusy(false); }
   };

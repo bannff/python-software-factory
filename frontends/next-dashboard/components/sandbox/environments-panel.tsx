@@ -6,6 +6,7 @@ import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { cn } from "@/lib/utils";
+import { useMutationRefresh } from "@/components/canvas/refresh-context";
 import { listDevicePresets, listEnvironments, listProfiles, provision, sandboxFailure, terminate, type Environment } from "./sandbox-api";
 
 const FIELD = "rounded-md border bg-background/50 px-3 py-2 text-sm";
@@ -19,13 +20,14 @@ export function EnvironmentsPanel() {
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const mounted = useMounted();
+  const { version, notify } = useMutationRefresh();
 
   const refresh = useCallback(async () => {
     try { const next = await listEnvironments(); if (mounted.current) setEnvs(next); }
     catch (cause) { if (mounted.current) setNotice(sandboxFailure("Environments are unavailable.", cause)); }
     finally { if (mounted.current) setLoaded(true); }
   }, [mounted]);
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => { void refresh(); }, [refresh, version]);
 
   const open = async () => {
     setNotice(null);
@@ -36,7 +38,7 @@ export function EnvironmentsPanel() {
   };
   const run = async (action: () => Promise<void>, failure: string) => {
     setBusy(true); setNotice(null);
-    try { await action(); setChoice(null); await refresh(); }
+    try { await action(); setChoice(null); await refresh(); notify(); }
     catch (cause) { setNotice(sandboxFailure(failure, cause)); }
     finally { setBusy(false); }
   };

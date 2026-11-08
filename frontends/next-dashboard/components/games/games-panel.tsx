@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { createGame, deleteGame, listGames, listGameTypes, moveInColumn, resetGame, type Game, type GameTypes } from "./games-api";
 import { gameFailure } from "./game-errors";
 import { GameBoard } from "./game-board";
+import { useMutationRefresh } from "@/components/canvas/refresh-context";
 
 /** Start, play, reset and delete games, driven by the games_* tools. */
 export function GamesPanel() {
@@ -17,19 +18,20 @@ export function GamesPanel() {
   const [loaded, setLoaded] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { version, notify } = useMutationRefresh();
 
   const refresh = useCallback(async () => {
     try { setGames(await listGames()); }
     catch (cause) { setNotice(gameFailure("Games are unavailable.", cause)); }
     finally { setLoaded(true); }
   }, []);
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => { void refresh(); }, [refresh, version]);
   useEffect(() => { void listGameTypes().then(setCatalog).catch(() => undefined); }, []);
   const playable = (g: Game) => catalog?.humanPlayable == null || catalog.humanPlayable.includes(g.game_type);
 
   const run = async (action: () => Promise<void>, failure: string): Promise<boolean> => {
     setBusy(true); setNotice(null);
-    try { await action(); await refresh(); return true; }
+    try { await action(); await refresh(); notify(); return true; }
     catch (cause) { setNotice(gameFailure(failure, cause)); return false; }
     finally { setBusy(false); }
   };
