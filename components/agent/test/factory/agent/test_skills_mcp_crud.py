@@ -38,8 +38,14 @@ async def test_skill_list_read_add_and_conflict(tmp_path, monkeypatch) -> None:
     listed = await catalog.call_tool("agent_list_skills", {})
     # The packaged built-in catalogue is always visible alongside the user root.
     assert "existing" in _ids(listed.structured_content["data"])
+    flags = {row["id"]: row["builtin"] for row in listed.structured_content["data"]["skills"]}
+    assert flags["existing"] is False
+    assert flags["companion-x-behavior"] is True
     detail = await catalog.call_tool("agent_read_skill", {"skill_id": "existing"})
     assert detail.structured_content["data"]["body"] == "Follow evidence."
+    assert detail.structured_content["data"]["builtin"] is False
+    packaged = await catalog.call_tool("agent_read_skill", {"skill_id": "companion-x-behavior"})
+    assert packaged.structured_content["data"]["builtin"] is True
 
     added = await catalog.call_tool("agent_add_skill", {
         "skill_id": "new-skill", "name": "New Skill",

@@ -91,6 +91,7 @@ export default function SkillsView() {
           key={skill.id} type="button" onClick={() => void select(skill)} aria-current={detail?.id === skill.id}
           className={`w-full rounded-md px-3 py-2 text-left ${detail?.id === skill.id ? "bg-violet-500/15" : "hover:bg-accent/30"}`}>
           <span className="flex items-center gap-2 truncate text-sm font-medium">{skill.name}
+            {skill.builtin && <span className="rounded bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-normal text-violet-300" title="Ships with the factory">Built-in</span>}
             {policy.disabledSkills.includes(skill.id) && <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-normal text-muted-foreground" title="Switched off in Settings → Skills">Off for you</span>}</span>
           <span className="block truncate font-mono text-[10px] text-muted-foreground">{skill.id}</span>
           {skill.description && <span className="mt-1 block line-clamp-2 text-[11px] text-muted-foreground">{skill.description}</span>}
@@ -114,9 +115,10 @@ export default function SkillsView() {
           : detail ? <article><div className="flex items-start justify-between gap-2">
             <div><p className="text-xs font-medium uppercase tracking-wide text-violet-400">Skill</p>
             <h3 className="mt-1 text-lg font-semibold">{detail.name}</h3><code className="text-xs text-muted-foreground">{detail.id}</code></div>
-            {caps?.skills.delete && <ConfirmDelete label="Delete skill" onConfirm={() => void remove()} disabled={busy}
+            {caps?.skills.delete && !detail.builtin && <ConfirmDelete label="Delete skill" onConfirm={() => void remove()} disabled={busy}
               className="inline-flex items-center gap-1.5 rounded-md border border-destructive/40 px-3 py-2 text-xs text-destructive disabled:opacity-40"><Trash2 className="h-3.5 w-3.5" /> Delete</ConfirmDelete>}</div>
-            {caps && !caps.skills.delete && <p className="mt-2 text-[11px] text-muted-foreground">{authoringGateNotice(caps, "skills", "delete")}</p>}
+            {detail.builtin ? <p className="mt-2 text-[11px] text-muted-foreground">Built-in skills ship with the factory and cannot be deleted.</p>
+              : caps && !caps.skills.delete && <p className="mt-2 text-[11px] text-muted-foreground">{authoringGateNotice(caps, "skills", "delete")}</p>}
             {detail.description && <p className="mt-3 text-sm text-muted-foreground">{detail.description}</p>}
             <pre className="mt-5 max-h-[26rem] overflow-auto whitespace-pre-wrap rounded-md border border-border/50 bg-background/50 p-4 font-sans text-xs leading-relaxed">{detail.body}</pre></article>
           : <div className="flex min-h-56 flex-col items-center justify-center text-center text-muted-foreground">

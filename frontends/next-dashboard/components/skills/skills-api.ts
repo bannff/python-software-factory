@@ -6,6 +6,8 @@ export interface SkillSummary {
   id: string;
   name: string;
   description: string;
+  /** Shipped with the factory: read-only, never deletable. */
+  builtin: boolean;
 }
 
 export interface SkillDetail extends SkillSummary {
@@ -17,7 +19,8 @@ function summary(raw: unknown): SkillSummary | null {
   const value = raw as Record<string, unknown>;
   if (typeof value.id !== "string" || typeof value.name !== "string") return null;
   return { id: value.id, name: value.name,
-    description: typeof value.description === "string" ? value.description : "" };
+    description: typeof value.description === "string" ? value.description : "",
+    builtin: value.builtin === true };
 }
 
 export async function listSkills(): Promise<SkillSummary[]> {

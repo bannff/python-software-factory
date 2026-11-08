@@ -11,15 +11,23 @@ beforeEach(() => { mocks.callTool.mockReset(); });
 describe("Skills MCP API", () => {
   it("lists and reads typed skills", async () => {
     mocks.callTool.mockResolvedValueOnce({ tool: "agent_list_skills", result: {
-      ok: true, data: { skills: [{ id: "review", name: "Review", description: "Check" }] },
+      ok: true, data: { skills: [{ id: "review", name: "Review", description: "Check", builtin: true }] },
     }}).mockResolvedValueOnce({ tool: "agent_read_skill", result: {
-      ok: true, data: { id: "review", name: "Review", description: "Check", body: "Read evidence." },
+      ok: true, data: { id: "review", name: "Review", description: "Check", body: "Read evidence.", builtin: true },
     }});
-    await expect(listSkills()).resolves.toEqual([{ id: "review", name: "Review", description: "Check" }]);
+    await expect(listSkills()).resolves.toEqual([{ id: "review", name: "Review", description: "Check", builtin: true }]);
     await expect(readSkill("review")).resolves.toEqual({
-      id: "review", name: "Review", description: "Check", body: "Read evidence.",
+      id: "review", name: "Review", description: "Check", body: "Read evidence.", builtin: true,
     });
     expect(mocks.callTool).toHaveBeenLastCalledWith("agent_read_skill", { skill_id: "review" });
+  });
+
+  it("treats a missing or non-boolean builtin flag as user-authored", async () => {
+    mocks.callTool.mockResolvedValueOnce({ tool: "agent_list_skills", result: {
+      ok: true, data: { skills: [{ id: "a", name: "A" }, { id: "b", name: "B", builtin: "yes" }] },
+    }});
+    const rows = await listSkills();
+    expect(rows.map((row) => row.builtin)).toEqual([false, false]);
   });
 
   it("reads the skill ID rule from the add tool's published schema", async () => {
