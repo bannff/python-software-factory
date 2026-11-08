@@ -9,6 +9,7 @@ import { useState, useCallback } from "react";
 import { GraphDetailPanel } from "./graph-detail-panel";
 import BrickViewRenderer from "./brick-view-renderer";
 import type { CanvasViewId } from "@/lib/types";
+import { useMutationRefresh } from "./refresh-context";
 
 interface GraphBrickViewProps {
   /** The brick's *_get_views tool name. */
@@ -28,6 +29,7 @@ export default function GraphBrickView({
   graphHeight = 260,
 }: GraphBrickViewProps) {
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  const { version } = useMutationRefresh();
 
   // Listen for item selection from the BrickViewRenderer
   const handleItemSelect = useCallback((entityId: string) => {
@@ -36,6 +38,7 @@ export default function GraphBrickView({
 
   return (
     <GraphDetailPanel
+      key={version}
       entityId={selectedEntityId}
       entityType={defaultEntityType}
       onNavigate={onNavigate}
