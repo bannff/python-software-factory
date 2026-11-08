@@ -52,6 +52,14 @@ __all__ = [
 ]
 
 
+def public_tool_entry(item: Any) -> dict[str, Any]:
+    """Schema entry for an admitted tool, naming its brick and callable name."""
+    return {
+        **tool_schema_entry(item.source_name, item.tool, item.input_schema),
+        "brick": item.brick, "qualified_name": item.public_name,
+    }
+
+
 def tool_schema_entry(
     name: str, tool: Any, input_schema: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -141,13 +149,9 @@ def build_tool_catalog(
     from .authorization import filter_projection
     projection = project_public_tools(tool_maps)
     for item in filter_projection(projection):
-        entry = tool_schema_entry(
-            item.source_name, item.tool, item.input_schema,
-        )
+        entry = public_tool_entry(item)
         if wanted is not None and entry["category"] not in wanted:
             continue
-        entry["brick"] = item.brick
-        entry["qualified_name"] = item.public_name
         tools.append(entry)
 
     # Reuse the ONE alias table the repo already has (``ml`` →
