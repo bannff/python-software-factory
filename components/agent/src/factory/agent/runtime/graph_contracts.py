@@ -6,7 +6,6 @@ from typing import Annotated, Any, Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 _READ_ONLY_TOOLS = frozenset({
-    "dataset_get_capabilities", "dataset_describe_config_schema",
     "dataset_get_job", "dataset_get_artifact", "dataset_resolve_artifact",
     "devtools_read_file", "devtools_list_dir", "devtools_search",
     "devtools_git_status", "devtools_git_diff", "devtools_git_log",
