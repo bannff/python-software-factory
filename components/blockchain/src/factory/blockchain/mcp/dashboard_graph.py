@@ -22,16 +22,27 @@ def related_graph_entities(
         for current_id in ids:
             if not current_id:
                 continue
-            entity = invoker("graph_graph_get_entity", entity_id=current_id) or {}
-            rows.extend(_rows_from_entity(entity, current_id, seen))
-            result = invoker("graph_graph_get_neighbors", entity_id=current_id, direction="both") or {}
-            neighbors = result.get("neighbors", []) if isinstance(result, dict) else []
+            lookup = _payload(invoker("graph_graph_get_entity", entity_id=current_id))
+            entity = lookup.get("entity") if "found" in lookup else lookup
+            rows.extend(_rows_from_entity(entity if isinstance(entity, dict) else {}, current_id, seen))
+            result = _payload(invoker("graph_graph_get_neighbors", entity_id=current_id, direction="both"))
+            neighbors = result.get("neighbors", [])
             for neighbor in neighbors:
                 if isinstance(neighbor, dict):
                     rows.extend(_rows_from_entity(neighbor, current_id, seen))
     except Exception:
         return rows[:limit]
     return rows[:limit]
+
+
+def _payload(result: Any) -> dict[str, Any]:
+    """The tool payload from the aggregator's ``{ok, data}`` envelope, or a bare dict."""
+    if not isinstance(result, dict):
+        return {}
+    if "ok" in result or "data" in result:
+        data = result.get("data")
+        return data if result.get("ok", True) and isinstance(data, dict) else {}
+    return result
 
 
 def _entity_ids(transactions: list[dict[str, Any]] | None, bounties: list[dict[str, Any]] | None) -> list[str]:
