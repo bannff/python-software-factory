@@ -168,7 +168,8 @@ class GamesRuntime:
         store = self.get_store()
         h = store.health_check()
         return {"healthy": h.healthy, "backend": h.backend,
-                "active_games": h.active_games}
+                "active_games": h.active_games,
+                "durable": h.backend != "memory"}  # sessions survive an API restart
 
     @staticmethod
     def available_game_types() -> list[str]:

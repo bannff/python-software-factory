@@ -26,7 +26,7 @@ def register(mcp: Any, get_runtime: Callable[[], "GamesRuntime"]) -> None:
             "type": "object",
             "properties": {
                 "default_game_type": {"type": "string", "enum": ["connect_four"]},
-                "store_backend": {"type": "string", "enum": ["memory"]},
+                "store_backend": {"type": "string", "enum": ["memory", "graph"]},
                 "rows": {"type": "integer", "default": 6},
                 "cols": {"type": "integer", "default": 7},
                 "win_length": {"type": "integer", "default": 4},
