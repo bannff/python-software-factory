@@ -72,7 +72,7 @@ def test_complete_tool_catalog_and_concrete_dto_schemas_are_frozen() -> None:
             "input": tool.fn._mcp_input_model.model_json_schema(mode="validation"),
             "output": output.model_json_schema(),
         }
-    assert _digest(snapshot) == "fd9037650e8d6e1e1fcca23a38b9ac0d0f337ba9e87d6389cd61fc6597c763b8"
+    assert _digest(snapshot) == "d129f46c256609b0d6e18764e416340dede6152e0ce5c90d78e7a0207fba0d4e"
 
 
 def test_resources_prompts_complete_view_and_representative_envelopes_are_frozen() -> None:

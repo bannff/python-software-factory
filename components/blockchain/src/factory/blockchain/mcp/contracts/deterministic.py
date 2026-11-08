@@ -18,6 +18,7 @@ class HealthOutput(DTO):
     healthy: bool
     provider: str
     chain_height: int = 0
+    durable: bool = False  # state survives an API restart
 
 
 class ConfigSchemaOutput(DTO):

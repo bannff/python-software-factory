@@ -14,6 +14,7 @@ from ..models import (
     TransactionType, _utcnow,
 )
 from .chain_ops import verify_blocks
+from .neo4j_chain_state import credit_supply
 from .neo4j_ledger import _add_entity, _add_rel, _invoke
 from .neo4j_rewards import Neo4jRewardMixin
 
@@ -29,7 +30,7 @@ class Neo4jBountyMixin(Neo4jRewardMixin):
             raise LedgerError("invalid_amount", "Amount must be positive")
         new_bal = float(rp.get("balance", 0)) + amount
         self._update_wallet_balance(to_wallet, new_bal)  # type: ignore[attr-defined]
-        self._total_supply += amount  # type: ignore[attr-defined]
+        credit_supply(self, _add_entity, amount)
         tx = self._make_tx(TransactionType.MINT, None, to_wallet, amount, memo)  # type: ignore[attr-defined]
         self._commit_block([tx.tx_id])  # type: ignore[attr-defined]
         return tx
@@ -149,6 +150,7 @@ class Neo4jBountyMixin(Neo4jRewardMixin):
             r = _invoke("graph_graph_health_check")
             data = getattr(r, "data", None)
             return {"healthy": bool(r and r.ok and data and data.healthy), "provider": "neo4j",
+                    "durable": True,
                     "chain_height": len(self._blocks)}  # type: ignore[attr-defined]
         except Exception as e:
             return {"healthy": False, "provider": "neo4j", "error": str(e)}
