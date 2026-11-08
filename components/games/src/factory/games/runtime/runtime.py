@@ -167,8 +167,7 @@ class GamesRuntime:
     def health_check(self) -> dict[str, Any]:
         store = self.get_store()
         h = store.health_check()
-        return {"healthy": h.healthy, "backend": h.backend,
-                "active_games": h.active_games,
+        return {"healthy": h.healthy, "backend": h.backend, "active_games": h.active_games,
                 "durable": h.backend != "memory"}  # sessions survive an API restart
 
     @staticmethod
