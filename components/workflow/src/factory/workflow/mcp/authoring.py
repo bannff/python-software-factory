@@ -10,6 +10,7 @@ from .contracts.authoring import (
     AuthoringStatusOutput, DefinitionOutput, DeleteWorkflowInput, UpsertWorkflowInput,
     ValidateWorkflowsInput, ValidationOutput,
 )
+from .authoring_errors import definition_failure
 from .contracts.base import EmptyInput, json_safe
 
 if TYPE_CHECKING:
@@ -39,7 +40,14 @@ def register(mcp: Any, runtime: "WorkflowRuntime", manager: "AuthoringManager | 
     def authoring_upsert_workflow_definition(id: str, yaml_or_object: str | dict, dry_run: bool = False) -> ToolResult[DefinitionOutput]:
         if not manager:
             raise AuthoringError("Authoring tools disabled")
-        return DefinitionOutput.model_validate(json_safe(manager.upsert_workflow_definition(id=id, yaml_or_object=yaml_or_object, dry_run=dry_run)))
+        try:
+            saved = manager.upsert_workflow_definition(id=id, yaml_or_object=yaml_or_object, dry_run=dry_run)
+        except Exception as exc:
+            typed = definition_failure(exc)
+            if typed is None:
+                raise
+            raise typed from exc
+        return DefinitionOutput.model_validate(json_safe(saved))
 
     @mcp.tool(name="workflow.authoring.delete_workflow_definition")
     @authoring_decorator(input_model=DeleteWorkflowInput, output_model=DefinitionOutput)
