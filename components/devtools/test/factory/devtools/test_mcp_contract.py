@@ -55,7 +55,7 @@ def test_run_command_is_strict_typed_operational_shell_tool(
     catalog = create_tool_catalog(Runtime())
     tools = asyncio.run(catalog.list_tools())
     assert [item.name for item in tools] == [
-        "devtools_list_allowed_project_roots",
+        "devtools_list_allowed_project_roots", "devtools_list_projects",
         "devtools_read_file", "devtools_list_dir", "devtools_search",
         "devtools_git_status", "devtools_git_diff", "devtools_git_log",
         "devtools_write_file", "devtools_edit_file", "devtools_run_command",

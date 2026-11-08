@@ -1,14 +1,14 @@
 "use client";
 
-import { useProjectRoots } from "@/lib/hooks/use-project-roots";
+import { useProjectDirectories } from "@/lib/hooks/use-project-directories";
 import { Field, FIELD } from "./crew-field";
 
-/** Picker over the devtools-allowed roots; free text only when none are configured. */
+/** Picker over admissible projects inside the allowed roots; free text only when none exist. */
 export function CrewProjectField({ value, onChange, error }: {
   value: string; error?: string;
   onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
 }) {
-  const { roots } = useProjectRoots();
+  const { projects: roots } = useProjectDirectories();
   // A saved project outside the current roots stays selectable so editing never silently drops it.
   const options = value && !roots.includes(value) ? [value, ...roots] : roots;
   return (
