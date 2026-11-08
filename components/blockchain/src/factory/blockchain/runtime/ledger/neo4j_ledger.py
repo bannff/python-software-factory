@@ -4,6 +4,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
+from ..errors import LedgerError
 from ..models import (
     Block, Bounty, BountyStatus, ChainInfo, Transaction,
     TransactionStatus, TransactionType, Wallet, _utcnow,
@@ -144,12 +145,12 @@ class Neo4jLedger:
         sp = self._get_wallet_props(from_wallet)
         rp = self._get_wallet_props(to_wallet)
         if not sp:
-            raise ValueError(f"Sender not found: {from_wallet}")
+            raise LedgerError("wallet_not_found", f"Sender not found: {from_wallet}")
         if not rp:
-            raise ValueError(f"Receiver not found: {to_wallet}")
+            raise LedgerError("wallet_not_found", f"Receiver not found: {to_wallet}")
         sb = float(sp.get("balance", 0))
         if amount <= 0 or sb < amount:
-            raise ValueError(f"Invalid transfer: balance={sb}, amount={amount}")
+            raise LedgerError("invalid_amount" if amount <= 0 else "insufficient_balance", f"Invalid transfer: balance={sb}, amount={amount}")
         self._update_wallet_balance(from_wallet, sb - amount)
         self._update_wallet_balance(to_wallet, float(rp.get("balance", 0)) + amount)
         tx = self._make_tx(TransactionType.TRANSFER, from_wallet, to_wallet, amount, memo)

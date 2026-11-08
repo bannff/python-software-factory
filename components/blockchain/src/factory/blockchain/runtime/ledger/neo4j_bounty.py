@@ -8,6 +8,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
+from ..errors import LedgerError
 from ..models import (
     Block, Bounty, BountyStatus, ChainInfo, Transaction,
     TransactionType, _utcnow,
@@ -23,9 +24,9 @@ class Neo4jBountyMixin(Neo4jRewardMixin):
     def mint(self, to_wallet: str, amount: float, memo: str = "") -> Transaction:
         rp = self._get_wallet_props(to_wallet)  # type: ignore[attr-defined]
         if not rp:
-            raise ValueError(f"Wallet not found: {to_wallet}")
+            raise LedgerError("wallet_not_found", f"Wallet not found: {to_wallet}")
         if amount <= 0:
-            raise ValueError("Amount must be positive")
+            raise LedgerError("invalid_amount", "Amount must be positive")
         new_bal = float(rp.get("balance", 0)) + amount
         self._update_wallet_balance(to_wallet, new_bal)  # type: ignore[attr-defined]
         tx = self._make_tx(TransactionType.MINT, None, to_wallet, amount, memo)  # type: ignore[attr-defined]
@@ -38,10 +39,11 @@ class Neo4jBountyMixin(Neo4jRewardMixin):
     ) -> Bounty:
         pp = self._get_wallet_props(poster_wallet)  # type: ignore[attr-defined]
         if not pp:
-            raise ValueError(f"Wallet not found: {poster_wallet}")
+            raise LedgerError("wallet_not_found", f"Wallet not found: {poster_wallet}")
         bal = float(pp.get("balance", 0))
         if amount <= 0 or bal < amount:
-            raise ValueError(f"Invalid bounty: balance={bal}, amount={amount}")
+            raise LedgerError("invalid_amount" if amount <= 0 else "insufficient_balance",
+                              f"Invalid bounty: balance={bal}, amount={amount}")
         self._update_wallet_balance(poster_wallet, bal - amount)  # type: ignore[attr-defined]
         escrow_tx = self._make_tx(  # type: ignore[attr-defined]
             TransactionType.BOUNTY_ESCROW, poster_wallet, None, amount, "escrow",
@@ -65,12 +67,12 @@ class Neo4jBountyMixin(Neo4jRewardMixin):
     def claim_bounty(self, bounty_id: str, claimer_wallet: str) -> Transaction:
         bp = self._get_bounty_props(bounty_id)
         if not bp:
-            raise ValueError(f"Bounty not found: {bounty_id}")
+            raise LedgerError("bounty_not_found", f"Bounty not found: {bounty_id}")
         if bp.get("status") != "open":
-            raise ValueError(f"Bounty not open: {bp.get('status')}")
+            raise LedgerError("bounty_not_open", f"Bounty not open: {bp.get('status')}")
         cp = self._get_wallet_props(claimer_wallet)  # type: ignore[attr-defined]
         if not cp:
-            raise ValueError(f"Claimer not found: {claimer_wallet}")
+            raise LedgerError("wallet_not_found", f"Claimer not found: {claimer_wallet}")
         amt = float(bp.get("amount", 0))
         self._update_wallet_balance(  # type: ignore[attr-defined]
             claimer_wallet, float(cp.get("balance", 0)) + amt)
