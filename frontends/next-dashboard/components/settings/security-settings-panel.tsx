@@ -47,7 +47,7 @@ export default function SecuritySettingsPanel() {
   return <section aria-labelledby="security-settings-title" className="rounded-lg border border-border/50 bg-card/30 p-5">
     <h2 id="security-settings-title" className="text-sm font-semibold">Security</h2>
     <p className="mt-0.5 text-xs text-muted-foreground">Choose the tools that must ask before running.</p>
-    <div className="mt-4 grid gap-3 sm:grid-cols-3">{POSTURE.map((item) => <article key={item.title} className="rounded-md border border-border/40 p-3">
+    <div className="mt-4 grid gap-3 @xl:grid-cols-3">{POSTURE.map((item) => <article key={item.title} className="rounded-md border border-border/40 p-3">
       <item.icon className="h-4 w-4 text-violet-400" /><h3 className="mt-2 text-sm font-medium">{item.title}</h3>
       <p className="mt-1 text-xs text-muted-foreground">{item.detail}</p>
     </article>)}</div>

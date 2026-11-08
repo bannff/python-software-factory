@@ -160,7 +160,7 @@ export function ArtifactDetail({
             </div>
           )}
           <div className="mb-5"><ArtifactPreview artifact={current} onAnchorSelect={setPendingAnchor} /></div>
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(260px,0.75fr)]">
+          <div className="grid gap-6 @2xl:grid-cols-[minmax(0,1.5fr)_minmax(260px,0.75fr)]">
             <ArtifactEditor artifact={current} onSaved={changed} />
             <div className="space-y-6">
               <ArtifactHistory versions={versionRows} loading={versions.loading} reverting={reverting} currentVersion={current.version} onRevert={revert} />

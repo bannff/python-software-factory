@@ -47,7 +47,7 @@ export function StartForm({ onStart, hasThread }: {
       <textarea id="project-spec" value={spec} onChange={(e) => setSpec(e.target.value)} rows={4}
         placeholder="Describe the multi-step work each cycle should advance."
         className="mt-1 w-full rounded-md border border-border/60 bg-background px-3 py-2 text-sm" />
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-3 grid gap-3 @md:grid-cols-2 @2xl:grid-cols-3">
         <Field label="Agent" htmlFor="project-agent">
           <select id="project-agent" value={agentId} onChange={(e) => setAgentChoice(e.target.value)} className={CONTROL}>
             {personas.map((p) => <option key={p.id} value={p.id}>{p.name || p.id}</option>)}

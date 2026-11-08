@@ -134,7 +134,7 @@ export default function MemoryView() {
       </header>
 
       {stats && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4" aria-label="Memory statistics">
+        <div className="grid grid-cols-2 gap-3 @xl:grid-cols-4" aria-label="Memory statistics">
           <div className="rounded-lg border border-border/60 bg-card/30 p-3">
             <p className="text-xs text-muted-foreground">Total</p>
             <p className="text-lg font-semibold">{stats.totalMemories}</p>
