@@ -6,11 +6,12 @@ Shared handler for two convergence triggers:
 
 Logic: check the target experiment's last-eval timestamp vs a
 configurable staleness threshold.  If stale, persist a freshness
-eval via the evals brick's evals_persist_score MCP tool (through
+eval via the evals brick's evals_persist_score MCP tool (lookup uses evals_list_run_results) (through
 invoker — no cross-brick imports).
 
-Defensive: a persist failure is logged but NEVER breaks the caller's
-completion or timer path.
+Defensive: failures are logged and reported in the returned summary but
+NEVER break the caller's completion or timer path.  A failed freshness
+lookup yields ``action="error"`` (not "stale") and persists nothing.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from __future__ import annotations
 import logging
 import os
 import time
+from datetime import datetime
 from typing import Any
 
 from .mcp_result import successful_data
@@ -44,22 +46,50 @@ def _get_staleness_threshold() -> float:
     return float(_DEFAULT_STALENESS_THRESHOLD_S)
 
 
-def _get_last_eval_timestamp(invoker: Any, run_id: str, target_app: str) -> float | None:
-    """Query the evals brick for the latest eval timestamp for this target.
+class FreshnessLookupError(RuntimeError):
+    """The evals lookup failed or returned an unusable shape.
 
-    Returns epoch seconds or None if no prior eval exists.
+    Distinct from "never evaluated": a failed lookup says nothing about
+    freshness, so the handler must report it instead of guessing stale.
     """
+
+
+def _parse_run_timestamp(raw: Any) -> float:
+    """Parse an RFC3339 run timestamp (``...Z``) into epoch seconds."""
     try:
-        result = invoker("evals_get_latest_score", target_app=target_app or run_id)
-        data = successful_data(result)
-        if data is not None:
-            ts = data.get("timestamp") or data.get("scored_at")
-            if ts is not None:
-                return float(ts)
-        return None
-    except Exception as exc:
-        logger.debug("freshness: could not fetch last eval for %s: %s", target_app, exc)
-        return None
+        return datetime.fromisoformat(str(raw).replace("Z", "+00:00")).timestamp()
+    except ValueError as exc:
+        raise FreshnessLookupError(f"unparseable run timestamp {raw!r}") from exc
+
+
+def _matches_target(experiment_name: Any, target: str) -> bool:
+    # Score records are named ``score:<workflow_type>:<target_app>``.
+    name = str(experiment_name)
+    return name == target or name.endswith(f":{target}")
+
+
+def _get_last_eval_timestamp(invoker: Any, run_id: str, target_app: str) -> float | None:
+    """Newest persisted eval run for this target, via ``evals_list_run_results``.
+
+    Returns epoch seconds, or None if the target was never evaluated.
+    Raises FreshnessLookupError when the lookup itself fails.
+    """
+    target = target_app or run_id
+    result = invoker("evals_list_run_results")
+    data = successful_data(result)
+    if data is None:
+        raise FreshnessLookupError(f"evals_list_run_results failed: {result!r}")
+    runs = data.get("runs")
+    if not isinstance(runs, list):
+        raise FreshnessLookupError("evals_list_run_results returned no 'runs' list")
+    stamps = [
+        _parse_run_timestamp(run["timestamp"])
+        for run in runs
+        if isinstance(run, dict)
+        and run.get("timestamp") is not None
+        and _matches_target(run.get("experiment_name", ""), target)
+    ]
+    return max(stamps, default=None)
 
 
 def _is_stale(last_eval_ts: float | None, threshold_s: float) -> bool:
@@ -118,7 +148,12 @@ def handle_freshness_check(event: Event, invoker: Any) -> dict[str, Any]:
         target_app = payload.get("target_app", workflow_id)
 
         threshold_s = _get_staleness_threshold()
-        last_eval_ts = _get_last_eval_timestamp(invoker, run_id, target_app)
+        try:
+            last_eval_ts = _get_last_eval_timestamp(invoker, run_id, target_app)
+        except Exception as exc:
+            # Loud, typed, and no persist: an unknown state is not "stale".
+            logger.error("freshness: lookup failed for target=%s: %s", target_app, exc)
+            return {"action": "error", "target_app": target_app, "error": str(exc)}
 
         if _is_stale(last_eval_ts, threshold_s):
             _persist_freshness_eval(invoker, event)
