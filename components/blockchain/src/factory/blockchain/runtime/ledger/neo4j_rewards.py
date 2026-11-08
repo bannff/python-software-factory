@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 from ..models import TransactionType
+from .neo4j_chain_state import credit_supply
 from .neo4j_ledger import _add_entity, _invoke
 
 
@@ -54,7 +55,7 @@ class Neo4jRewardMixin:
             raise ValueError(f"Wallet not found: {record['wallet_id']}")
         self._update_wallet_balance(  # type: ignore[attr-defined]
             record["wallet_id"], float(rp.get("balance", 0)) + record["amount"])
-        self._total_supply += record["amount"]  # type: ignore[attr-defined]
+        credit_supply(self, _add_entity, record["amount"])
         release_tx = self._make_tx(  # type: ignore[attr-defined]
             TransactionType.BOUNTY_RELEASE, None, record["wallet_id"],
             record["amount"], record.get("memo") or f"reward release run {run_id}",

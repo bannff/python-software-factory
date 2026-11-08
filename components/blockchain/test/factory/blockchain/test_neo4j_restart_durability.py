@@ -70,10 +70,4 @@ def test_new_blocks_after_restart_extend_the_chain(graph) -> None:
 
 
 def test_health_reports_durability(graph) -> None:
-    class Health:
-        ok = True
-        data = type("D", (), {"healthy": True})()
-
-    graph_call = graph.__call__
-    ledger = Ledger(total_supply=1.0)
-    assert ledger.health_check().get("durable") is True
+    assert Ledger(total_supply=1.0).health_check().get("durable") is True

@@ -110,7 +110,7 @@ class MockLedger:
         return reconcile(self, wallet_id)
 
     def health_check(self) -> dict[str, Any]:
-        return {"healthy": True, "provider": "mock_ledger", "chain_height": len(self._blocks)}
+        return {"healthy": True, "provider": "mock_ledger", "durable": False, "chain_height": len(self._blocks)}
 
 
 __all__ = ["MockLedger", "TREASURY_ID", "sync_block", "sync_bounty", "sync_transaction", "sync_wallet", "event_emitter"]
