@@ -40,6 +40,7 @@ class CapabilitiesOutput(_DTO):
     finetuning_backends: list[str]
     features: list[str]
     timeseries_model_types: list[str] = []
+    authoring_enabled: bool = False  # base-model/default edits allowed; hide edit controls when false
 
 
 class HealthTrackerOutput(_DTO):

@@ -17,6 +17,8 @@ from .deterministic_dtos import (
     ExperimentListInput, RunIdInput, TrackingRunOutput,
 )
 
+from ..runtime.authoring_policy import authoring_enabled
+
 
 def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
     """Register contract and tracking deterministic tools."""
@@ -31,7 +33,8 @@ def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
             features=["experiments", "runs", "metrics", "params", "artifacts",
                 "finetuning", "lora", "qlora", "model_export",
                 "training_objectives", "checkpoint_lifecycle"],
-            timeseries_model_types=[item.value for item in TimeSeriesModelType])
+            timeseries_model_types=[item.value for item in TimeSeriesModelType],
+            authoring_enabled=authoring_enabled())
 
     @mcp.tool(name="ml_health_check")
     @deterministic(input_model=EmptyInput, output_model=HealthOutput)
