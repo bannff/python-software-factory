@@ -60,4 +60,10 @@ def test_trajectory_zone_boundary_rejects_tampered_zone(tmp_path: pathlib.Path) 
     path.write_bytes(path.read_bytes().replace(b'"a1"', b'"a9"'))
     result = _boundary_tool(tmp_path)(dataset_uri=uri)
     assert result.ok is False
-    assert result.error == "tool_execution_failed"
+    assert result.error == "trajectory_tampered"
+
+
+def test_missing_or_unreadable_zone_has_typed_codes(tmp_path: pathlib.Path) -> None:
+    tool = _boundary_tool(tmp_path)
+    assert tool(dataset_uri="  ").error == "invalid_dataset_uri"
+    assert tool(dataset_uri=(tmp_path / "nope.jsonl").as_uri()).error == "dataset_unreadable"

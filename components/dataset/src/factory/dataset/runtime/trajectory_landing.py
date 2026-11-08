@@ -27,7 +27,14 @@ FORBIDDEN_ROW_KEYS = frozenset({
 
 
 class TrajectoryRowError(ValueError):
-    """Stable rejection reason for a non-conforming trajectory row."""
+    """Stable rejection reason for a non-conforming trajectory row or zone.
+
+    ``code`` is the typed MCP failure code a boundary reports for this cause.
+    """
+
+    def __init__(self, message: str, code: str = "trajectory_invalid") -> None:
+        super().__init__(message)
+        self.code = code
 
 
 class TrajectoryRow(BaseModel):
@@ -137,19 +144,21 @@ def resolve_trajectory_zone(
         content = read_bytes_no_follow(path)
         ref = json.loads(read_bytes_no_follow(ref_path).decode("utf-8"))
     except OSError as exc:
-        raise TrajectoryRowError(f"trajectory zone is unreadable: {exc}") from None
+        raise TrajectoryRowError(f"trajectory zone is unreadable: {exc}", "dataset_unreadable") from None
     if not isinstance(ref, dict) or not _DIGEST_PATTERN.match(str(ref.get("digest", ""))):
-        raise TrajectoryRowError("trajectory zone reference is missing a valid digest")
+        raise TrajectoryRowError("trajectory zone reference is missing a valid digest", "trajectory_ref_invalid")
     actual = f"sha256:{_sha256(content)}"
     if actual != ref["digest"]:
         raise TrajectoryRowError(
-            "trajectory rowset tampered: digest does not match its reference"
+            "trajectory rowset tampered: digest does not match its reference",
+            "trajectory_tampered",
         )
     rows = parse_rowset(content)
     if int(ref.get("row_count", -1)) != len(rows):
         raise TrajectoryRowError(
             f"trajectory rowset row_count mismatch: ref={ref.get('row_count')} "
-            f"actual={len(rows)}"
+            f"actual={len(rows)}",
+            "trajectory_row_count_mismatch",
         )
     return {"schema_version": TRAJECTORY_ROW_SCHEMA_VERSION, "digest": ref["digest"],
             "row_count": len(rows), "rows": [row.model_dump(mode="json") for row in rows]}

@@ -5,7 +5,8 @@ from pathlib import Path
 
 from typing import Any
 
-from factory.mcp_utils.interface import ToolResult, deterministic
+from factory.mcp_utils.interface import ToolResult, TypedToolFailure, deterministic
+from ..runtime.trajectory_landing import TrajectoryRowError
 
 from .contracts.lifecycle import (
     ArtifactOutput, DatasetUriInput, JobInput, ScenarioPackInput,
@@ -66,5 +67,10 @@ def register(mcp: Any, storage_root: Path | None = None) -> None:
         dataset_uri: str, storage_root: str | None = None,
     ) -> ToolResult[ResolvedTrajectoryZoneOutput]:
         """Resolve a digest-verified trajectory landing-zone rowset."""
-        zone = dataset_resolve_trajectory_zone(dataset_uri, storage_root)
+        if not dataset_uri.strip():
+            raise TypedToolFailure("invalid_dataset_uri", "dataset_uri is required")
+        try:
+            zone = dataset_resolve_trajectory_zone(dataset_uri, storage_root)
+        except TrajectoryRowError as exc:
+            raise TypedToolFailure(exc.code, str(exc)) from exc
         return ResolvedTrajectoryZoneOutput.model_validate(zone).model_dump(mode="json")
