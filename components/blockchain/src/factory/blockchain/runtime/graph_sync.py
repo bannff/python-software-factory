@@ -44,8 +44,8 @@ def sync_wallet(wallet: Wallet) -> None:
 
 def sync_transaction(tx: Transaction) -> None:
     props = tx.model_dump()
-    props["tx_type"] = str(tx.tx_type)
-    props["status"] = str(tx.status)
+    props["tx_type"] = tx.tx_type.value
+    props["status"] = tx.status.value
     _invoke(
         "graph_graph_add_entity",
         entity_id=tx.tx_id,
@@ -97,7 +97,7 @@ def sync_block(block: Block) -> None:
 
 def sync_bounty(bounty: Bounty) -> None:
     props = bounty.model_dump()
-    props["status"] = str(bounty.status)
+    props["status"] = bounty.status.value
     _invoke(
         "graph_graph_add_entity",
         entity_id=bounty.bounty_id,
