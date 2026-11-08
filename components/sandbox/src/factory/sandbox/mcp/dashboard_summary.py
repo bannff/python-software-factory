@@ -51,7 +51,7 @@ def build_dashboard_summary(runtime: "SandboxRuntime") -> dict[str, Any]:
     profiles = _all_profiles(list_profiles, resolve_profile)
     activities = list_recent_activity()
     graph_entities = list_related_graph_entities()
-    env_rows = [environment_row(env.model_dump(), profiles) for env in environments]
+    env_rows = [environment_row(env.model_dump(mode="json"), profiles) for env in environments]
 
     _attach_activity_summary(env_rows, activities)
     env_rows.sort(key=lambda item: (status_rank(item["status"]), item.get("created_at", "")), reverse=False)
