@@ -39,11 +39,17 @@ def register(mcp: Any, runtime: "WorkflowRuntime", manager: "AuthoringManager | 
     def authoring_upsert_workflow_definition(id: str, yaml_or_object: str | dict, dry_run: bool = False) -> ToolResult[DefinitionOutput]:
         if not manager:
             raise AuthoringError("Authoring tools disabled")
-        return DefinitionOutput.model_validate(json_safe(manager.upsert_workflow_definition(id=id, yaml_or_object=yaml_or_object, dry_run=dry_run)))
+        result = manager.upsert_workflow_definition(id=id, yaml_or_object=yaml_or_object, dry_run=dry_run)
+        if not dry_run:
+            runtime.reload_workflows()
+        return DefinitionOutput.model_validate(json_safe(result))
 
     @mcp.tool(name="workflow.authoring.delete_workflow_definition")
     @authoring_decorator(input_model=DeleteWorkflowInput, output_model=DefinitionOutput)
     def authoring_delete_workflow_definition(id: str) -> ToolResult[DefinitionOutput]:
         if not manager:
             raise AuthoringError("Authoring tools disabled")
-        return DefinitionOutput.model_validate(json_safe(manager.delete_workflow_definition(id=id)))
+        result = manager.delete_workflow_definition(id=id)
+        if result.get("deleted"):
+            runtime.reload_workflows()
+        return DefinitionOutput.model_validate(json_safe(result))
