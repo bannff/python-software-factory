@@ -93,7 +93,7 @@ engines, HTTP clients) — they are the targets of Phase 2.
 
 Store the raw map:
 ```
-graph_add_entity(entity_type='EndpointInventory', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='EndpointInventory', properties={
   "run_id": "{{run_id}}", "app": "{{target_app}}",
   "agent_id": "{{agent_id}}",
   "endpoints": "<JSON array of {method, path, file, function, framework}>"
@@ -135,16 +135,16 @@ hop by hop, recording each call site.
 
 Persist source/sink/edges:
 ```
-graph_add_entity(entity_type='TaintSource', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='TaintSource', properties={
   "run_id": "{{run_id}}", "endpoint": "<path>", "param": "<name>",
   "param_type": "path|query|body|header|cookie",
   "file": "<path>", "line": <int>
 })
-graph_add_entity(entity_type='TaintSink', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='TaintSink', properties={
   "run_id": "{{run_id}}", "operation": "<call>",
   "sink_class": "<vuln_class>", "file": "<path>", "line": <int>
 })
-graph_add_relationship(relationship_type='FLOWS_TO',
+graph_add_relationship(relationship_id="<relationship_id>", relationship_type='FLOWS_TO',
   source_id="<source>", target_id="<sink>",
   properties={"hops": <int>, "auth_gap": true|false})
 ```
@@ -190,7 +190,7 @@ flow.
 
 For each weakness with a confirmed flow, emit one entity:
 ```
-graph_add_entity(entity_type='SuspectedVuln', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='SuspectedVuln', properties={
   "run_id": "{{run_id}}", "app": "{{target_app}}",
   "agent_id": "{{agent_id}}",
   "vuln_class": "IDOR|SQLi|XSS|SSRF|CSRF|PathTraversal|CmdInjection|Deserialization|MassAssignment",
@@ -260,7 +260,7 @@ severity outcome. Examples (illustrative, not exhaustive):
 
 For every plausible chain, emit:
 ```
-graph_add_entity(entity_type='ChainedAttack', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='ChainedAttack', properties={
   "run_id": "{{run_id}}", "app": "{{target_app}}",
   "agent_id": "{{agent_id}}",
   "vuln_classes": "<comma-list e.g. SSRF,IDOR>",
@@ -269,7 +269,7 @@ graph_add_entity(entity_type='ChainedAttack', properties={
   "expected_impact": "<what the chain unlocks beyond either link>",
   "confidence": <0.0-1.0>
 })
-graph_add_relationship(relationship_type='CHAINS',
+graph_add_relationship(relationship_id="<relationship_id>", relationship_type='CHAINS',
   source_id="<chain_id>", target_id="<SuspectedVuln id>")
 ```
 

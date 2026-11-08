@@ -40,6 +40,6 @@ APIGateway, Lambda, SecretsManager, KMSKey
 
 Connect with relationships:
 ```
-graph_add_relationship(source_id=..., target_id=...,
+graph_add_relationship(relationship_id="<relationship_id>", source_id=..., target_id=...,
     relationship_type='OWNS|ACCESSES|ATTACK_PATH')
 ```

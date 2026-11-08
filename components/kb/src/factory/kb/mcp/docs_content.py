@@ -149,7 +149,7 @@ and relationships via LLM, building a knowledge graph alongside the vector index
 Vector search finds semantically similar documents — great for fuzzy retrieval.
 But it can't answer structural questions: "How many organizations are mentioned?"
 or "What connects concept A to concept B?" The knowledge graph handles those
-via Cypher queries through the `graph` brick's `graph_query` tool.
+via Cypher queries through the `storage` brick's `storage_graph_query` tool.
 
 ## How It Works
 
@@ -176,17 +176,17 @@ kb_ingest(content="...", extract_entities=True)
 
 ## Querying the Graph
 
-Use the `graph` brick's `graph_query` tool with Cypher:
+Use the `storage` brick's `storage_graph_query` tool with Cypher:
 
 ```python
 # Entities from a document
-graph_query(query_str=\"\"\"
+storage_graph_query(cypher=\"\"\"
     MATCH (d:KBDocument {id: $id})-[:HAS_ENTITY]->(e:__Entity__)
     RETURN e.name, e.type
 \"\"\", params={"id": "doc-001"})
 
 # Count entity types
-graph_query(query_str=\"\"\"
+storage_graph_query(cypher=\"\"\"
     MATCH (e:__Entity__)
     RETURN e.type, count(*) AS n ORDER BY n DESC
 \"\"\")

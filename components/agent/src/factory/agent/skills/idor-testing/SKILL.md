@@ -38,7 +38,7 @@ Identify every user-controllable identifier:
 
 Store the map in graph:
 ```
-graph_add_entity(entity_type='IDORSurface', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='IDORSurface', properties={
   "run_id": "{{run_id}}", "app": "{{target_app}}",
   "references": ["VendorID", "AddressID", ...],
   "endpoints": ["/addresses", "/orders", ...],
@@ -123,6 +123,7 @@ sandbox_execute: aws s3 cp s3://<bucket>/vendor-A/sensitive.json -
 For each confirmed IDOR:
 ```
 graph_add_entity(
+  entity_id="<entity_id>",
   entity_type='ProvenExploit',
   properties={
     "run_id": "{{run_id}}",

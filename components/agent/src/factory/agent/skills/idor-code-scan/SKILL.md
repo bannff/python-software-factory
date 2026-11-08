@@ -42,7 +42,7 @@ For each endpoint found, record:
 
 Store as EndpointInventory entity:
 ```
-graph_add_entity(type='EndpointInventory', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='EndpointInventory', properties={
   run_id, app, agent_id, created_at,
   endpoints: "<JSON array of discovered endpoints>"
 })
@@ -67,7 +67,7 @@ checked against it. Skip endpoints where all resource keys are
 
 Store as ParamInventory entity:
 ```
-graph_add_entity(type='ParamInventory', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='ParamInventory', properties={
   run_id, app, agent_id, created_at,
   params: "<JSON array of {endpoint, param, source, classification}>"
 })
@@ -95,15 +95,15 @@ If auth_checks found → verify they actually protect this param.
 
 Store trace in graph:
 ```
-graph_add_entity(type='TaintSource', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='TaintSource', properties={
   run_id, endpoint, param, param_type, file, line
 })
-graph_add_entity(type='TaintSink', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='TaintSink', properties={
   run_id, operation, file, line, sink_type
 })
 ```
-Link: graph_add_relationship(type='FLOWS_TO', source→sink)
-Link: graph_add_relationship(type='HAS_TAINT_TRACE', finding→source)
+Link: graph_add_relationship(relationship_id="<relationship_id>", relationship_type='FLOWS_TO', source_id=<source id>, target_id=<sink id>)
+Link: graph_add_relationship(relationship_id="<relationship_id>", relationship_type='HAS_TAINT_TRACE', source_id=<finding id>, target_id=<source id>)
 
 Set has_taint_trace=true on SuspectedVuln if trace confirms flow.
 
@@ -128,7 +128,7 @@ reasoning → high confidence. If you can → lower or discard.
 
 For each suspected IDOR:
 ```
-graph_add_entity(type='SuspectedVuln', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='SuspectedVuln', properties={
   run_id, app, vuln_class, agent_id, cwe, confidence,
   file, function, line_start, line_end, code_snippet,
   reasoning, attack_chain, recommended_test,
