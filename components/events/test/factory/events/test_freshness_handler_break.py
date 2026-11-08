@@ -176,7 +176,6 @@ class TestDefensiveIsolation:
 
         A None invoker fails the lookup, which is reported as an error.
         """
-        # None is not callable — the handler's try/except should catch
         result = handle_freshness_check(_make_event(), None)
         # Handler survives; lookup TypeError is reported, nothing persisted.
         assert result["action"] == "error"
