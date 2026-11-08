@@ -54,7 +54,7 @@ export default function PrivacySettingsPanel() {
         ? "The operator sets these via environment variables before starting the deployment."
         : "These values are fixed by the deployment; no operator lever exists yet."}</p>
     </div>}
-    <div className="mt-4 grid gap-3 sm:grid-cols-3">{DISCLOSURES.map((item) => <article key={item.title} className="rounded-md border border-border/40 p-4">
+    <div className="mt-4 grid gap-3 @xl:grid-cols-3">{DISCLOSURES.map((item) => <article key={item.title} className="rounded-md border border-border/40 p-4">
       <item.icon className="h-5 w-5 text-violet-400" /><h3 className="mt-3 text-sm font-medium">{item.title}</h3>
       <p className="mt-1 text-xs text-muted-foreground">{item.detail}</p>
     </article>)}</div>

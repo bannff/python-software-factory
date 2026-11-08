@@ -83,10 +83,10 @@ export default function ArtifactsView() {
           </button>
         </div>
       </header>
-      <div className="grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)]">
+      <div className="grid gap-4 @3xl:grid-cols-[14rem_minmax(0,1fr)]">
         <FolderSidebar folders={folders} activeFolderId={activeFolderId} onSelect={setActiveFolderId}
           onCreate={onCreateFolder} onRename={onRenameFolder} onDelete={onDeleteFolder} />
-        <div className="flex flex-col gap-4">
+        <div className="@container flex min-w-0 flex-col gap-4">
           <label className="flex max-w-md items-center gap-2 rounded-lg border border-border/60 bg-card/30 px-3 py-2">
             <Search className="h-4 w-4 text-muted-foreground" />
             <span className="sr-only">Filter artifacts</span>
@@ -97,7 +97,7 @@ export default function ArtifactsView() {
           {loading && artifacts.length === 0 && <div className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Loading artifacts…</div>}
           {!loading && !error && visible.length === 0 && !creating && <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border/60 p-10 text-center"><Box className="h-8 w-8 text-violet-400/70" /><h2 className="mt-3 font-medium">{activeFolderId ? "Empty folder" : "No artifacts yet"}</h2><p className="mt-1 max-w-sm text-sm text-muted-foreground">{activeFolderId ? "Move an artifact here, or ask Companion X to save one directly into it." : "Ask Companion X to save a report, widget, or document, or click New artifact above."}</p></div>}
           {active && <ArtifactDetail artifact={active} tombstoned={activeTombstoned} onChanged={refetch} onDeleted={setTombstoned} onClose={() => { window.history.pushState({}, "", "/artifacts"); setTombstoned(null); setSelected(null); }} />}
-          {visible.length > 0 && <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">{visible.map((item) => <button key={item.slug} type="button" onClick={() => open(item.slug)} className="group rounded-xl border border-border/60 bg-card/30 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-violet-500/40 hover:bg-card/60 hover:shadow-lg hover:shadow-violet-500/5"><div className="flex items-start gap-3"><span className="rounded-lg bg-violet-500/10 p-2 text-violet-400"><FileText className="h-4 w-4" /></span><div className="min-w-0"><h2 className="truncate font-medium">{item.name}</h2><p className="truncate text-xs text-muted-foreground">{item.slug} · v{item.version}</p></div></div><p className="mt-3 line-clamp-2 min-h-10 text-sm text-muted-foreground">{item.description || `A ${item.kind} artifact`}</p><div className="mt-3 flex flex-wrap gap-1">{item.tags.slice(0, 4).map((tag) => <span key={tag} className="rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">{tag}</span>)}</div></button>)}</div>}
+          {visible.length > 0 && <div className="grid gap-3 @xl:grid-cols-2 @4xl:grid-cols-3">{visible.map((item) => <button key={item.slug} type="button" onClick={() => open(item.slug)} className="group rounded-xl border border-border/60 bg-card/30 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-violet-500/40 hover:bg-card/60 hover:shadow-lg hover:shadow-violet-500/5"><div className="flex items-start gap-3"><span className="rounded-lg bg-violet-500/10 p-2 text-violet-400"><FileText className="h-4 w-4" /></span><div className="min-w-0"><h2 className="truncate font-medium">{item.name}</h2><p className="truncate text-xs text-muted-foreground">{item.slug} · v{item.version}</p></div></div><p className="mt-3 line-clamp-2 min-h-10 text-sm text-muted-foreground">{item.description || `A ${item.kind} artifact`}</p><div className="mt-3 flex flex-wrap gap-1">{item.tags.slice(0, 4).map((tag) => <span key={tag} className="rounded-full bg-muted/60 px-2 py-0.5 text-[10px] text-muted-foreground">{tag}</span>)}</div></button>)}</div>}
         </div>
       </div>
     </section>

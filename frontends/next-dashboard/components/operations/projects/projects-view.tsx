@@ -68,7 +68,7 @@ export default function ProjectsView() {
       )}
 
       {!error && loops.length > 0 && (
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,1.35fr)]">
+        <div className="grid gap-4 @3xl:grid-cols-[minmax(0,1fr)_minmax(320px,1.35fr)]">
           <ul className="grid content-start gap-3" aria-label="Projects">
             {loops.map((loop) => (
               <li key={loop.loopId}>
@@ -81,7 +81,7 @@ export default function ProjectsView() {
             <ProjectDetail key={active.loopId} loop={active} onClose={() => setSelected(null)}
               actions={{ pause, resume, stop }} />
           ) : (
-            <div className="hidden items-center justify-center rounded-xl border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground lg:flex">
+            <div className="hidden items-center justify-center rounded-xl border border-dashed border-border/50 p-8 text-center text-sm text-muted-foreground @3xl:flex">
               Select a project to see its cycles and controls.
             </div>
           )}

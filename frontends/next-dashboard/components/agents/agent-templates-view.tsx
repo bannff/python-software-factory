@@ -130,7 +130,7 @@ export default function AgentTemplatesView() {
   const showEditor = selected === null ? canCreate : isUserTemplate;
 
   return (
-    <section aria-labelledby="templates-title" className="grid gap-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
+    <section aria-labelledby="templates-title" className="grid gap-4 @3xl:grid-cols-[18rem_minmax(0,1fr)]">
       <div className="min-w-0"><div className="mb-3 flex items-center justify-between">
         <div><h2 id="templates-title" className="text-lg font-semibold">Agent Templates</h2>
           <p className="text-xs text-muted-foreground">Personas agents use for chat and crews.</p></div>

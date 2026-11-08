@@ -23,7 +23,7 @@ function SessionsEmbed() {
  */
 export function StandaloneView({ view }: { view: StandaloneViewId }) {
   return (
-    <div className="min-h-0 flex-1 overflow-auto">
+    <div className="@container min-h-0 flex-1 overflow-auto">
       <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading…</div>}>
         {view === "artifacts" && <ArtifactsView />}
         {view === "settings" && <SettingsView />}

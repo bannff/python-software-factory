@@ -96,7 +96,7 @@ export default function LessonsView({
       )}
 
       {!error && lessons.length > 0 && (
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
+        <div className="grid gap-4 @2xl:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
           <div className="flex flex-col gap-3" role="list" aria-label="Lessons">
             {lessons.map((lesson) => (
               <div role="listitem" key={lesson.lessonId}>

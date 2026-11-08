@@ -69,7 +69,7 @@ export default function AgentCapabilitiesView() {
             onClick={() => select(id)} className={cn("min-h-10 shrink-0 rounded-md px-3 text-left text-sm",
               active === id ? "bg-violet-500/15 text-violet-300" : "text-muted-foreground hover:bg-accent/40 hover:text-foreground")}>{tabLabel}</button>)}
         </div>
-        <div role="tabpanel" aria-label={label} tabIndex={0} className="min-h-0 min-w-0 overflow-y-auto">
+        <div role="tabpanel" aria-label={label} tabIndex={0} className="@container min-h-0 min-w-0 overflow-y-auto">
           {active === "crews" && <CrewsView />}
           {active === "agents" && <AgentTemplatesView />}
           {active === "connections" && <ConnectionsView />}
