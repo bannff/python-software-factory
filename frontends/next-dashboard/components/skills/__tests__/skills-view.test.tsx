@@ -42,8 +42,8 @@ function capabilities(skills: Partial<typeof LIFECYCLE>) {
 }
 
 beforeEach(() => {
-  mocks.list.mockReset().mockResolvedValue([{ id: "review", name: "Review", description: "Check evidence" }]);
-  mocks.read.mockReset().mockResolvedValue({ id: "review", name: "Review", description: "Check evidence", body: "Read the diff." });
+  mocks.list.mockReset().mockResolvedValue([{ id: "review", name: "Review", description: "Check evidence", builtin: false }]);
+  mocks.read.mockReset().mockResolvedValue({ id: "review", name: "Review", description: "Check evidence", body: "Read the diff.", builtin: false });
   mocks.add.mockReset().mockResolvedValue({ id: "new-skill", name: "New Skill", description: "Added" });
   mocks.pattern.mockReset().mockResolvedValue("^[a-z0-9][a-z0-9-]{0,63}$");
   mocks.remove.mockReset().mockResolvedValue(undefined);
@@ -118,6 +118,18 @@ describe("SkillsView", () => {
     expect(screen.getByRole("button", { name: "Add skill" })).toBeTruthy();
     expect(screen.queryByRole("button", { name: "Delete skill" })).toBeNull();
     expect(await screen.findByText(/FACTORY_AGENT_AUTHORING_SKILLS=delete/)).toBeTruthy();
+  });
+
+  it("marks a built-in skill and withholds Delete even when skills.delete is allowed", async () => {
+    mocks.list.mockResolvedValue([{ id: "review", name: "Review", description: "Check evidence", builtin: true }]);
+    mocks.read.mockResolvedValue({ id: "review", name: "Review", description: "Check evidence", body: "Read the diff.", builtin: true });
+    render(<SkillsView />);
+    expect(await screen.findByText("Built-in")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /Review/ }));
+    await screen.findByText("Read the diff.");
+    expect(screen.queryByRole("button", { name: "Delete skill" })).toBeNull();
+    expect(screen.getByText(/Built-in skills ship with the factory/)).toBeTruthy();
+    expect(screen.queryByText(/FACTORY_AGENT_AUTHORING_SKILLS=delete/)).toBeNull();
   });
 
   it("surfaces an authoring root failure verbatim on write", async () => {

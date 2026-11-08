@@ -114,6 +114,8 @@ class SkillSummary(StrictDTO):
     id: str
     name: str
     description: str = ""
+    # Provenance: True for skills packaged with the factory (read-only).
+    builtin: bool = False
 
 
 class SkillIdInput(StrictDTO):

@@ -24,7 +24,9 @@ logger = logging.getLogger(__name__)
 
 
 def _summary(skill: StoredSkill) -> SkillSummary:
-    return SkillSummary(id=skill.id, name=skill.name, description=skill.description)
+    return SkillSummary(
+        id=skill.id, name=skill.name, description=skill.description, builtin=skill.builtin,
+    )
 
 
 def register(mcp: Any, agent: "SuperAgent") -> None:
