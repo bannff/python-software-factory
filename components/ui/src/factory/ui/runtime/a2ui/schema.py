@@ -137,6 +137,12 @@ def validate_a2ui(payload: dict[str, Any]) -> list[ValidationError]:
                 path, "'props' must be an object", comp.get("id")
             ))
 
+        # Optional: children is a list of child component ids
+        if "children" in comp and not isinstance(comp["children"], list):
+            errors.append(ValidationError(
+                path, "'children' must be an array of component ids", comp.get("id")
+            ))
+
         # Optional: parent must reference existing id
         if "parent" in comp:
             parent_id = comp["parent"]
@@ -152,6 +158,28 @@ def validate_a2ui(payload: dict[str, Any]) -> list[ValidationError]:
                 errors.append(ValidationError(
                     f"components[id={comp.get('id')}]",
                     f"Parent '{comp['parent']}' not found",
+                    comp.get("id"),
+                ))
+
+    # Validate children references (third pass): bare text or inline objects
+    # here used to reach the UI as id-less, type-less nodes (issue #224).
+    for i, comp in enumerate(payload["components"]):
+        kids = comp.get("children") if isinstance(comp, dict) else None
+        if not isinstance(kids, list):
+            continue
+        for child in kids:
+            if not isinstance(child, str):
+                errors.append(ValidationError(
+                    f"components[{i}].children",
+                    "'children' entries must be component id strings; put nested "
+                    "components in 'components' with a 'parent' reference",
+                    comp.get("id"),
+                ))
+            elif child not in seen_ids:
+                errors.append(ValidationError(
+                    f"components[{i}].children",
+                    f"Child '{child}' is not a component id; 'children' lists ids, "
+                    "use a Text component for text",
                     comp.get("id"),
                 ))
 
