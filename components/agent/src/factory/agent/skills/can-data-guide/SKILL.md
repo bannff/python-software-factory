@@ -39,8 +39,15 @@ decoded_data/*.jsonl (131GB, 100M+ records)
 ```python
 dataset_submit_generation(
     recipe_uri="recipe://local/can-synthesize@1",
-    config={"multiplier": 50, "failure_rate": 0.15, ...}
+    recipe_digest="<sha256>",
+    context_snapshot_uri="snapshot://local/can-default@1",
+    context_snapshot_digest="<sha256>",
+    tool_schema_snapshot_uri="schema://local/empty@1",
+    tool_schema_snapshot_digest="<sha256>",
+    generation_seed=42
 )
+# The tool has no config argument: set multiplier (50) and failure_rate (0.15)
+# in the recipe that recipe_uri points to.
 ```
 
 ✅ **Use realistic failure patterns:**

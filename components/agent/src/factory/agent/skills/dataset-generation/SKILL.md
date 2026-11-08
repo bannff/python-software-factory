@@ -11,15 +11,16 @@ You are composing and submitting dataset generation jobs. The `dataset` brick ow
 ### Submit a generation job (immediate receipt)
 
 ```
-dataset_submit_generation(request={
-  "recipe_uri": "recipe://local/pass-through@1",
-  "recipe_digest": "<sha256-hex>",
-  "input_artifacts": [],
-  "context_snapshot": {"uri": "snapshot://...", "digest": "<sha256-hex>"},
-  "tool_schema_snapshot": {"uri": "schema://...", "digest": "<sha256-hex>", "allowed_tools": []},
-  "requested_views": ["default"],
-  "idempotency_key": "optional-dedup-key"
-})
+dataset_submit_generation(
+  recipe_uri="recipe://local/pass-through@1",
+  recipe_digest="<sha256-hex>",
+  context_snapshot_uri="snapshot://...",
+  context_snapshot_digest="<sha256-hex>",
+  tool_schema_snapshot_uri="schema://...",
+  tool_schema_snapshot_digest="<sha256-hex>",
+  requested_views="default",
+  idempotency_key="optional-dedup-key"
+)
 ```
 
 Returns: `{job_id, status: "queued", submitted_at}`. The job runs in a background worker.
@@ -71,14 +72,15 @@ Do NOT pass raw `llm_config` blobs in recipe configs. Routing must go through `l
 
 ```
 # Step 1: Submit the job
-dataset_submit_generation(request={
-  "recipe_uri": "recipe://local/pass-through@1",
-  "recipe_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-  "input_artifacts": [],
-  "context_snapshot": {"uri": "snapshot://local/compat@1", "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
-  "tool_schema_snapshot": {"uri": "schema://local/empty@1", "digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "allowed_tools": []},
-  "requested_views": ["default"]
-})
+dataset_submit_generation(
+  recipe_uri="recipe://local/pass-through@1",
+  recipe_digest="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  context_snapshot_uri="snapshot://local/compat@1",
+  context_snapshot_digest="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  tool_schema_snapshot_uri="schema://local/empty@1",
+  tool_schema_snapshot_digest="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  requested_views="default"
+)
 
 # Step 2: Poll until completed
 dataset_get_job(job_id="<job_id_from_step_1>")
@@ -115,14 +117,15 @@ dataset_resolve_artifact(dataset_uri="<dataset_uri_from_step_3>")
 
 ```
 # Step 1: Submit with Ollama as the LLM backend
-dataset_submit_generation(request={
-  "recipe_uri": "recipe://local/ollama-e2e@1",
-  "recipe_digest": "<sha256>",
-  "input_artifacts": [],
-  "context_snapshot": {"uri": "snapshot://local/ollama@1", "digest": "<sha256>"},
-  "tool_schema_snapshot": {"uri": "schema://local/empty@1", "digest": "<sha256>", "allowed_tools": []},
-  "requested_views": ["default"]
-})
+dataset_submit_generation(
+  recipe_uri="recipe://local/ollama-e2e@1",
+  recipe_digest="<sha256>",
+  context_snapshot_uri="snapshot://local/ollama@1",
+  context_snapshot_digest="<sha256>",
+  tool_schema_snapshot_uri="schema://local/empty@1",
+  tool_schema_snapshot_digest="<sha256>",
+  requested_views="default"
+)
 
 # Step 2: Poll — the worker routes LLM calls through llm_gateway with backend="ollama"
 dataset_get_job(job_id="<job_id>")

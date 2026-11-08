@@ -96,7 +96,7 @@ Discover every reachable route, not just object-id reads.
 
 Persist the runtime route table:
 ```
-graph_add_entity(entity_type='RuntimeEndpointInventory', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='RuntimeEndpointInventory', properties={
   "run_id": "{{run_id}}", "app": "{{target_app}}",
   "agent_id": "{{agent_id}}",
   "endpoints": "<JSON array of {method, path, auth_required, source}>"
@@ -168,7 +168,7 @@ locally as a probe outcome but do NOT file a finding.
 
 For each confirmed exploit:
 ```
-graph_add_entity(entity_type='ProvenExploit', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='ProvenExploit', properties={
   "run_id": "{{run_id}}", "app": "{{target_app}}",
   "agent_id": "{{agent_id}}",
   "vuln_class": "IDOR|SQLi|XSS|SSRF|CSRF|PathTraversal|CmdInjection|AuthBypass|MassAssignment",
@@ -187,7 +187,7 @@ graph_add_entity(entity_type='ProvenExploit', properties={
 
 If a sast-open-scan finding seeded this probe, link it:
 ```
-graph_add_relationship(relationship_type='CONFIRMS',
+graph_add_relationship(relationship_id="<relationship_id>", relationship_type='CONFIRMS',
   source_id="<ProvenExploit id>", target_id="<SuspectedVuln id>")
 ```
 
@@ -242,7 +242,7 @@ SAST layer apply here, plus runtime-only chains:
 
 For each plausible chain, emit:
 ```
-graph_add_entity(entity_type='ChainedAttack', properties={
+graph_add_entity(entity_id="<entity_id>", entity_type='ChainedAttack', properties={
   "run_id": "{{run_id}}", "app": "{{target_app}}",
   "agent_id": "{{agent_id}}",
   "vuln_classes": "<comma-list e.g. SSRF,IDOR>",
@@ -252,7 +252,7 @@ graph_add_entity(entity_type='ChainedAttack', properties={
   "evidence_bundle_ids": "<JSON list>",
   "confidence": <0.0-1.0>
 })
-graph_add_relationship(relationship_type='CHAINS',
+graph_add_relationship(relationship_id="<relationship_id>", relationship_type='CHAINS',
   source_id="<chain_id>", target_id="<ProvenExploit id>")
 ```
 

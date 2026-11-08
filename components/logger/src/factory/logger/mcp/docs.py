@@ -18,21 +18,21 @@ Structured logging with pluggable sinks and formatters.
 
 ```python
 # Log a message
-logger.info(message="User logged in", source="auth", run_id="abc123")
+logger_info(message="User logged in", source="auth", run_id="abc123")
 
 # Tail recent logs
-logger.tail(lines=20)
+logger_tail(lines=20)
 
 # Search logs
-logger.search(level="error", source="workflow", limit=50)
+logger_search(level="error", source="workflow", limit=50)
 ```
 
 ## MCP Tools
 
-- `logger.info` / `logger.error` / `logger.warning` - Log messages
-- `logger.tail` - Get recent log entries
-- `logger.search` - Search logs with filters
-- `logger.clear` - Clear log file (admin)
+- `logger_info` / `logger_error` / `logger_warning` - Log messages
+- `logger_tail` - Get recent log entries
+- `logger_search` - Search logs with filters
+- `logger_clear` - Clear log file (admin)
 
 ## Resources
 
@@ -114,17 +114,15 @@ Add structured context to log entries for better traceability.
 
 - **source**: Which brick/component (auth, workflow, agent)
 - **run_id**: Correlation ID for tracing across operations
-- **tenant_id**: Multi-tenant isolation
 - **context**: Arbitrary key-value pairs
 
 ## Example
 
 ```python
-logger.info(
+logger_info(
     message="Payment processed",
     source="payments",
     run_id="run-abc123",
-    tenant_id="tenant-xyz",
     context={"amount": 99.99, "currency": "USD"}
 )
 ```
@@ -133,10 +131,10 @@ logger.info(
 
 ```python
 # Find all logs for a specific run
-logger.search(run_id="run-abc123")
+logger_search(run_id="run-abc123")
 
 # Find errors from a specific source
-logger.search(level="error", source="workflow")
+logger_search(level="error", source="workflow")
 ```
 """,
     },

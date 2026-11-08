@@ -46,20 +46,18 @@ ablation runs.
 ### Submit a CAN generation job
 
 ```
-dataset_submit_generation(request={
-  "recipe_uri": "recipe://local/can-pipeline-aug@1",
-  "recipe_digest": "<sha256>",
-  "input_artifacts": [
-    {"uri": "file://<path>.mf4", "digest": "<sha256>"},
-    {"uri": "file://<path>.dbc", "digest": "<sha256>"}
-  ],
-  "context_snapshot": {"uri": "snapshot://local/can-default@1",
-                       "digest": "<sha256>"},
-  "tool_schema_snapshot": {"uri": "schema://local/empty@1",
-                           "digest": "<sha256>", "allowed_tools": []},
-  "requested_views": ["default", "sft"],
-  "idempotency_key": "can-pipeline-aug-<trace_id>"
-})
+dataset_submit_generation(
+  recipe_uri="recipe://local/can-pipeline-aug@1",
+  recipe_digest="<sha256>",
+  input_artifact_uris=["file://<path>.mf4", "file://<path>.dbc"],
+  input_artifact_digests=["<sha256>", "<sha256>"],
+  context_snapshot_uri="snapshot://local/can-default@1",
+  context_snapshot_digest="<sha256>",
+  tool_schema_snapshot_uri="schema://local/empty@1",
+  tool_schema_snapshot_digest="<sha256>",
+  requested_views="default,sft",
+  idempotency_key="can-pipeline-aug-<trace_id>"
+)
 ```
 
 Use `recipe://local/can-pipeline-aug@1` for the full 5-stage pipeline

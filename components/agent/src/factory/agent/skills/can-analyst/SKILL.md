@@ -14,17 +14,18 @@ inter-signal correlations.
 ### Submit a CAN ingest job
 
 ```
-dataset_submit_generation(request={
-  "recipe_uri": "recipe://local/can-ingest@1",
-  "recipe_digest": "<sha256>",
-  "input_artifacts": [{"uri": "file://<path>.mf4", "digest": "<sha256>"}],
-  "context_snapshot": {"uri": "snapshot://local/can-default@1",
-                       "digest": "<sha256>"},
-  "tool_schema_snapshot": {"uri": "schema://local/empty@1",
-                           "digest": "<sha256>", "allowed_tools": []},
-  "requested_views": ["default"],
-  "idempotency_key": "can-ingest-<trace_id>"
-})
+dataset_submit_generation(
+  recipe_uri="recipe://local/can-ingest@1",
+  recipe_digest="<sha256>",
+  input_artifact_uris=["file://<path>.mf4"],
+  input_artifact_digests=["<sha256>"],
+  context_snapshot_uri="snapshot://local/can-default@1",
+  context_snapshot_digest="<sha256>",
+  tool_schema_snapshot_uri="schema://local/empty@1",
+  tool_schema_snapshot_digest="<sha256>",
+  requested_views="default",
+  idempotency_key="can-ingest-<trace_id>"
+)
 ```
 
 Returns `{job_id, status: "queued", submitted_at}`. The recipe parses

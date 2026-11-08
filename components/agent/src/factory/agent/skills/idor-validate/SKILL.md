@@ -93,6 +93,7 @@ provenance chain is queryable (parallel to the `CONFIRMS` edge in
 idor-testing/SKILL.md PHASE 7):
 ```
 graph_add_relationship(
+  relationship_id="<relationship_id>",
   relationship_type='PROMOTED_FROM',
   source_id="<finding entity_id>",
   target_id="<original_finding_id>"   # the SuspectedVuln id

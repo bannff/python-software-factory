@@ -39,12 +39,17 @@ Without good data, nothing else matters. You are responsible for:
 ### Step 1: Ingest Raw Data
 
 ```
-dataset_submit_generation(request={
-  "recipe_uri": "recipe://local/can-ingest@1",
-  "recipe_digest": "<sha256>",
-  "input_artifacts": [{"uri": "file:///path/to/data", "digest": "<sha256>"}],
-  "requested_views": ["default"]
-})
+dataset_submit_generation(
+  recipe_uri="recipe://local/can-ingest@1",
+  recipe_digest="<sha256>",
+  input_artifact_uris=["file:///path/to/data"],
+  input_artifact_digests=["<sha256>"],
+  context_snapshot_uri="snapshot://local/can-default@1",
+  context_snapshot_digest="<sha256>",
+  tool_schema_snapshot_uri="schema://local/empty@1",
+  tool_schema_snapshot_digest="<sha256>",
+  requested_views="default"
+)
 ```
 
 **Decision logic:**
@@ -161,14 +166,17 @@ Returns: `{dataset_uri, manifest_uri, digest, schema_version, available_views}`
 # First, let me ingest the tier-2 decoded signals and tier-3 failure labels
 # using a recipe that includes profiling and synthesis stages.
 
-dataset_submit_generation(request={
-  "recipe_uri": "recipe://local/can-ingest-fleet@1",
-  "input_artifacts": [
-    {"uri": "s3://example-bucket/tier-2/", "digest": "..."},
-    {"uri": "s3://example-bucket/tier-3/", "digest": "..."}
-  ],
-  "requested_views": ["default"]
-})
+dataset_submit_generation(
+  recipe_uri="recipe://local/can-ingest-fleet@1",
+  recipe_digest="<sha256>",
+  input_artifact_uris=["s3://example-bucket/tier-2/", "s3://example-bucket/tier-3/"],
+  input_artifact_digests=["...", "..."],
+  context_snapshot_uri="snapshot://local/can-default@1",
+  context_snapshot_digest="<sha256>",
+  tool_schema_snapshot_uri="schema://local/empty@1",
+  tool_schema_snapshot_digest="<sha256>",
+  requested_views="default"
+)
 
 # Agent: Job submitted. Let me poll until completion.
 

@@ -76,9 +76,9 @@ Steps:
    - Commit node linked to GTEntry
    - CLASSIFIED_AS edge to CWECategory
 4. Verify with `graph_find_entities(entity_type="GTEntry", properties={"gt_id": "{gt_id}"})`
-5. Run the IDOR scan swarm: spawn_swarm(swarm_id="rt-scan-idor-swarm-v2",
+5. Run the IDOR scan swarm: agent_invoke_swarm(swarm_id="rt-scan-idor-swarm-v2",
    task="Detect IDOR in {{service_name}}")
-   Use get_swarm_registry to list the current swarm options.
+   Use agent_get_swarm_registry to list the current swarm options.
 
 Sample GT entry for the idor-warehouse challenge app:
   See projects/companion_x/challenges/idor_warehouse/gt_entries.json for 3 ready-to-use entries."""
