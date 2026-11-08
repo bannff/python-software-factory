@@ -148,11 +148,12 @@ class SQLLessonStore:
         now = datetime.now(timezone.utc)
         updated = record.model_copy(update={
             "memory_id": memory_id, "memory_revision": record.revision,
-            "revision": expected_revision + 1, "updated_at": now,
+            "updated_at": now,
         })
         result = self._sql.execute(
+            # Projection is bookkeeping: it must not move the revision clients fence on.
             "UPDATE lessons SET memory_id=:memory,memory_revision=:memory_revision,"
-            "revision=revision+1,updated_at=:updated WHERE tenant_id=:tenant "
+            "updated_at=:updated WHERE tenant_id=:tenant "
             "AND owner_id=:owner AND lesson_id=:lesson AND revision=:revision "
             "AND status='accepted' AND memory_id IS NULL",
             {"memory": memory_id, "memory_revision": record.revision,

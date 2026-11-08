@@ -90,3 +90,27 @@ async def test_restart_finds_existing_projection_before_store(tmp_path) -> None:
         set_service("tool_invoker_for_caller", previous)
     assert calls == ["memory_retrieve"]
     assert restarted.get("tenant", "owner", lesson.lesson_id).memory_id == "existing-memory"
+
+
+@pytest.mark.asyncio
+async def test_projection_does_not_move_the_revision_a_client_holds(tmp_path) -> None:
+    """The revision returned by accept must still fence the next action (#362)."""
+    lifecycle = _runtime(tmp_path)
+    lesson = lifecycle.add("tenant", "owner", "Cite evidence").lesson
+
+    def factory(_caller):
+        def invoke(target, **_kwargs):
+            if target["tool_name"] == "memory_retrieve":
+                return _response({"memories": [], "count": 0})
+            return _response({"stored": True, "memory": {"id": "memory-1"}})
+        return invoke
+
+    previous = get_service("tool_invoker_for_caller")
+    set_service("tool_invoker_for_caller", factory)
+    try:
+        await project_accepted(lifecycle.store)
+    finally:
+        set_service("tool_invoker_for_caller", previous)
+    after = lifecycle.get("tenant", "owner", lesson.lesson_id)
+    assert after.memory_id == "memory-1"
+    assert after.revision == lesson.revision
