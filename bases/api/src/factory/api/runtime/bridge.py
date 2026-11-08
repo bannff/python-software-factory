@@ -55,8 +55,8 @@ def _get_tools() -> dict[str, Any]:
 def _timeline_capabilities() -> dict[str, Any]:
     """Describe timeline support: live SSE plus optional graph history."""
     graph_backend = (
-        os.environ.get("FACTORY_GRAPH_ADAPTER")
-        or os.environ.get("GRAPH_BACKEND")
+        os.environ.get("GRAPH_BACKEND")  # the key that selects the adapter wins
+        or os.environ.get("FACTORY_GRAPH_ADAPTER")
         or "networkx"
     ).lower()
     graph_sink_enabled = _graph_sink_enabled()
