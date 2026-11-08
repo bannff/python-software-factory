@@ -66,7 +66,7 @@ def test_flat_defaults_and_non_coercive_unknown_field_rejection() -> None:
     expected = {
         "graph_id": "", "run_id": "", "vuln_class": "", "domain_class": "",
         "workflow_type": "auto", "target_app": "", "input_summary": "",
-        "output_summary": "", "feedback_verdict": "", "tool_error_rate": None,
+        "output_summary": "", "feedback_verdict": "", "tool_error_rate": None, "game_reward": None,
     }
     assert set(parameters) == set(expected)
     assert {name: parameters[name].default for name in expected} == expected

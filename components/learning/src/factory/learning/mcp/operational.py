@@ -48,6 +48,7 @@ def register(mcp: Any, get_runtime: Callable[[], "LearningRuntime"]) -> None:
         output_summary: str = "",
         feedback_verdict: str = "",
         tool_error_rate: float | None = None,
+        game_reward: float | None = None,
     ) -> ToolResult[ComputeRewardOutput]:
         """Compute a neutral reward using the existing flat defaults.
 
@@ -71,5 +72,7 @@ def register(mcp: Any, get_runtime: Callable[[], "LearningRuntime"]) -> None:
             "feedback_verdict": feedback_verdict,
             # Process-health signal for the telemetry source.
             "tool_error_rate": tool_error_rate,
+            # Signed per-player reward of a finished game (game-outcome source).
+            "game_reward": game_reward,
         }
         return ok(ComputeRewardOutput(**get_runtime().compute(run_ctx, _invoker())))
