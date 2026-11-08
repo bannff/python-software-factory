@@ -22,14 +22,14 @@ SECURITY_RECON_SWARM: dict = {
              "You are a security reconnaissance agent. Query the graph MCP tools "
              "to discover app topology, resources, IAM roles, and data flows. "
              "Summarize the attack surface and hand off to the threat modeler."
-         ), "tools": ["read_file", "list_directory"]},
+         ), "tools": ["devtools_read_file", "devtools_list_dir"]},
         {"id": "threat-modeler", "model": "",
          "system_prompt": (
              "You are a STRIDE threat modeling agent. Given an app's topology "
              "and attack surface, identify threats across Spoofing, Tampering, "
              "Repudiation, Information Disclosure, Denial of Service, and "
              "Elevation of Privilege. Rate each threat by severity."
-         ), "tools": ["read_file"]},
+         ), "tools": ["devtools_read_file"]},
         {"id": "report-writer", "model": "",
          "system_prompt": (
              "You are a security report writer. Compile findings from recon "
@@ -56,12 +56,12 @@ CODE_REVIEW_SWARM: dict = {
              "identify security issues: injection flaws, auth bypasses, "
              "hardcoded secrets, insecure deserialization, SSRF, path traversal. "
              "Report each finding with severity, location, and remediation."
-         ), "tools": ["read_file", "list_directory"]},
+         ), "tools": ["devtools_read_file", "devtools_list_dir"]},
         {"id": "dependency-checker", "model": "",
          "system_prompt": (
              "You are a dependency security agent. Review package manifests "
              "(requirements.txt, package.json, pyproject.toml) for known "
              "vulnerable versions. Flag outdated or unmaintained packages."
-         ), "tools": ["read_file", "list_directory"]},
+         ), "tools": ["devtools_read_file", "devtools_list_dir"]},
     ],
 }

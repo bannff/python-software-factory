@@ -19,7 +19,6 @@ DATASET_RESEARCHER = AgentConfig(
 )
 
 _RESEARCH_TOOLS = [
-    "dataset_get_capabilities", "dataset_describe_config_schema",
     "dataset_get_job", "dataset_get_artifact", "dataset_resolve_artifact",
 ]
 _RESEARCH_NODES = [
