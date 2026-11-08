@@ -48,6 +48,7 @@ def mint(ledger: Any, effects: LedgerEffects, to_wallet: str, amount: float, mem
     if amount <= 0:
         raise LedgerError("invalid_amount", "Amount must be positive")
     receiver.balance += amount
+    ledger._total_supply += amount  # minting is the only way supply grows
     effects.sync_wallet(receiver)
     tx = make_transaction(ledger, effects, TransactionType.MINT, None, to_wallet, amount, memo)
     commit_block(ledger, effects, [tx.tx_id])
