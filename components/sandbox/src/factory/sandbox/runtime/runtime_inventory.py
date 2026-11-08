@@ -18,6 +18,11 @@ def _discover():
 class RuntimeInventoryMixin:
     """Environment listing and health for SandboxRuntime."""
 
+    def stored_status(self, env_id: str):
+        """Stored lifecycle status, or None when the env is unknown (no adapter call)."""
+        env = self._store.load(env_id)
+        return None if env is None else env.status
+
     def list_environments(self) -> list[EnvironmentInfo]:
         """List all environments (store + discovered from Docker)."""
         stored = {e.env_id: e for e in self._store.list_environments()}

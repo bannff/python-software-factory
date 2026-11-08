@@ -119,6 +119,7 @@ class DockerAdapter(DockerPeerNetworkMixin, DockerProvisionMixin, DockerFileOpsM
         return {
             "healthy": True,
             "adapter": "docker",
+            "simulated": False,
             "docker_version": stdout.strip(),
             "active_containers": len(
                 [c for c in self._containers.values() if c["status"] == "running"]

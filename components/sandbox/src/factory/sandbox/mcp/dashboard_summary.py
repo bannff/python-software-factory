@@ -31,13 +31,24 @@ __all__ = [
 ]
 
 
+def _all_profiles(names, resolve) -> dict[str, Any]:
+    """Built-in plus user profiles, matching ``sandbox.list_profiles``."""
+    profiles: dict[str, Any] = {}
+    for name in names():
+        try:
+            profiles[name] = resolve(name)
+        except Exception:  # noqa: BLE001 - one bad user YAML must not hide the rest
+            continue
+    return profiles
+
+
 def build_dashboard_summary(runtime: "SandboxRuntime") -> dict[str, Any]:
     """Aggregate sandbox runtime data into dashboard-friendly structures."""
-    from ..runtime.profiles import BUILTIN_PROFILES
+    from ..runtime.profiles import list_profiles, resolve_profile
 
     environments = runtime.list_environments()
     health = runtime.health_check()
-    profiles = BUILTIN_PROFILES
+    profiles = _all_profiles(list_profiles, resolve_profile)
     activities = list_recent_activity()
     graph_entities = list_related_graph_entities()
     env_rows = [environment_row(env.model_dump(), profiles) for env in environments]

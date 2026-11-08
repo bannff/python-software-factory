@@ -32,7 +32,8 @@ async def git_diff(execute: ExecFn, env_id: str, path: str) -> dict[str, Any]:
     probe = await execute(
         env_id, f"git -C {quoted} rev-parse --is-inside-work-tree", 30,
     )
-    if probe.get("exit_code", 1) != 0:
+    # Real git prints exactly "true"; an adapter that merely exits 0 (mock) is not a repo.
+    if probe.get("exit_code", 1) != 0 or probe.get("stdout", "").strip() != "true":
         return {"is_git_repo": False, "path": path, "files": [], "stat": ""}
 
     status = await execute(env_id, f"git -C {quoted} status --porcelain", 30)
