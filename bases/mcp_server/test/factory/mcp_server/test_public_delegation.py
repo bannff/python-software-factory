@@ -145,3 +145,29 @@ async def test_native_meta_call_uses_public_delegate() -> None:
         },
     )
     assert result.structured_content["data"]["tool"] == "safe"
+
+
+class _Echo:
+    async def call_public_brick_tool(self, brick, tool, arguments):
+        return {"arguments": arguments}
+
+
+@pytest.mark.asyncio
+async def test_call_brick_tool_accepts_the_standard_object_form() -> None:
+    """MCP clients send arguments as an object; the JSON-string form still works (#382)."""
+    catalog = build_native_meta_catalog(_Echo())
+    result = await catalog.call_tool("call_brick_tool", {
+        "brick_name": "demo", "tool_name": "safe", "arguments": {"value": 1},
+    })
+    assert result.structured_content["data"]["arguments"] == {"value": 1}
+
+
+@pytest.mark.asyncio
+async def test_call_brick_tool_malformed_arguments_get_a_typed_error() -> None:
+    catalog = build_native_meta_catalog(_Echo())
+    for bad in ("{not json", "[1, 2]"):
+        result = await catalog.call_tool("call_brick_tool", {
+            "brick_name": "demo", "tool_name": "safe", "arguments": bad,
+        })
+        assert result.structured_content["ok"] is False
+        assert result.structured_content["error"] == "invalid_arguments"

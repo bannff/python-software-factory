@@ -33,7 +33,8 @@ class PromptInput(BrickInput):
 
 class CallBrickToolInput(BrickInput):
     tool_name: str
-    arguments: str | None = None
+    # Standard MCP clients send an object; the JSON-string form stays supported.
+    arguments: str | dict[str, Any] | None = None
     envelope: str | None = None
     as_task: bool = False
     task_ttl_ms: int | None = None

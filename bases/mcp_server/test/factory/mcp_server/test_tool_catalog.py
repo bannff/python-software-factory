@@ -161,6 +161,20 @@ def test_progressive_discovery_and_catalog_share_one_shape(
         assert entry["description"] == by_name[entry["name"]]["description"]
 
 
+def test_get_brick_tools_names_the_callable_tool(real_loader: LazyBrickLoader) -> None:
+    """Progressive discovery must say which brick a tool is and what to call (#382)."""
+    per_brick = real_loader.get_brick_tools("ui")
+    catalog = build_tool_catalog(_Agg(real_loader), None)
+    callable_names = {
+        (t["brick"], t["name"]): t["qualified_name"]
+        for t in catalog["tools"] if t["brick"] == "ui"
+    }
+    assert per_brick["tools"]
+    for tool in per_brick["tools"]:
+        assert tool["brick"] == "ui"
+        assert tool["qualified_name"] == callable_names[("ui", tool["name"])]
+
+
 def test_tool_schema_entry_shape_is_fixed() -> None:
     """The frontend consumes these keys by name — pin the whole set."""
     class _T:

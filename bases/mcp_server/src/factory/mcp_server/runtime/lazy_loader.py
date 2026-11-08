@@ -113,7 +113,11 @@ class LazyBrickLoader:
         from .authorization import filter_projection
         admitted = filter_projection(projection)
         schemas = [
-            tool_schema_entry(item.source_name, item.tool, item.input_schema)
+            {
+                **tool_schema_entry(item.source_name, item.tool, item.input_schema),
+                "brick": item.brick,
+                "qualified_name": item.public_name,
+            }
             for item in admitted
         ]
         return {

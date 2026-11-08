@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 from factory.mcp_utils.interface import (
-    deterministic, operational, ToolCatalog, ToolResult, ok,
+    deterministic, operational, ToolCatalog, ToolResult, TypedToolFailure, ok,
 )
 
 from .mcp_contracts import (
@@ -19,6 +19,21 @@ META_TOOL_NAMES = frozenset({
     "get_brick_prompts", "call_brick_tool", "read_brick_resource",
     "render_brick_prompt", "get_tool_catalog", "reload_capabilities",
 })
+
+
+def _parse_arguments(arguments: str | dict[str, Any] | None) -> dict[str, Any]:
+    """Accept an object or a JSON-encoded object; anything else is typed."""
+    if isinstance(arguments, dict):
+        return arguments
+    if not arguments:
+        return {}
+    try:
+        parsed = json.loads(arguments)
+    except json.JSONDecodeError as exc:
+        raise TypedToolFailure("invalid_arguments", "arguments must be a JSON object") from exc
+    if not isinstance(parsed, dict):
+        raise TypedToolFailure("invalid_arguments", "arguments must be a JSON object")
+    return parsed
 
 
 def build_native_meta_catalog(aggregator: Any) -> ToolCatalog:
@@ -48,16 +63,15 @@ def build_native_meta_catalog(aggregator: Any) -> ToolCatalog:
     @catalog.tool()
     @operational(input_model=CallBrickToolInput, output_model=JsonObjectOutput)
     async def call_brick_tool(
-        brick_name: str, tool_name: str, arguments: str | None = None,
+        brick_name: str, tool_name: str,
+        arguments: str | dict[str, Any] | None = None,
         envelope: str | None = None, as_task: bool = False,
         task_ttl_ms: int | None = None,
     ) -> ToolResult[JsonObjectOutput]:
         del as_task, task_ttl_ms
         if envelope is not None:
             return fail("authorization_denied")
-        parsed = json.loads(arguments) if arguments else {}
-        if not isinstance(parsed, dict):
-            raise ValueError("tool arguments must be a JSON object")
+        parsed = _parse_arguments(arguments)
         return ok(await aggregator.call_public_brick_tool(
             brick_name, tool_name, parsed,
         ))
