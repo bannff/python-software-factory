@@ -106,16 +106,13 @@ class LazyBrickLoader:
         if error:
             return {"error": error}
         from .public_admission import project_public_tools
-        from .tool_catalog import tool_schema_entry
+        from .tool_catalog import public_tool_entry
         projection = project_public_tools(((
             brick_name, self.get_cached_tool_map(brick_name, catalog),
         ),))
         from .authorization import filter_projection
         admitted = filter_projection(projection)
-        schemas = [
-            tool_schema_entry(item.source_name, item.tool, item.input_schema)
-            for item in admitted
-        ]
+        schemas = [public_tool_entry(item) for item in admitted]
         return {
             "brick": brick_name, "tools": schemas, "count": len(schemas),
             "invalid_tools": list(projection.invalid_tools),
