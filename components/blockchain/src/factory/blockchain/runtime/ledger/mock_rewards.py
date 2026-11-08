@@ -65,6 +65,7 @@ def release_reward(ledger: Any, effects: LedgerEffects, run_id: str) -> dict[str
             "owner_id": wallet.owner_id, "balance": 0.0,
         })
     wallet.balance += record["amount"]
+    ledger._total_supply += record["amount"]  # rewards are minted at release, not funded
     effects.sync_wallet(wallet)
     tx = make_transaction(
         ledger, effects, TransactionType.BOUNTY_RELEASE, None, wallet.wallet_id,

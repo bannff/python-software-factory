@@ -17,6 +17,7 @@ class FakeGraphNeo4jLedger(Neo4jRewardMixin):
         self.entities: dict[str, dict] = {}
         self.wallets = {"wallet-agent": {"balance": 0.0}}
         self.make_tx_calls = 0
+        self._total_supply = 0.0
 
     # Neo4jLedger seams used by the mixin
     def _make_tx(self, tx_type, from_w, to_w, amount, memo):
