@@ -17,6 +17,7 @@ class HealthOutput(DTO):
     healthy: bool
     backend: str
     active_games: int
+    durable: bool = False
 
 
 class ConfigSchemaOutput(DTO):

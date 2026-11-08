@@ -39,11 +39,13 @@ def register(mcp: Any, get_runtime: Callable[[], "GamesRuntime"]) -> None:
     @mcp.tool()
     @deterministic(input_model=EmptyInput, output_model=ConfigSchemaOutput)
     def describe_config_schema() -> ToolResult[ConfigSchemaOutput]:
+        from ..runtime.runtime import GamesRuntime
         return {"type": "object", "properties": {"default_game_type": {
-            "type": "string", "enum": ["connect_four"],
+            "type": "string", "enum": GamesRuntime.available_game_types(),
             "description": "Default game type for new sessions"}, "store_backend": {
-            "type": "string", "enum": ["memory"],
-            "description": "Session storage backend"}, "max_active_games": {
+            "type": "string", "enum": GamesRuntime.available_backends(),
+            "description": "Session storage backend (set GAMES_PERSISTENCE=graph to survive restarts)"},
+            "max_active_games": {
             "type": "integer", "description": "Max concurrent games"}}}
 
     @mcp.tool()
