@@ -79,7 +79,7 @@ def test_scheduler_add_accepts_wire_iso_one_shot_at(tmp_path) -> None:
         if target["tool_name"] == "get_agent_registry":
             data = {"count": 1, "agents": [{"id": "developer"}]}
         else:
-            assert target == {"brick_name": "session", "tool_name": "resolve_thread"}
+            assert target == {"brick_name": "session", "tool_name": "ensure_thread"}
             data = {"session": {"session_id": "session", "thread_id": "thread"}}
         return {"ok": True, "result": {"structured_content": {"ok": True, "data": data}}}
 
@@ -135,3 +135,37 @@ def test_scheduler_trigger_types_stale_revision_and_missing_schedule(tmp_path) -
         reset_envelope(token)
     assert stale.error == "schedule_revision_conflict"
     assert missing.error == "schedule_not_found"
+
+
+def test_scheduler_add_on_a_cold_thread_ensures_the_origin_session(tmp_path, monkeypatch) -> None:
+    """A thread that never spoke has no Session row yet (#223); creating a
+    schedule must register it, with the same default model chat uses."""
+    monkeypatch.setenv("COMPANION_X_CHAT_MODEL", "m-test")
+    tools = {tool.name: tool for tool in asyncio.run(_catalog(tmp_path).list_tools())}
+    calls: list[tuple[dict, dict]] = []
+
+    def invoke(target, **kwargs):
+        calls.append((target, kwargs["arguments"]))
+        if target["tool_name"] == "get_agent_registry":
+            data = {"count": 1, "agents": [{"id": "developer"}]}
+        else:
+            data = {"session": {"session_id": "s-new", "thread_id": "cold"}}
+        return {"ok": True, "result": {"structured_content": {"ok": True, "data": data}}}
+
+    previous = get_service("tool_invoker_for_caller")
+    set_service("tool_invoker_for_caller", lambda _caller: invoke)
+    token = set_envelope({"tenant_id": "tenant", "principal_id": "owner", "thread_id": "cold"})
+    try:
+        created = asyncio.run(tools["scheduler_add"].fn(
+            agent_id="developer", task="nightly report\nmore", kind="interval",
+            interval_seconds=3600,
+        ))
+    finally:
+        reset_envelope(token)
+        set_service("tool_invoker_for_caller", previous)
+    assert created.ok is True, created.error
+    assert created.data.schedule.origin_session_id == "s-new"
+    (target, args), = [c for c in calls if c[0]["tool_name"] == "ensure_thread"]
+    assert target["brick_name"] == "session"
+    assert args["thread_id"] == "cold" and args["agent_id"] == "developer"
+    assert args["model"] == "m-test" and args["title"] == "nightly report"

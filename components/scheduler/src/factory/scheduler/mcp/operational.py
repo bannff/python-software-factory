@@ -5,6 +5,7 @@ import asyncio
 import logging
 from typing import Any, Callable
 
+from factory.llm_gateway.interface import default_chat_model_id
 from factory.mcp_utils.interface import ToolResult, fail, get_envelope, get_service, operational
 from factory.mcp_utils.registration import typed_tool
 
@@ -36,7 +37,7 @@ def register(mcp: Any, get_runtime: Callable[[], Any]) -> None:
             tenant, owner, thread = identity(envelope)
             check_fields(task, kind, interval_seconds, one_shot_at)
             await check_agent(agent_id, {"tenant_id": tenant, "principal_id": owner})
-            origin = await _origin(thread, get_envelope() or envelope or {})
+            origin = await _origin(thread, get_envelope() or envelope or {}, agent_id, task)
         except ValueError as exc:
             return failure_code(exc)
         return result(lambda: ScheduleOutput(schedule=get_runtime().lifecycle.create(
@@ -103,14 +104,24 @@ def _remove(lifecycle, tenant, owner, schedule_id, revision):
     return RemovedOutput(removed=True, schedule_id=schedule_id)
 
 
-async def _origin(thread_id: str, envelope: dict) -> dict:
+async def _origin(thread_id: str, envelope: dict, agent_id: str, task: str) -> dict:
+    """The thread's Session, registered if the thread has not spoken yet.
+
+    A cold page holds a client-minted thread id with no Session row until the
+    first chat turn; ``ensure_thread`` is idempotent, so a warm thread returns
+    its existing row untouched (#223)."""
     factory = get_service("tool_invoker_for_caller")
     invoke = factory("scheduler") if callable(factory) else None
     if not callable(invoke):
         raise ValueError("scheduler_origin_unavailable")
+    lines = task.strip().splitlines()
     raw = await asyncio.to_thread(
-        invoke, {"brick_name": "session", "tool_name": "resolve_thread"},
-        arguments={"thread_id": thread_id, "envelope": envelope},
+        invoke, {"brick_name": "session", "tool_name": "ensure_thread"},
+        arguments={
+            "thread_id": thread_id, "title": lines[0][:200] if lines else "New chat",
+            "agent_id": agent_id, "model": default_chat_model_id(),
+            "envelope": envelope,
+        },
         idempotency_key=f"scheduler-origin:{thread_id}", envelope=envelope,
     )
     structured = raw.get("result", {}).get("structured_content") if isinstance(raw, dict) else None
