@@ -54,6 +54,7 @@ class ComputeRewardInput(StrictModel):
     output_summary: str = Field(default="", max_length=_MAX_INPUT_TEXT)
     feedback_verdict: str = Field(default="", max_length=128)
     tool_error_rate: FiniteFloat | None = None
+    game_reward: FiniteFloat | None = None
 
 
 RewardVerdict = Literal["rewarded", "no_reward", "penalized"]

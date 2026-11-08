@@ -43,6 +43,9 @@ def dispatch_mcp_handler(
                 elif tool_name == "chat_feedback_dispatch":
                     from .chat_turn_handler import handle_chat_feedback
                     result = handle_chat_feedback(event, invoker)
+                elif tool_name == "game_reward_dispatch":
+                    from .game_reward_handler import handle_game_reward
+                    result = handle_game_reward(event, invoker)
                 elif tool_name == "telemetry_reward_dispatch":
                     from .telemetry_handler import handle_telemetry_reward
                     result = handle_telemetry_reward(event, invoker)

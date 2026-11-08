@@ -1,0 +1,10 @@
+id: auto-reward-on-game-finished
+event_type: "game.finished"
+handler: "mcp:game_reward_dispatch"
+description: >
+  Score a finished game's learner reward via the learning game-outcome source
+  and emit reward.computed, so gameplay reaches memory and the wallet (#384).
+  Idempotent per game_id.
+enabled: true
+priority: 1
+filters: {}
