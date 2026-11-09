@@ -143,8 +143,10 @@ def register_bridge_routes(app) -> None:
         timeline = _timeline_capabilities()
         # Side-chat planner state (issue #41): the wiring never fails boot, so
         # a degraded side panel must be visible here, not just in the log line.
+        from .health_features import feature_availability
         from .side_chat_wiring import side_chat_status
         side_chat = side_chat_status()
+        features = await feature_availability(_call_tool, side_chat)
         agg = _get_aggregator()
         if agg:
             all_tools = agg.get_all_tool_names()
@@ -169,6 +171,7 @@ def register_bridge_routes(app) -> None:
                 "capabilities": make_serializable(caps),
                 "timeline": timeline,
                 "side_chat": side_chat,
+                "features": features,
             })
         # Fallback to flat tool map
         tools = _get_tools()

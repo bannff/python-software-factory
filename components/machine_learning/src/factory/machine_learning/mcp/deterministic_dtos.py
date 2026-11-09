@@ -40,6 +40,9 @@ class CapabilitiesOutput(_DTO):
     finetuning_backends: list[str]
     features: list[str]
     timeseries_model_types: list[str] = []
+    training_available: bool = True  # false when the optional `ml` uv group is not installed
+    training_missing: list[str] = []
+    training_install_hint: str = ""
     authoring_enabled: bool = False  # base-model/default edits allowed; hide edit controls when false
 
 
