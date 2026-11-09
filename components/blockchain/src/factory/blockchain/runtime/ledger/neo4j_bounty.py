@@ -148,8 +148,7 @@ class Neo4jBountyMixin(Neo4jRewardMixin):
     def health_check(self) -> dict[str, Any]:
         try:
             r = _invoke("graph_graph_health_check")
-            data = getattr(r, "data", None)
-            return {"healthy": bool(r and r.ok and data and data.healthy), "provider": "neo4j",
+            return {"healthy": bool(r and r.get("healthy")), "provider": "neo4j",
                     "durable": True,
                     "chain_height": len(self._blocks)}  # type: ignore[attr-defined]
         except Exception as e:
