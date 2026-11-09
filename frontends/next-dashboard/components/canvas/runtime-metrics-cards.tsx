@@ -77,7 +77,7 @@ export function RuntimeMetricsCards({
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-3 @2xl:grid-cols-2 @5xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 @md:grid-cols-2 @2xl:grid-cols-3">
       {cards.map((card) => (
         <MetricCard key={card.key} icon={card.icon} label={card.label} value={card.value} detail={card.detail}
           tone={card.tone} active={activeKey === card.key}
