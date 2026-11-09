@@ -89,6 +89,11 @@ async def invoke_catalog_tool(
         from factory.mcp_utils.interface import ServiceOnlyAccessError, get_envelope
         if isinstance(exc, ServiceOnlyAccessError):
             return transport_failure(type(exc).__name__, str(exc))
+        if isinstance(exc, PermissionError):
+            # A denial is not a tool bug: say so, without policy or principal detail.
+            logger.warning("catalog_tool_denied brick=%s tool=%s stage=%s error_type=%s",
+                           brick_name, resolved_name, stage, type(exc).__name__)
+            return transport_failure("AuthorizationDenied", "authorization_denied", protected=protected)
         if isinstance(exc, SchemaMigrationError):
             fields = _invalid_fields(exc)
             return transport_failure(

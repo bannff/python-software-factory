@@ -24,6 +24,8 @@ class HealthOutput(DTO):
     config_dir: str
     subscriptions_loaded: int | None = None
     history_retention_days: int | None = None
+    store_path: str | None = None
+    stray_stores: list[str] = []  # other events DBs in the workspace; history may be split
     error: str | None = None
 
 

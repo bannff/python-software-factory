@@ -14,6 +14,7 @@ from .contracts.deterministic import (
 from ..runtime.envelope import ContextEnvelope
 from ..runtime.history import EventHistoryEntry
 from ..runtime.models import Event
+from ..runtime.store_location import live_store_path, stray_stores
 from ..runtime.subscriptions import SubscriptionDefinition
 
 if TYPE_CHECKING:
@@ -41,9 +42,11 @@ def register(mcp: Any, get_runtime: Callable[[], "EventsRuntime"],
     def events_health_check() -> ToolResult[HealthOutput]:
         try:
             runtime = get_runtime()
+            live = live_store_path()
             subscriptions = runtime.get_subscription_registry().list_all()
             return {"status": "healthy", "subscriptions_loaded": len(subscriptions),
                     "history_retention_days": runtime.get_history_retention_days(),
+                    "store_path": str(live), "stray_stores": stray_stores(live),
                     "config_dir": str(get_config_dir())}
         except Exception as error:
             return {"status": "unhealthy", "error": str(error),
