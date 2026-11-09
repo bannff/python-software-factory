@@ -164,3 +164,31 @@ def test_training_receipts_accept_real_storage_tool_results() -> None:
         source = load_training_receipts()
     assert source["health"] == "error"
     assert source["value"] is None
+
+
+def test_tracker_experiments_appear_in_the_observatory() -> None:
+    from factory.machine_learning.runtime.observatory_tracking import load_tracked_experiments
+    from factory.machine_learning.runtime.runtime import TrackingRuntime
+
+    runtime = TrackingRuntime()
+    tracker = runtime.get_tracker()
+    exp = tracker.create_experiment("probe-exp", "probe")
+    run = tracker.start_run(exp.id, "r1")
+    tracker.log_metric(run.id, "f1", 0.7)
+    source = load_tracked_experiments(lambda: runtime)
+    summary = build_summary([*_sources([_receipt()], []), source])
+    names = {row["experiment_name"]: row for row in summary["experiments"]}
+    assert names["probe-exp"]["source"] == "tracking"
+    assert names["probe-exp"]["runs"] == 1 and names["probe-exp"]["latest_value"] == 0.7
+    assert summary["overview"]["experiments"] == 2
+    assert summary["overview"]["tracked_runs"] == 1
+
+
+def test_tracker_only_population_still_counts_experiments() -> None:
+    from factory.machine_learning.runtime.observatory_tracking import load_tracked_experiments
+    from factory.machine_learning.runtime.runtime import TrackingRuntime
+
+    runtime = TrackingRuntime()
+    runtime.get_tracker().create_experiment("solo")
+    summary = build_summary([*_sources(None, None), load_tracked_experiments(lambda: runtime)])
+    assert summary["overview"]["experiments"] == 1

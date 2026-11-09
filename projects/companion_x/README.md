@@ -26,7 +26,7 @@ All bricks use lightweight file-based or in-memory adapters.
 | Cache | memory | `FACTORY_CACHE_ADAPTER=memory` | Ephemeral |
 | Worker | memory | `FACTORY_WORKER_BACKEND=memory` | Ephemeral |
 | Storage | memory | `FACTORY_STORAGE_ADAPTER=memory` | Ephemeral |
-| Blockchain | mock_ledger | `BLOCKCHAIN_ADAPTER=mock_ledger` | Ephemeral |
+| Blockchain | Neo4j ledger (`mock` for tests) | `BLOCKCHAIN_ADAPTER=neo4j` | Neo4j (health reports `durable`) |
 | Dataset | csv_can_ingest | `FACTORY_DATASET_ADAPTER=csv_can_ingest` | File-based (CSV/TXT) |
 
 KB and Memory embeddings go through the configured LLM gateway embedder; memory evolution also uses the chat profile (`COMPANION_X_CHAT_MODEL`).

@@ -28,3 +28,11 @@ def test_train_failures_are_typed(tools, tmp_path) -> None:
     }
     bad_config = train(model_type="lightgbm", X_uri="x.npy", y_uri="y.npy", config={"not_a_field": 1})
     assert not bad_config.ok and "not_a_field" in bad_config.error
+
+
+def test_capabilities_report_training_libraries(tools, monkeypatch) -> None:
+    import factory.machine_learning.mcp.deterministic as det
+    monkeypatch.setattr(det, "missing_training_libs", lambda: ["torch"])
+    data = tools["ml_get_capabilities"]().data
+    assert data.training_available is False and data.training_missing == ["torch"]
+    assert "--group ml" in data.training_install_hint

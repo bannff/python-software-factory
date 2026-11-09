@@ -18,6 +18,7 @@ from .deterministic_dtos import (
 )
 
 from ..runtime.authoring_policy import authoring_enabled
+from ..runtime.training_libs import INSTALL_HINT, missing_training_libs
 
 
 def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
@@ -27,7 +28,10 @@ def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
     @deterministic(input_model=EmptyInput, output_model=CapabilitiesOutput)
     def ml_get_capabilities() -> ToolResult[CapabilitiesOutput]:
         """Return machine-readable capabilities for machine_learning brick."""
+        missing = missing_training_libs()
         return CapabilitiesOutput(name="machine_learning", version="2.0.0",
+            training_available=not missing, training_missing=missing,
+            training_install_hint=INSTALL_HINT if missing else "",
             backends=TrackingRuntime.available_backends(),
             finetuning_backends=TrackingRuntime.available_finetuning_backends(),
             features=["experiments", "runs", "metrics", "params", "artifacts",

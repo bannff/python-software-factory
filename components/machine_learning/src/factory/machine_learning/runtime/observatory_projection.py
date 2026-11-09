@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .observatory_tracking import SOURCE_NAME, tracked_experiment_rows
+
 _PRIMARY = ("auroc", "f1", "accuracy")
 _EPSILON = 0.01
 
@@ -146,7 +148,14 @@ def build_summary(sources: list[dict[str, Any]]) -> dict[str, Any]:
     learning = _source(sources, "learning_runs").get("value")
     fine_jobs = _source(sources, "fine_tuning_jobs").get("value")
     runs = enrich_receipts(training_value or [])
+    tracked = _source(sources, SOURCE_NAME).get("value")
     experiments = _experiments(runs)
+    receipt_names = {row["experiment_name"] for row in experiments}
+    experiments += [
+        row for row in tracked_experiment_rows(tracked or [])
+        if row["experiment_name"] not in receipt_names
+    ]
+    experiments_known = training_value is not None or tracked is not None
     models = _models(runs)
     state, message = _state(training_value, learning)
     healths = [source.get("health") for source in sources]
@@ -161,7 +170,8 @@ def build_summary(sources: list[dict[str, Any]]) -> dict[str, Any]:
         "sources": [{k: v for k, v in source.items() if k != "value"} for source in sources],
         "overview": {
             "training_runs": len(runs) if training_value is not None else None,
-            "experiments": len(experiments) if training_value is not None else None,
+            "experiments": len(experiments) if experiments_known else None,
+            "tracked_runs": sum(len(e["runs"]) for e in tracked) if tracked is not None else None,
             "receipt_models": len(models) if training_value is not None else None,
             "fine_tuning_jobs": len(fine_jobs) if fine_jobs is not None else None,
             "live_models": None,
