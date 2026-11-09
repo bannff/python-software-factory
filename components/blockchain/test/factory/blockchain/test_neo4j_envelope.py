@@ -4,7 +4,7 @@ from __future__ import annotations
 import pytest
 
 from factory.blockchain.runtime.errors import LedgerError
-from factory.blockchain.runtime.ledger import neo4j_ledger
+from factory.blockchain.runtime.ledger import neo4j_invoke
 from factory.blockchain.runtime.ledger.neo4j_bounty import Neo4jBountyMixin
 from factory.blockchain.runtime.ledger.neo4j_ledger import Neo4jLedger
 
@@ -48,7 +48,7 @@ class Ledger(Neo4jBountyMixin, Neo4jLedger):
 @pytest.fixture
 def agg(monkeypatch) -> EnvelopeAggregator:
     fake = EnvelopeAggregator()
-    monkeypatch.setattr(neo4j_ledger, "_get_aggregator", lambda: fake)
+    monkeypatch.setattr(neo4j_invoke, "_get_aggregator", lambda: fake)
     return fake
 
 
@@ -68,6 +68,6 @@ def test_failed_envelope_raises_typed_error(monkeypatch) -> None:
     class Failing:
         def invoke_tool(self, tool, **kw):
             return {"ok": False, "error": "boom"}
-    monkeypatch.setattr(neo4j_ledger, "_get_aggregator", lambda: Failing())
+    monkeypatch.setattr(neo4j_invoke, "_get_aggregator", lambda: Failing())
     with pytest.raises(LedgerError):
-        neo4j_ledger._invoke("graph_graph_get_entity", entity_id="x")
+        neo4j_invoke._invoke("graph_graph_get_entity", entity_id="x")
