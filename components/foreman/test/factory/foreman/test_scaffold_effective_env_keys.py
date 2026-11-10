@@ -10,5 +10,11 @@ def _keys(bricks: list[str]) -> set[str]:
 
 
 def test_graph_and_memory_emit_the_backend_keys_runtime_reads() -> None:
-    keys = _keys(["graph", "memory", "cache", "kb"])
-    assert {"GRAPH_BACKEND", "MEMORY_BACKEND", "CACHE_BACKEND", "KB_BACKEND"} <= keys
+    keys = _keys(["graph", "memory", "cache", "kb", "events"])
+    assert {"GRAPH_BACKEND", "MEMORY_BACKEND", "CACHE_BACKEND", "KB_BACKEND", "EVENTS_BACKEND"} <= keys
+
+
+def test_inert_adapter_keys_are_not_scaffolded_for_get_infra_bricks() -> None:
+    keys = _keys(["graph", "memory", "cache", "kb", "events"])
+    inert = {f"FACTORY_{b}_ADAPTER" for b in ("GRAPH", "MEMORY", "CACHE", "KB", "EVENTS")}
+    assert not inert & keys

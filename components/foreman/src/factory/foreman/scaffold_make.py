@@ -4,7 +4,10 @@ Generates standardized commands: dev, up, stop, logs, test.
 Env vars are driven by which bricks are wired.
 """
 
-# Brick → env vars needed at runtime
+# Brick → env vars needed at runtime. Bricks that select via get_infra take
+# <BRICK>_BACKEND; the FACTORY_<BRICK>_ADAPTER form is read only by llm_gateway,
+# security and browser (and the not-yet-migrated bricks below), so it is not
+# scaffolded where it would be silently ignored (#378).
 BRICK_ENV_VARS: dict[str, list[tuple[str, str]]] = {
     "auth": [
         ("FACTORY_AUTH_ADAPTER", "memory"),
@@ -14,23 +17,20 @@ BRICK_ENV_VARS: dict[str, list[tuple[str, str]]] = {
         ("KEYCLOAK_CLIENT_SECRET", "change-me"),
     ],
     "cache": [
-        ("FACTORY_CACHE_ADAPTER", "memory"),
         ("CACHE_BACKEND", "memory"),
         ("REDIS_URL", "redis://localhost:6379/0"),
     ],
     "events": [
-        ("FACTORY_EVENTS_ADAPTER", "memory"),
+        ("EVENTS_BACKEND", "memory"),
         ("REDIS_URL", "redis://localhost:6379/0"),
     ],
     "graph": [
-        ("FACTORY_GRAPH_ADAPTER", "networkx"),
         ("GRAPH_BACKEND", "persistent_networkx"),
         ("NEO4J_URI", "bolt://localhost:7687"),
         ("NEO4J_USER", "neo4j"),
         ("NEO4J_PASSWORD", "password"),
     ],
     "kb": [
-        ("FACTORY_KB_ADAPTER", "neo4j"),
         ("KB_BACKEND", "neo4j"),
     ],
     "storage": [
@@ -49,7 +49,6 @@ BRICK_ENV_VARS: dict[str, list[tuple[str, str]]] = {
         ("OTEL_SERVICE_NAME", "factory"),
     ],
     "memory": [
-        ("FACTORY_MEMORY_ADAPTER", "memory"),
         ("MEMORY_BACKEND", "memory"),
     ],
     "workflow": [
