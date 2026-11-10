@@ -56,6 +56,9 @@ variable per surface — `FACTORY_AGENT_AUTHORING_SKILLS` (add, delete),
 `FACTORY_AGENT_AUTHORING_STEERING` (create, update, delete),
 `FACTORY_AGENT_AUTHORING_AGENT_TEMPLATES` (create, delete, fork, reset),
 `FACTORY_AGENT_AUTHORING_CONFIG` (read, write); each also accepts `all` / `none`.
+**`CONFIG=write` is not a narrow grant:** it includes `write_tool_module` and `reload_config`, so it lets the
+caller run arbitrary Python inside the agent process (it can read the process's credentials, reach the network and
+change state). Grant it only to a fully trusted operator; `CONFIG=read` is the safe setting (#27).
 Exact precedence per (surface, action), first match wins: (1) that surface's
 variable when non-empty, (2) the legacy `SUPER_AGENT_ENABLE_AUTHORING_TOOLS` env
 blanket switch, (3) `settings.authoring.enabled` — consulted ONLY while NO
