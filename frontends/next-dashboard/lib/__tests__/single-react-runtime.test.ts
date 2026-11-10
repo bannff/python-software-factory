@@ -28,7 +28,10 @@ const NEXT_ROOT = path.resolve(__dirname, "..", "..", ".next");
 const BUILT_CHUNK_DIRS = ["static/chunks", "server/chunks"].map((dir) =>
   path.join(NEXT_ROOT, dir),
 );
-const builtDirs = BUILT_CHUNK_DIRS.filter((dir) => existsSync(dir));
+// `next dev` also fills .next/*/chunks, but with dev bundles that break the
+// production invariants; only `next build` writes BUILD_ID (#12).
+const isProductionBuild = existsSync(path.join(NEXT_ROOT, "BUILD_ID"));
+const builtDirs = isProductionBuild ? BUILT_CHUNK_DIRS.filter((dir) => existsSync(dir)) : [];
 
 describe("single React runtime in the built app", () => {
   it("detects a React 18 renderer emitted into a chunk", () => {
@@ -47,7 +50,7 @@ describe("single React runtime in the built app", () => {
   it("ships one React version and no React-18 renderer marker", () => {
     expect(
       builtDirs.length > 0 || !process.env.CI,
-      "no .next build output — run `npm run build` before this guard",
+      "no production .next build — run `npm run build` before this guard",
     ).toBe(true);
     if (builtDirs.length === 0) return;
 
