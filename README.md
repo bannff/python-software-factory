@@ -9,8 +9,6 @@ Every capability in this repo is a *brick*: a self-contained Python package with
 - **Agent runtime**: Strands Agents SDK over MCP v2 (LangChain/LangGraph dormant behind `AGENT_RUNTIME_ADAPTER=langchain` + the `langgraph-legacy` group), streamed to the UI through CopilotKit / AG-UI.
 - **Built to be run by agents.** The repo ships its own governance MCP server (`foreman`), steering docs, and an execution ledger so an autonomous loop can build the next feature unattended.
 
-> **Status.** Companion X is mid-way through absorbing the feature set of [KiroCrew](https://github.com/kirodotdev) as its acceptance list — 56 of 100 in-scope features live, 29 more scaffolded and awaiting live proof. Progress is tracked row-by-row in [`.kiro/specs/python-factory-bp34j-companion-crew-features/kirocrew-feature-map.md`](.kiro/specs/python-factory-bp34j-companion-crew-features/kirocrew-feature-map.md).
-
 ---
 
 ## Contents
@@ -64,7 +62,7 @@ python-factory/
 ├── frontends/
 │   └── next-dashboard/   Companion X cockpit (Next.js 15 · React 19 · shadcn/ui · CopilotKit)
 ├── BRICKS_INDEX.yaml the registry: every brick, its adapters, its dependencies
-└── .kiro/ .agents/   steering, specs, skills, and the execution ledger agents read every cycle
+└── .agents/          steering, skills, recipes and workflows agents read every cycle
 ```
 
 **Every brick has the same shape** (the `workflow` brick is the exemplar):
@@ -133,8 +131,6 @@ read_brick_resource("graph://schemas/taxonomy/security")
 
 Scope the surface with `MCP_INCLUDE_BRICKS=agent,memory,workflow` — you get exactly those bricks' tools, nothing else. The running Companion X API also serves the same surface at `http://127.0.0.1:8000/mcp/` (bearer token from `.env`), so any MCP client can drive the live product.
 
-Ready-made [Kiro](https://kiro.dev) power definitions for both servers are in [`.kiro/powers/`](.kiro/powers/).
-
 ---
 
 ## Working in the repo
@@ -179,8 +175,7 @@ Memory for agents lives in the `memory` brick (`memory_store` / `memory_retrieve
 ## Docs and governance
 
 - **Handbook:** the [GitHub Wiki](https://github.com/bannff/python-factory/wiki) is canonical **only at the exact revision pinned in [`AGENTS.md`](AGENTS.md)**. A floating wiki page is navigation, not authority. Precedence: system/user instructions → executable repo state (code, CI, schemas) → the pinned handbook → host-specific compatibility files.
-- **Specs:** `.kiro/specs/<name>/` — `requirements.md`, `design.md`, `tasks.md` per feature. The active one is the Companion X KiroCrew port.
-- **Steering:** `.kiro/steering/` (auto-loaded) and `.agents/steering/` (deep references: brick anatomy, MCP tool taxonomy, testing, memory, UI protocol).
+- **Steering:** `.agents/steering/` (deep references: brick anatomy, MCP tool taxonomy, testing, memory, UI protocol).
 - **Templates:** start any new doc, issue, wiki page, or discussion from [`docs/templates/`](docs/templates/).
 - **Deployment infra** (CDK stacks, pipelines) lives in a separate repo; this repo keeps only the CDK *generation* capability in the `blueprint` base.
 
