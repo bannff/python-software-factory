@@ -67,12 +67,12 @@ def main():
     app = create_app()
     if pid_file := os.environ.get("COMPANION_X_API_PID_FILE"):
         Path(pid_file).write_text(str(os.getpid()))
-    logger.info(
-        "Starting Companion-X unified server via api base "
-        "(MCP + REST + SSE + AG-UI streaming, port 8000)",
-    )
     host = os.environ.get("FACTORY_API_HOST", "127.0.0.1")
     port = int(os.environ.get("FACTORY_API_PORT", "8000"))
+    logger.info(
+        "Starting Companion-X unified server via api base "
+        "(MCP + REST + SSE + AG-UI streaming) on %s:%d", host, port,
+    )
     uvicorn.run(app, host=host, port=port)
 
 
