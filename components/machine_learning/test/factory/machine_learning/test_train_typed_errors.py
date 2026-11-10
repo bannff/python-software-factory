@@ -36,3 +36,10 @@ def test_capabilities_report_training_libraries(tools, monkeypatch) -> None:
     data = tools["ml_get_capabilities"]().data
     assert data.training_available is False and data.training_missing == ["torch"]
     assert "--group ml" in data.training_install_hint
+
+
+def test_missing_training_library_error_names_the_install_command() -> None:
+    from factory.machine_learning.runtime.training_errors import training_error_message
+    message = training_error_message("native_dependency_missing", ModuleNotFoundError("No module named 'lightgbm'"))
+    assert "lightgbm" in message and "--group ml" in message
+    assert training_error_message("training_failed", RuntimeError("boom")) == "boom"

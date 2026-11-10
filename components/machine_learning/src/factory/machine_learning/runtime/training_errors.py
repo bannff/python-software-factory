@@ -23,3 +23,11 @@ def classify_training_error(error: BaseException) -> str:
     if isinstance(error, OSError):
         return "training_data_unreadable"
     return "training_failed"
+
+
+def training_error_message(code: str, error: BaseException) -> str:
+    """Public message: a missing library names the group that installs it."""
+    if code != "native_dependency_missing":
+        return str(error)
+    from .training_libs import INSTALL_HINT
+    return f"{error}. ML training libraries are not installed; run: {INSTALL_HINT}"
