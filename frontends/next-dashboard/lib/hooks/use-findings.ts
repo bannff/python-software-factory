@@ -2,6 +2,7 @@
 
 import { useMemo, useEffect, useState } from "react";
 import { callTool } from "@/lib/api";
+import { errorReason } from "@/lib/error-reason";
 import { unwrapToolData } from "@/lib/tool-result-data";
 import type { Finding, FindingSeverity, ActiveToolCall } from "@/lib/types";
 
@@ -43,10 +44,9 @@ function parseFindings(items: unknown[], sourceId: string, sourceName: string): 
   return findings;
 }
 
-/** Unwrap the typed graph_get_recent_findings envelope to a flat row list. */
+/** Unwrap the typed graph_get_recent_findings envelope to a flat row list; an ok:false envelope throws. */
 function unwrapTypedRows(raw: unknown): Record<string, unknown>[] {
-  let value: unknown;
-  try { value = unwrapToolData(raw); } catch { value = raw; }
+  const value = unwrapToolData(raw);
   const rows = (value as { rows?: unknown } | null)?.rows
     ?? ((value as { result?: { rows?: unknown } } | null)?.result)?.rows;
   return Array.isArray(rows) ? (rows as Record<string, unknown>[]) : [];
@@ -104,8 +104,16 @@ export function notifyFindingsChanged(): void {
   if (typeof window !== "undefined") window.dispatchEvent(new Event(FINDINGS_CHANGED));
 }
 
+export interface FindingsLoad { findings: Finding[]; error: string | null }
+
+/** Plain list, for callers that don't surface a failed read. */
 export function useFindings(toolCalls: ActiveToolCall[]): Finding[] {
+  return useFindingsLoad(toolCalls).findings;
+}
+
+export function useFindingsLoad(toolCalls: ActiveToolCall[]): FindingsLoad {
   const [mcpFindings, setMcpFindings] = useState<Finding[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
 
   useEffect(() => {
@@ -115,14 +123,18 @@ export function useFindings(toolCalls: ActiveToolCall[]): Finding[] {
   }, []);
 
   useEffect(() => {
+    let live = true;
     callTool("graph_get_recent_findings", {
       severity: "", app: "", run_id: "", limit: 50,
     })
       .then((raw) => {
         const rows = unwrapTypedRows(raw);
+        if (!live) return;
         setMcpFindings(rows.map(rowToFinding));
+        setError(null);
       })
-      .catch(() => { /* no-op — graph may not be available */ });
+      .catch((cause) => { if (live) setError(errorReason(cause) ?? "Findings could not be read"); });
+    return () => { live = false; };
   }, [version]);
 
   // Parse findings from chat tool call results
@@ -142,7 +154,7 @@ export function useFindings(toolCalls: ActiveToolCall[]): Finding[] {
   }, [toolCalls]);
 
   // Merge MCP findings + chat findings, dedup by id
-  return useMemo(() => {
+  const findings = useMemo(() => {
     const seen = new Set<string>();
     const merged: Finding[] = [];
     for (const f of [...mcpFindings, ...chatFindings]) {
@@ -153,4 +165,5 @@ export function useFindings(toolCalls: ActiveToolCall[]): Finding[] {
     }
     return merged;
   }, [mcpFindings, chatFindings]);
+  return { findings, error };
 }
