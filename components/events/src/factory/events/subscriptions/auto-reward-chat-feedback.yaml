@@ -2,9 +2,7 @@ id: auto-reward-on-chat-feedback
 event_type: "chat.feedback"
 handler: "mcp:chat_feedback_dispatch"
 description: >
-  Turn an explicit user thumbs verdict into a reward signal via the
-  learning user-feedback source → reward.computed (up mints + stores,
-  down stores a PENALIZED learning). bd:python-factory-pfvo9 S2.
+  Turn an explicit user thumbs verdict into a reward signal through the learning user-feedback source, then emit reward.computed (thumbs up mints and stores; thumbs down stores a penalized learning).
 enabled: true
 priority: 1
 filters: {}

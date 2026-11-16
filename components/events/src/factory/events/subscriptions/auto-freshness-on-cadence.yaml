@@ -2,9 +2,7 @@ id: auto-freshness-on-cadence
 event_type: "eval.freshness.due"
 handler: "mcp:freshness_dispatch"
 description: >
-  bd:python-factory-v7imt.4 — Cadence-based eval-freshness trigger.
-  Routes to the same staleness handler as on-completion; fired by
-  AgentRunner's timer_due wake publishing eval.freshness.due events.
+  Cadence-based eval-freshness trigger. Uses the same staleness check as the on-completion trigger; fires when an agent's timer wakes it with an eval-freshness-due event.
 filters: {}
 enabled: true
 priority: 20
