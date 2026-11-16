@@ -125,10 +125,6 @@ def collect_sources(runtime_supplier: RuntimeSupplier) -> list[SourceEnvelope]:
         load_training_receipts(), load_learning_runs(),
         load_fine_tuning_jobs(runtime_supplier),
         load_tracked_experiments(runtime_supplier),
-        _envelope(
-            "live_models", None, health="degraded", durability="runtime",
-            error="public live-model enumeration unavailable",
-        ),
     ]
 
 

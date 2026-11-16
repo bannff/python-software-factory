@@ -11,7 +11,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from .views_observatory import header
 
 
 def learning_view() -> dict[str, Any]:
@@ -23,7 +22,6 @@ def learning_view() -> dict[str, Any]:
         "icon": "🧠",
         "layout": {"type": "flex", "direction": "column"},
         "components": [
-            header("Reward, penalty, memory, convergence, events, and artifacts remain distinct."),
             _item_list(),
         ],
         "metadata": {

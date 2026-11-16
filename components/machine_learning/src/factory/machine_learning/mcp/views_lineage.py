@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from .views_observatory import header
 
 
 def lineage_view() -> dict[str, Any]:
@@ -12,7 +11,6 @@ def lineage_view() -> dict[str, Any]:
         "id": "ml-lineage", "name": "Lineage", "brick": "machine_learning",
         "icon": "🧬", "layout": {"type": "flex", "direction": "column"},
         "components": [
-            header("Verified source references only; missing provenance stays visible."),
             {
                 "id": "ml-lineage-graph", "type": "lineage",
                 "props": {

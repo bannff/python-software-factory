@@ -174,7 +174,6 @@ def build_summary(sources: list[dict[str, Any]]) -> dict[str, Any]:
             "tracked_runs": sum(len(e["runs"]) for e in tracked) if tracked is not None else None,
             "receipt_models": len(models) if training_value is not None else None,
             "fine_tuning_jobs": len(fine_jobs) if fine_jobs is not None else None,
-            "live_models": None,
             "regressions": sum(row["regression_state"] == "regressed" for row in experiments) if training_value is not None else None,
             "learning_runs": len(learning) if learning is not None else None,
         },
