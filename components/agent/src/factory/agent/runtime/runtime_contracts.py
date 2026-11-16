@@ -56,6 +56,8 @@ class RuntimeInvocation:
     metadata: Mapping[str, str] = field(default_factory=dict)
     messages: tuple[Mapping[str, Any], ...] = ()
     frontend_tools: tuple[FrontendToolSpec, ...] = ()
+    # Inline persona for a swarm member; ``agent_id`` then names it only.
+    member: MemberDefinition | None = None
 
     def __post_init__(self) -> None:
         if self.model_id and (
@@ -107,8 +109,21 @@ class RuntimeResult:
 
 
 @dataclass(frozen=True)
+class MemberDefinition:
+    """Inline persona for a node that is not a registered persona (swarm member).
+
+    ``tools`` are canonical MCP names; adapters narrow the trusted scope to
+    exactly these, the same way an ``exact_tools`` persona is narrowed.
+    """
+
+    system_prompt: str
+    model: str = ""
+    tools: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
 class GraphNode:
-    """One declared bounded graph node identified by a registered persona."""
+    """One declared bounded graph node: a registered persona or an inline member."""
 
     node_id: str
     agent_id: str
@@ -119,6 +134,7 @@ class GraphNode:
     # ``managed_graph_tool._execute``, which built a bare
     # ``GraphNode(node.id, node.id)`` with no channel for it at all.
     output_schema: str | None = None
+    member: MemberDefinition | None = None
 
 
 @dataclass(frozen=True)
@@ -150,6 +166,7 @@ __all__ = [
     "GraphEdge",
     "GraphNode",
     "GraphRequest",
+    "MemberDefinition",
     "RuntimeAdapterDescriptor",
     "RuntimeInvocation",
     "RuntimeLifecycleEvent",

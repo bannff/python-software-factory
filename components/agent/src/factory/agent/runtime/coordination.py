@@ -4,7 +4,9 @@ from __future__ import annotations
 from typing import Any
 from uuid import uuid4
 
-from .runtime_contracts import GraphEdge, GraphNode, GraphRequest, RuntimeInvocation
+from .runtime_contracts import (
+    GraphEdge, GraphNode, GraphRequest, MemberDefinition, RuntimeInvocation,
+)
 
 
 def _value(item: Any, name: str, default: Any = None) -> Any:
@@ -41,7 +43,7 @@ def swarm_request(
 ) -> GraphRequest:
     """Translate ordered registered swarm personas into a bounded pipeline."""
     agents = _value(config, "agents", ()) or ()
-    nodes = tuple(GraphNode(_value(agent, "id"), _value(agent, "id")) for agent in agents)
+    nodes = tuple(_member_node(agent) for agent in agents)
     edges = tuple(
         GraphEdge(nodes[index].node_id, nodes[index + 1].node_id)
         for index in range(len(nodes) - 1)
@@ -52,6 +54,17 @@ def swarm_request(
         max_steps=min(int(_value(config, "max_iterations", 20)), 64),
         timeout_seconds=float(_value(config, "execution_timeout", 300.0)),
     )
+
+
+def _member_node(agent: Any) -> GraphNode:
+    """Swarm members are inline definitions: ids repeat across swarms and none is
+    a registered persona, so adapters must not resolve them by id."""
+    member_id = _value(agent, "id")
+    return GraphNode(member_id, member_id, member=MemberDefinition(
+        system_prompt=_value(agent, "system_prompt"),
+        model=_value(agent, "model", "") or "",
+        tools=tuple(_value(agent, "tools", ()) or ()),
+    ))
 
 
 def _invocation(

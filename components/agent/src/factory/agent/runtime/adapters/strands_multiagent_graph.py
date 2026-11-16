@@ -162,11 +162,11 @@ class StrandsMultiagentGraphExecutor:
         """Build the node Agent through the SAME persona path as chat."""
         from strands import Agent
 
-        from ..personas import resolve_agent_config
+        from ..personas import resolve_persona
         from ..steering_documents import apply_steering
         from .strands_skills import persona_skills
 
-        persona = resolve_agent_config(node.agent_id)
+        persona = resolve_persona(node.agent_id, node.member)
         system_prompt, _digest = apply_steering(persona.system_prompt)
         model_builder = self._model_builder or build_strands_model
         model_id = request.invocation.model_id or getattr(self._agents, "_model_id", "")
