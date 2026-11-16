@@ -4,12 +4,12 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useFindings } from "@/lib/hooks/use-findings";
+import { notifyFindingsChanged, useFindingsLoad } from "@/lib/hooks/use-findings";
 import { ComponentTree } from "@companion-x/shared-renderer";
 import { FindingDetail } from "./finding-detail";
 import { FindingRow } from "./finding-row";
 import { FindingForm } from "./finding-form";
-import { EmptyFindings } from "./findings-empty";
+import { EmptyFindings, FindingsUnavailable } from "./findings-empty";
 import { kindCounts } from "./finding-kinds";
 import {
   usePaintedComponents,
@@ -29,7 +29,7 @@ interface FindingsViewProps {
 }
 
 export default function FindingsView({ toolCalls, agentState }: FindingsViewProps) {
-  const findings = useFindings(toolCalls);
+  const { findings, error } = useFindingsLoad(toolCalls);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterSev, setFilterSev] = useState<FindingSeverity | "all">("all");
   const [filterKind, setFilterKind] = useState<string | null>(null);
@@ -155,7 +155,7 @@ export default function FindingsView({ toolCalls, agentState }: FindingsViewProp
             ))}
           </div>
         ) : (
-          adding ? null : <EmptyFindings onAdd={() => setAdding(true)} />
+          adding ? null : error ? <FindingsUnavailable onRetry={notifyFindingsChanged} /> : <EmptyFindings onAdd={() => setAdding(true)} />
         )}
       </div>
     </div>
