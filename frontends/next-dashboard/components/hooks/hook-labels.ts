@@ -19,3 +19,13 @@ export function eventLabel(eventType: string): string {
 export function toolLabel(handler: string): string {
   return handler.startsWith("mcp:") ? handler.slice("mcp:".length) : handler;
 }
+
+const TRACKER = String.raw`bd[: ]python-factory-[a-z0-9.]+(?: (?:slice \d+|S\d+))?`;
+const LEADING = new RegExp(String.raw`^\s*${TRACKER}\s*[—-]\s*`);
+const PARENTHETICAL = new RegExp(String.raw`\s*\(${TRACKER}\)`, "g");
+const TRAILING = new RegExp(String.raw`\s*${TRACKER}(?=\.?\s*$)`);
+
+/** Seeded platform descriptions cite internal tracker ids; people don't need them. */
+export function hookDescription(text: string): string {
+  return text.trim().replace(LEADING, "").replace(PARENTHETICAL, "").replace(TRAILING, "").replace(/\s+\.$/, ".").replace(/\.\.$/, ".").trim();
+}
