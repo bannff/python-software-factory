@@ -5,7 +5,7 @@ import { Plus, RefreshCw, Trash2, Webhook } from "lucide-react";
 import { ConfirmDelete } from "@/components/ui/confirm-delete";
 import { useMcpConnection } from "@/lib/hooks/use-mcp-connection";
 import { eventHistoryLabel, hasEventHistory } from "./event-history";
-import { eventLabel, toolLabel } from "./hook-labels";
+import { eventLabel, hookDescription, toolLabel } from "./hook-labels";
 import { AGENT_LIFECYCLE_EVENTS, deleteHook, hookAuthoringAvailable, listHooks,
   listInvocableTools, listRecentFirings, saveHook, setHookEnabled,
   type Hook, type HookFiring } from "./hooks-api";
@@ -126,7 +126,7 @@ export default function HooksView() {
             </div>
           </div>
           <p className="mt-3 font-mono text-xs" title={hook.tool}>Runs: {toolLabel(hook.tool)}</p>
-          {hook.description && <p className="mt-2 text-xs text-muted-foreground">{hook.description}</p>}
+          {hook.description && <p className="mt-2 text-xs text-muted-foreground">{hookDescription(hook.description)}</p>}
           {history && <p className="mt-3 text-[11px] text-muted-foreground">{history}</p>}
         </article>;
       })}</div>}
