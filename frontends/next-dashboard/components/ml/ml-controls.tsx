@@ -6,24 +6,18 @@ import { DatasetsPanel } from "./datasets-panel";
 import { FineTunePanel } from "./finetune-panel";
 import { TrainPanel } from "./train-panel";
 
-/** The ML view's own brick id; the first sub-tab (Overview) is the default when none is selected. */
+/** The ML view's own brick id; Overview (the default) stays state-only. */
 const ML_BRICK = "machine_learning";
-const ASSETS_ON = new Set(["ml-overview", "ml-models"]);
-const TRAINING_ON = new Set(["ml-experiments", "ml-models"]);
 
-/** Assets (base models, datasets, jobs) on Overview and Models; the training form on Experiments and Models. */
+/** Assets (base models, datasets, jobs) live on Models; the training form on Experiments. */
 export function MlControls() {
   const selected = useWorkbenchContext().selectedBrickViews[ML_BRICK] ?? "ml-overview";
-  return (
+  if (selected === "ml-models") return (
     <>
-      {ASSETS_ON.has(selected) && (
-        <>
-          <BaseModelsPanel />
-          <DatasetsPanel />
-          <FineTunePanel />
-        </>
-      )}
-      {TRAINING_ON.has(selected) && <TrainPanel />}
+      <BaseModelsPanel />
+      <DatasetsPanel />
+      <FineTunePanel />
     </>
   );
+  return selected === "ml-experiments" ? <TrainPanel /> : null;
 }
