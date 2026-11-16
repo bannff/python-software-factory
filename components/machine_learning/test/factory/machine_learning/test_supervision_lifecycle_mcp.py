@@ -42,7 +42,7 @@ def test_supervision_tools_dispatch_and_fail_loudly(tmp_path) -> None:
     assert ok.data.status == "pending" and ok.data.operation == _OP
     fail_now = tools["ml_resume_training"].fn(attempt_id="ghost")
     assert fail_now.ok is False and fail_now.data is None
-    assert "unknown supervised attempt" in fail_now.error
+    assert fail_now.error == "attempt_not_found"
     inspect: str = "ml_stop_at_checkpoint"
     stopped = tools[inspect].fn(attempt_id="live", checkpoint_name="ck1")
     assert stopped.ok and stopped.data.action == "stop"

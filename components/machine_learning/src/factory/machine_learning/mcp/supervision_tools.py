@@ -14,26 +14,32 @@ from factory.mcp_utils.interface import ToolResult, fail, ok, operational
 from ..runtime.supervision_claims import (
     create_training_supervision, TrainingSupervision,
 )
-from ..runtime.supervision_intents import SupervisionError
+from ..runtime.supervision_intents import SupervisionError, UnknownSupervisedAttemptError
 from .supervision_contracts import (
     AdjustedClaimOutput, AdjustHyperparamInput, PauseTrainingInput,
     ResumeTrainingInput, StopAtCheckpointInput, SupervisionActionOutput,
 )
 
 
-def _dispatch(handler: Any, request: dict[str, Any]) -> ToolResult[Any]:
-    """Run one supervision verb, mapping typed errors to fail envelopes.
+def _dispatch(factory: Callable[[], Any], verb: str, request: dict[str, Any]) -> ToolResult[Any]:
+    """Run one supervision verb, mapping failures to stable codes.
 
     Runtime conflicts (the adjust verb's already-bound attempt key) are
     terminal-negative data, not a success payload: map them to a typed fail
-    envelope the way the S1 CAN lifecycle tools map a non-completed terminal,
-    so the caller sees the conflict reason instead of a generic
-    ``tool_execution_failed`` from output-model validation.
+    envelope so the caller sees the conflict reason instead of a generic
+    ``tool_execution_failed``. An unknown attempt and an unconfigured model
+    root get their own codes so a UI or agent can tell them apart (#448).
     """
     try:
-        result = handler(**request)
+        result = getattr(factory(), verb)(**request)
+    except UnknownSupervisedAttemptError:
+        return fail("attempt_not_found")
     except SupervisionError as exc:
         return fail(str(exc))
+    except ValueError as exc:
+        if "ModelPassport" in str(exc):
+            return fail("model_root_not_configured")
+        raise
     if result.get("status") == "conflict":
         return fail(str(result.get("error", "supervision command conflicts")))
     return ok(result)
@@ -52,7 +58,7 @@ def register(
     )
     def pause_training(attempt_id: str, reason: str = "") -> ToolResult[SupervisionActionOutput]:
         """Accept a pause command for a live training attempt."""
-        return _dispatch(factory().pause, {"attempt_id": attempt_id, "reason": reason})
+        return _dispatch(factory, "pause", {"attempt_id": attempt_id, "reason": reason})
 
     @mcp.tool(name="ml_stop_at_checkpoint")
     @operational(
@@ -62,7 +68,7 @@ def register(
     attempt_id: str, checkpoint_name: str = "",
 ) -> ToolResult[SupervisionActionOutput]:
         """Stop a training attempt at its next checkpoint."""
-        return _dispatch(factory().stop, {"attempt_id": attempt_id, "checkpoint_name": checkpoint_name})
+        return _dispatch(factory, "stop", {"attempt_id": attempt_id, "checkpoint_name": checkpoint_name})
 
     @mcp.tool(name="ml_adjust_hyperparam")
     @operational(
@@ -72,7 +78,7 @@ def register(
     attempt_id: str, hyperparams: dict[str, Any],
 ) -> ToolResult[AdjustedClaimOutput]:
         """Issue a NEW attempt claim with the adjusted hyperparams."""
-        return _dispatch(factory().adjust, {"attempt_id": attempt_id, "hyperparams": hyperparams})
+        return _dispatch(factory, "adjust", {"attempt_id": attempt_id, "hyperparams": hyperparams})
 
     @mcp.tool(name="ml_resume_training")
     @operational(
@@ -80,7 +86,7 @@ def register(
     )
     def resume_training(attempt_id: str, reason: str = "") -> ToolResult[SupervisionActionOutput]:
         """Accept a resume command for a paused training attempt."""
-        return _dispatch(factory().resume, {"attempt_id": attempt_id, "reason": reason})
+        return _dispatch(factory, "resume", {"attempt_id": attempt_id, "reason": reason})
 
 
 __all__ = ["register"]
