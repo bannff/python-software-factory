@@ -9,7 +9,7 @@ import { listModelTypes, trainFailure, trainModel, type TrainResult } from "./tr
 const FIELD = "w-full rounded-md border bg-background/50 px-3 py-2 text-sm";
 const BLANK = { model_type: "", X_uri: "", y_uri: "", experiment_name: "" };
 
-/** Train a time-series model from two dataset locations; the run then shows up under Experiments. */
+/** Train a model (lightgbm, lstm or tcn) from two dataset locations; the run then shows up under Experiments. */
 export function TrainPanel() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(BLANK);
@@ -37,12 +37,12 @@ export function TrainPanel() {
   const set = (patch: Partial<typeof BLANK>) => setForm({ ...form, ...patch });
 
   return (
-    <section aria-label="Train a model" className="grid gap-3 p-4">
+    <section aria-label="Train model" className="grid gap-3 p-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium">Train a model</h3>
-        {!open && <button type="button" aria-label="Train a model" onClick={() => { setError(null); setOpen(true); }}
+        <h3 className="text-sm font-medium">Train model</h3>
+        {!open && <button type="button" aria-label="Train model" onClick={() => { setError(null); setOpen(true); }}
           className="inline-flex items-center gap-1.5 rounded-md border border-border/60 px-2.5 py-1.5 text-xs hover:bg-accent/40">
-          <Cpu className="h-3.5 w-3.5" aria-hidden /> Train a model</button>}
+          <Cpu className="h-3.5 w-3.5" aria-hidden /> Train model</button>}
       </div>
       {result && (
         <p role="status" className="text-xs text-emerald-400">

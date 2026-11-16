@@ -17,7 +17,7 @@ beforeEach(() => {
   });
 });
 
-const open = async () => { fireEvent.click(await screen.findByRole("button", { name: "Train a model" })); await screen.findByLabelText("Features (X)"); };
+const open = async () => { fireEvent.click(await screen.findByRole("button", { name: "Train model" })); await screen.findByLabelText("Features (X)"); };
 const fill = (x = "s3://bucket/X.npy", y = "s3://bucket/y.npy") => {
   fireEvent.change(screen.getByLabelText("Features (X)"), { target: { value: x } });
   fireEvent.change(screen.getByLabelText("Labels (y)"), { target: { value: y } });

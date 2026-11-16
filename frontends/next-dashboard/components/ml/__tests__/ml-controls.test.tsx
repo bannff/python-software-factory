@@ -13,31 +13,25 @@ import { MlControls } from "../ml-controls";
 beforeEach(() => { workbench.selectedBrickViews = {}; });
 
 describe("MlControls", () => {
-  it("shows all three panels on the default (Overview) sub-tab", () => {
+  it("shows no controls on the default (Overview) sub-tab: it is state only", () => {
+    const { container } = render(<MlControls />);
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("shows the asset panels on Models, without the training form", () => {
+    workbench.selectedBrickViews = { machine_learning: "ml-models" };
     render(<MlControls />);
     expect(screen.getByText("base models panel")).toBeTruthy();
     expect(screen.getByText("datasets panel")).toBeTruthy();
     expect(screen.getByText("fine-tuning panel")).toBeTruthy();
-  });
-
-  it("shows them on the Models sub-tab", () => {
-    workbench.selectedBrickViews = { machine_learning: "ml-models" };
-    render(<MlControls />);
-    expect(screen.getByText("fine-tuning panel")).toBeTruthy();
-  });
-
-  it("offers training on Models but not on Overview", () => {
-    render(<MlControls />);
     expect(screen.queryByText("train panel")).toBeNull();
-    workbench.selectedBrickViews = { machine_learning: "ml-models" };
-    const models = render(<MlControls />);
-    expect(models.getAllByText("train panel").length).toBe(1);
   });
 
   it("shows only the training form on Experiments", () => {
     workbench.selectedBrickViews = { machine_learning: "ml-experiments" };
     render(<MlControls />);
     expect(screen.getByText("train panel")).toBeTruthy();
+    expect(screen.queryByText("base models panel")).toBeNull();
     expect(screen.queryByText("datasets panel")).toBeNull();
     expect(screen.queryByText("fine-tuning panel")).toBeNull();
   });
