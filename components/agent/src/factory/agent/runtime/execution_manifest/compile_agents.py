@@ -5,6 +5,7 @@ import os
 from typing import Any
 
 from .base import json_object
+from .descriptors import ToolDescriptor
 from .nodes import AgentManifest, SwarmLimits, SwarmManifest
 from .plugin_freeze import graph_plugins, swarm_hooks, swarm_member_plugins
 from .preparation_support import (
@@ -75,6 +76,18 @@ def _persona_scope(
     return local, mode, resolved
 
 
+def _member_tools(tools: list[str]) -> ToolDescriptor:
+    """Swarm members are exact-tools personas: MCP names freeze as their scope.
+
+    Same split as ``_persona_scope`` / ``effective_persona_scope``; a member
+    naming no MCP tool keeps the inherited scope.
+    """
+    local, mcp = partition_tools(tools)
+    if not mcp:
+        return freeze_tools(local, "inherit", [], False)
+    return freeze_tools(local, "explicit", mcp, True)
+
+
 def owner_enabled_skills(skills: list[str]) -> list[str]:
     """Subtract the ambient owner's disabled skills (empty policy = all attach).
 
@@ -119,7 +132,7 @@ def compile_swarm(node_id: str, swarm: Any,
     for item in swarm.agents:
         member_context = {**context, "agent_id": item.id}
         skills = freeze_skills(item.skills)
-        tools = freeze_tools(item.tools, "inherit", [], False)
+        tools = _member_tools(item.tools)
         if any("handoff_to_agent" in tool.name for tool in tools.local):
             raise ValueError("predeclared handoff_to_agent conflicts with native swarm handoff")
         members.append(AgentManifest(
