@@ -1,6 +1,10 @@
 """Standalone swarm presets — security-recon and code-review.
 
 Extracted from defaults.py to keep the aggregator under 200 LOC.
+
+Member ``tools`` are canonical MCP names; ``compile_swarm`` freezes them as the
+member's exact scope. ``devtools_*`` tools additionally need a Session with a
+bound project at call time (``devtools_project_unbound`` otherwise).
 """
 from __future__ import annotations
 
