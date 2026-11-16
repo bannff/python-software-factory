@@ -116,10 +116,13 @@ export function ChartRenderer({ node }: RendererProps) {
             {data.map((d, i) => {
               const val = Number(d[yKey] ?? 0);
               return (
-                <div key={i} className="flex flex-col items-center flex-1 gap-1">
+                <div key={i} className="flex flex-col items-center flex-1 h-full gap-1">
                   <span className="text-xs text-muted-foreground">{val}</span>
-                  <div className="w-full rounded-t bg-primary transition-all"
-                    style={{ height: `${(val / maxVal) * 100}%` }} />
+                  {/* The track gives the bar's percentage height a parent with a height to resolve against. */}
+                  <div className="flex w-full flex-1 items-end justify-center">
+                    <div data-testid="chart-bar" className="w-full max-w-12 rounded-t bg-primary transition-all"
+                      style={{ height: `${(val / maxVal) * 100}%` }} />
+                  </div>
                   <span className="text-xs text-muted-foreground truncate max-w-full">
                     {String(d[xKey] ?? "")}
                   </span>
