@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useEffect, useMemo } from "react";
 import { cn } from "../lib/utils";
 import type { RendererProps } from "./renderer-types";
+import { eventCodeLabel } from "./renderers-item-list-utils";
 
 /* ── Color map: token → tailwind classes ── */
 
@@ -74,7 +75,7 @@ export function FilterBarInline({ values, colors, show_counts, counts, onFilter 
             )}
           >
             <span className={cn("h-1.5 w-1.5 rounded-full", pillCls.split(" ")[0].replace("text", "bg"))} />
-            <span className="capitalize">{val}</span>
+            <span className={eventCodeLabel(val) === val ? "capitalize" : undefined}>{eventCodeLabel(val)}</span>
             {show_counts && counts?.[val] != null ? <span className="text-[10px] text-muted-foreground/70">{counts[val]}</span> : null}
           </button>
         );
