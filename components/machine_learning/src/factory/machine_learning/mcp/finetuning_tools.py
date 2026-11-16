@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from typing import Any, Callable
-from factory.mcp_utils.interface import ToolResult, deterministic
+from factory.mcp_utils.interface import ToolResult, TypedToolFailure, deterministic
 from ..runtime.models import FineTuningMethod
 from ..runtime.runtime import TrackingRuntime
 from .finetuning_contracts import (
@@ -43,12 +43,20 @@ def register(mcp: Any, get_runtime: Callable[[], TrackingRuntime]) -> None:
     @mcp.tool()
     @deterministic(input_model=JobIdInput, output_model=CheckpointsOutput)
     def ml_list_checkpoints(job_id: str) -> ToolResult[CheckpointsOutput]:
-        return CheckpointsOutput(job_id=job_id, checkpoints=_checkpoints(get_runtime().get_finetuner().list_checkpoints(job_id)))
+        try:
+            items = get_runtime().get_finetuner().list_checkpoints(job_id)
+        except KeyError as error:
+            raise TypedToolFailure("job_not_found", job_id) from error
+        return CheckpointsOutput(job_id=job_id, checkpoints=_checkpoints(items))
 
     @mcp.tool()
     @deterministic(input_model=JobIdInput, output_model=StageArtifactsOutput)
     def ml_list_stage_artifacts(job_id: str) -> ToolResult[StageArtifactsOutput]:
-        return StageArtifactsOutput(job_id=job_id, artifacts=_checkpoints(get_runtime().get_finetuner().list_stage_artifacts(job_id)))
+        try:
+            items = get_runtime().get_finetuner().list_stage_artifacts(job_id)
+        except KeyError as error:
+            raise TypedToolFailure("job_not_found", job_id) from error
+        return StageArtifactsOutput(job_id=job_id, artifacts=_checkpoints(items))
 
 
 def _checkpoints(items: list[Any]) -> list[CheckpointItem]:
