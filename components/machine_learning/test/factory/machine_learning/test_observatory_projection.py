@@ -25,7 +25,6 @@ def _sources(training, learning):
         _source("training_receipts", training, "error" if training is None else "healthy"),
         _source("learning_runs", learning, "error" if learning is None else "healthy"),
         _source("fine_tuning_jobs", []),
-        _source("live_models", None, "degraded"),
     ]
 
 

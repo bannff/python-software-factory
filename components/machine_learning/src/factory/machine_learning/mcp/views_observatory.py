@@ -4,14 +4,6 @@ from __future__ import annotations
 from typing import Any
 
 
-def header(subtitle: str) -> dict[str, Any]:
-    """Return the persistent Observatory heading used by every mode."""
-    return {
-        "id": "ml-observatory-header", "type": "card",
-        "props": {"title": "ML Observatory", "description": subtitle},
-    }
-
-
 def _metric(key: str, label: str, icon: str) -> dict[str, Any]:
     return {
         "id": f"ml-overview-{key}", "type": "metric",
@@ -37,22 +29,7 @@ def overview_view() -> dict[str, Any]:
         "id": "ml-overview", "name": "Overview", "brick": "machine_learning",
         "icon": "🔭", "layout": {"type": "flex", "direction": "column"},
         "components": [
-            header("Training, experiments, models, learning, and provenance in one honest view."),
             *metrics,
-            {
-                "id": "ml-overview-population", "type": "metric",
-                "props": {
-                    "label": "Population State", "value": "Unknown",
-                    "data_tool": "ml_get_observatory_summary", "data_path": "$.population_state",
-                },
-            },
-            {
-                "id": "ml-overview-getting-started", "type": "card",
-                "props": {
-                    "title": "Start the improvement loop",
-                    "description": "Register a dataset, train a model, then evaluate it.",
-                },
-            },
             {
                 "id": "ml-overview-progress", "type": "chart",
                 "props": {
@@ -93,4 +70,4 @@ def overview_view() -> dict[str, Any]:
     }
 
 
-__all__ = ["header", "overview_view"]
+__all__ = ["overview_view"]

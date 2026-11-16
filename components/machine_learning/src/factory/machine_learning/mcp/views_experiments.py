@@ -4,7 +4,6 @@ from __future__ import annotations
 from typing import Any
 
 from .views_models import experiment_health, training_runs
-from .views_observatory import header
 
 
 def experiments_view() -> dict[str, Any]:
@@ -25,7 +24,6 @@ def experiments_view() -> dict[str, Any]:
         "id": "ml-experiments", "name": "Experiments", "brick": "machine_learning",
         "icon": "🧪", "layout": {"type": "flex", "direction": "column"},
         "components": [
-            header("Compare experiment families, scores, deltas, and predecessor evidence."),
             health, runs,
         ],
         "metadata": {
