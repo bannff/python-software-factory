@@ -3,8 +3,8 @@ name: CodeQL
 on:
   pull_request:
     branches: [main]
-  schedule:
-    - cron: '0 6 * * 1'
+  # No weekly cron: re-scan on demand from the Actions tab instead.
+  workflow_dispatch:
 
 jobs:
   analyze:
