@@ -159,6 +159,7 @@ class LangGraphRuntime:
                 model_id=parent.model_id,
                 memory_scope=parent.memory_scope,
                 output_schema=node.output_schema or "",
+                member=node.member,
                 thread_id=(parent.thread_id if parent.metadata.get("background_subagent") == "true"
                            else f"{parent.thread_id}:{node.node_id}" if parent.thread_id else None),
                 tenant_id=parent.tenant_id, owner_id=parent.owner_id,

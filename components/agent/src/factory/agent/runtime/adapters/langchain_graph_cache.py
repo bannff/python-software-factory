@@ -10,7 +10,7 @@ import asyncio
 from typing import Any
 
 from ..approval_policy import ApprovalPolicyStore
-from ..personas import resolve_agent_config
+from ..personas import resolve_persona
 from ..steering_documents import apply_steering
 from ..runtime_contracts import RuntimeInvocation
 from .capability_policy import effective_persona_scope
@@ -35,7 +35,7 @@ class CompiledGraphCache:
     async def get(
         self, request: RuntimeInvocation, checkpointer: Any, models: Any,
     ) -> Any:
-        persona = resolve_agent_config(request.agent_id)
+        persona = resolve_persona(request.agent_id, request.member)
         effective = effective_persona_scope(self._capabilities.scope, persona)
         model_id = models.effective_id(request.model_id, persona.model)
         system_prompt, steering_digest = apply_steering(persona.system_prompt)
@@ -47,7 +47,7 @@ class CompiledGraphCache:
         cache_key = (
             request.agent_id, model_id, frontend_digest(request.frontend_tools),
             effective.policy_id, effective.digest, steering_digest,
-            request.output_schema,
+            request.output_schema, request.member,
         )
         if cache_key in self._graphs:
             return self._graphs[cache_key]
