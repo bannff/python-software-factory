@@ -7,13 +7,10 @@ on:
   # that matter — auto-merge.yml merges with the repository's automatic
   # GITHUB_TOKEN, and a workflow run started that way does not create `push`
   # events (GitHub docs, actions/concepts/security/github_token), so auto-merged
-  # PRs would leave main unguarded. The scheduled run below is therefore the
-  # real post-merge coverage; `push` still covers a human pushing to main
-  # directly, and costs nothing.
+  # PRs leave main unguarded. Only human pushes are covered; the daily cron that
+  # used to backstop this was removed deliberately.
   push:
     branches: [main]
-  schedule:
-    - cron: "0 5 * * *"
   workflow_dispatch:
 
 env:
