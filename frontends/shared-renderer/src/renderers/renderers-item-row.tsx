@@ -8,7 +8,7 @@ import { StatusDotInline } from "./renderers-status";
 import { TrendBadgeInline } from "./renderers-status";
 import { DetailPanelInline } from "./renderers-detail-panel";
 import { ViewIcon } from "./renderers-icon";
-import { resolve, resolveStr, resolveNum, type ItemLayoutSpec, type DetailSpec, BADGE_COLORS } from "./renderers-item-list-utils";
+import { resolve, resolveStr, resolveNum, type ItemLayoutSpec, type DetailSpec, BADGE_COLORS, eventCodeLabel } from "./renderers-item-list-utils";
 
 /**
  * bd:python-factory-3jcls.1 — previously fell back to printing the raw
@@ -52,6 +52,9 @@ export function ItemRow({ item, itemKey, layout, detail, badgeColorMap, isExpand
     : undefined;
   const badgeColor = badgeValue ? (badgeColorMap[badgeValue] ?? "gray") : "gray";
   const badgeSuffix = layout?.badge?.suffix ?? "";
+  // A badge that only repeats the row title adds noise.
+  const badgeText = badgeValue ? eventCodeLabel(badgeValue) : undefined;
+  const showBadge = badgeText !== undefined && badgeText.toLowerCase() !== title.toLowerCase();
 
   // Value + trend
   const rawValue = layout?.value?.path ? resolve(item, layout.value.path) : undefined;
@@ -85,9 +88,9 @@ export function ItemRow({ item, itemKey, layout, detail, badgeColorMap, isExpand
           <span className="text-sm font-medium truncate">{title}</span>
           {subtitle && <span className="text-[10px] text-muted-foreground/60 truncate shrink-0">{subtitle}</span>}
           <SubtitleIcon name={subtitleIcon} />
-          {badgeValue && (
+          {showBadge && (
             <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-medium", BADGE_COLORS[badgeColor] ?? BADGE_COLORS.gray)}>
-              {badgeValue}{badgeSuffix}
+              {badgeText}{badgeSuffix}
             </span>
           )}
         </span>

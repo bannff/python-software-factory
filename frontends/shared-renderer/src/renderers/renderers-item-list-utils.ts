@@ -27,6 +27,17 @@ export function resolveNum(obj: Record<string, unknown>, path?: string): number 
   return typeof v === "number" ? v : undefined;
 }
 
+/* ── Event codes ── */
+
+const EVENT_CODE = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
+
+/** "game.move" -> "Move", "blockchain.tx.committed" -> "Tx committed"; anything that isn't a dotted code is returned as is. */
+export function eventCodeLabel(value: string): string {
+  if (!EVENT_CODE.test(value)) return value;
+  const words = value.split(".").slice(1).join(" ").replace(/_/g, " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 /* ── Badge color map ── */
 
 export const BADGE_COLORS: Record<string, string> = {

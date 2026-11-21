@@ -9,7 +9,7 @@ import { useToolData } from "./use-tool-data";
 import { FilterBarInline } from "./renderers-filter-bar";
 import { ItemRow } from "./renderers-item-row";
 import { ViewIcon, resolveIcon, isPictograph } from "./renderers-icon";
-import { resolve, extractArray, type ItemListProps } from "./renderers-item-list-utils";
+import { resolve, extractArray, eventCodeLabel, type ItemListProps } from "./renderers-item-list-utils";
 
 /* ── Subtitle icon (header) ── */
 
@@ -104,7 +104,7 @@ export function ItemListRenderer({ node }: RendererProps) {
 
   const emptyMessage = useMemo(() => {
     if (enrichedItems.length > 0 && filterValue) {
-      return `No runs match ${filterValue}.`;
+      return `Nothing matches ${eventCodeLabel(filterValue)}.`;
     }
     return p.empty_message;
   }, [enrichedItems.length, filterValue, p.empty_message]);
